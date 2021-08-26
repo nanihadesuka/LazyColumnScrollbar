@@ -1,0 +1,3 @@
+rootProject.name = "LazyColumnScrollbar"
+include ':app'
+include ':lib'
