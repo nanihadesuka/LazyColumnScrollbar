@@ -1,3 +1,7 @@
+[![](https://jitpack.io/v/nanihadesuka/LazyColumnScrollbar.svg)](https://jitpack.io/#nanihadesuka/LazyColumnScrollbar)
+[![](https://jitpack.io/v/nanihadesuka/LazyColumnScrollbar/month.svg)](https://jitpack.io/#nanihadesuka/LazyColumnScrollbar)
+
+
 # LazyColumn scrollbar compose library
 
 Compose implementation of the scroll bar. Can drag, scroll smoothly and includes animations.
