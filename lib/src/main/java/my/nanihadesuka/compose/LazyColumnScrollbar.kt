@@ -160,7 +160,7 @@ fun LazyColumnScrollbar(
 			Box(
 				Modifier
 					.align(Alignment.TopEnd)
-					.graphicsLayer { translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition() }
+					.graphicsLayer { translationY = (constraints.maxHeight.toFloat() * (1 - normalizedThumbSize())) * normalizedOffsetPosition() }
 					.padding(horizontal = padding)
 					.width(thickness)
 					.clip(thumbShape)
