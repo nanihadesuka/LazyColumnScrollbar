@@ -1,5 +1,6 @@
 package my.nanihadesuka.compose
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -7,6 +8,8 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListItemInfo
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.*
@@ -84,18 +87,32 @@ fun LazyColumnScrollbar(
 	
 	var dragOffset by remember { mutableStateOf(0f) }
 	
+	fun LazyListItemInfo.fractionHiddenTop() = -offset.toFloat() / size.toFloat()
+	fun LazyListItemInfo.fractionVisibleBottom(viewportEndOffset: Int) = (viewportEndOffset - offset).toFloat() / size.toFloat()
+	
 	fun normalizedThumbSize() = listState.layoutInfo.let {
 		if (it.totalItemsCount == 0) return@let 0f
-		val firstPartial = it.visibleItemsInfo.first().run { -offset.toFloat() / size.toFloat() }
-		val lastPartial = it.visibleItemsInfo.last().run { 1f - (it.viewportEndOffset - offset).toFloat() / size.toFloat() }
+		val firstPartial = it.visibleItemsInfo.first().fractionHiddenTop()
+		val lastPartial = 1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
 		val realVisibleSize = it.visibleItemsInfo.size.toFloat() - firstPartial - lastPartial
 		realVisibleSize / it.totalItemsCount.toFloat()
 	}.coerceAtLeast(thumbMinHeight)
 	
-	fun normalizedOffsetPosition() = listState.layoutInfo.let {
-		if (it.totalItemsCount == 0 || it.visibleItemsInfo.isEmpty()) 0f
-		else it.visibleItemsInfo.first().run { index.toFloat() - offset.toFloat() / size.toFloat() } / it.totalItemsCount.toFloat()
+	fun LazyListLayoutInfo.calcOffset(top:Float): Float {
+		val bottom = visibleItemsInfo.last().run { index.toFloat() + fractionVisibleBottom(viewportEndOffset) } / totalItemsCount.toFloat()
+		val offset = top * (1 - bottom) + bottom * bottom
+		return offset * (1f - normalizedThumbSize())
 	}
+	
+	fun normalizedOffsetPosition() = listState.layoutInfo.let {
+		if (it.totalItemsCount == 0 || it.visibleItemsInfo.isEmpty())
+			return@let 0f
+		
+		val top = it.visibleItemsInfo.first().run { index.toFloat() + fractionHiddenTop() } / it.totalItemsCount.toFloat()
+		it.calcOffset(top)
+	}
+	
+
 	
 	fun setScrollOffset(newOffset: Float)
 	{
@@ -127,7 +144,7 @@ fun LazyColumnScrollbar(
 	BoxWithConstraints(Modifier.fillMaxWidth()) {
 		
 		val dragState = rememberDraggableState { delta ->
-			setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
+			setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat()/(1f -normalizedThumbSize()))
 		}
 		
 		BoxWithConstraints(
@@ -140,13 +157,17 @@ fun LazyColumnScrollbar(
 					orientation = Orientation.Vertical,
 					startDragImmediately = true,
 					onDragStarted = { offset ->
-						val newOffset = offset.y / constraints.maxHeight.toFloat()
+						Log.e(">>>>","$offset")
+						val newOffset = listState.layoutInfo.calcOffset(offset.y / constraints.maxHeight.toFloat())
 						val currentOffset = normalizedOffsetPosition()
 						
-						if (currentOffset < newOffset && newOffset < currentOffset + normalizedThumbSize())
+						if (currentOffset < newOffset && newOffset < currentOffset + normalizedThumbSize()) {
+							Log.e(">>>>", "inside")
 							dragOffset = currentOffset
-						else
+						} else {
+							Log.e(">>>>","out")
 							setScrollOffset(newOffset)
+						}
 						
 						isSelected = true
 					},
@@ -160,7 +181,7 @@ fun LazyColumnScrollbar(
 			Box(
 				Modifier
 					.align(Alignment.TopEnd)
-					.graphicsLayer { translationY = (constraints.maxHeight.toFloat() * (1 - normalizedThumbSize())) * normalizedOffsetPosition() }
+					.graphicsLayer { translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition() }
 					.padding(horizontal = padding)
 					.width(thickness)
 					.clip(thumbShape)
