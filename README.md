@@ -22,7 +22,7 @@ Add it to your app build.gradle
 
 ```groovy
 dependencies {
-        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.0.3'
+        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.1.0'
     }
 ```
 
@@ -48,6 +48,28 @@ LazyColumnScrollbar(listState) {
 }
 ```
 
+indicatorContent example:
+```
+indicatorContent = { index, isThumbSelected ->
+    Text(
+        text = "i: $index",
+        Modifier
+            .clip(
+                RoundedCornerShape(
+                    topStart = 20.dp,
+                    bottomStart = 20.dp,
+                    bottomEnd = 16.dp
+                )
+            )
+            .background(Color.Green)
+            .padding(8.dp)
+            .clip(CircleShape)
+            .background(if (isThumbSelected) Color.Red else Color.Black)
+            .padding(12.dp)
+    )
+}
+```
+
 ## LazyColumnScrollbar arguments
 
 ```kotlin
@@ -60,6 +82,7 @@ fun LazyColumnScrollbar(
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
+    indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 )
 ```
