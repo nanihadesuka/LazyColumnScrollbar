@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 
@@ -41,6 +42,7 @@ fun LazyColumnScrollbar(
 	thumbColor: Color = Color(0xFF2A59B6),
 	thumbSelectedColor: Color = Color(0xFF5281CA),
 	thumbShape: Shape = CircleShape,
+	indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 	content: @Composable () -> Unit
 ) {
 	Box {
@@ -54,6 +56,7 @@ fun LazyColumnScrollbar(
 			thumbColor = thumbColor,
 			thumbSelectedColor = thumbSelectedColor,
 			thumbShape = thumbShape,
+			indicatorContent = indicatorContent
 		)
 	}
 }
@@ -75,7 +78,8 @@ fun LazyColumnScrollbar(
 	thumbMinHeight: Float = 0.1f,
 	thumbColor: Color = Color(0xFF2A59B6),
 	thumbSelectedColor: Color = Color(0xFF5281CA),
-	thumbShape: Shape = CircleShape
+	thumbShape: Shape = CircleShape,
+	indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 ) {
 	val coroutineScope = rememberCoroutineScope()
 
@@ -148,7 +152,7 @@ fun LazyColumnScrollbar(
 
 	fun setScrollOffset(newOffset: Float) {
 		setDragOffset(newOffset)
-        val totalItemsCount = listState.layoutInfo.totalItemsCount.toFloat()
+		val totalItemsCount = listState.layoutInfo.totalItemsCount.toFloat()
 		val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset)
 		val index: Int = floor(exactIndex).toInt()
 		val remainder: Float = exactIndex - floor(exactIndex)
@@ -164,11 +168,7 @@ fun LazyColumnScrollbar(
 		}
 	}
 
-	val isInAction by remember {
-      derivedStateOf {
-          listState.isScrollInProgress || isSelected
-      }
-    }
+	val isInAction = listState.isScrollInProgress || isSelected
 
 	val alpha by animateFloatAsState(
 		targetValue = if (isInAction) 1f else 0f,
@@ -186,47 +186,97 @@ fun LazyColumnScrollbar(
 		)
 	)
 
-	BoxWithConstraints(Modifier.fillMaxWidth()) {
+	BoxWithConstraints(
+		Modifier
+			.alpha(alpha)
+			.fillMaxWidth()
+	) {
 		val dragState = rememberDraggableState { delta ->
 			setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
 		}
 
+		if (indicatorContent != null) BoxWithConstraints(
+			Modifier
+				.align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
+				.fillMaxHeight()
+				.graphicsLayer {
+					translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
+					translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
+				}
+		) {
+			ConstraintLayout(
+				Modifier.align(Alignment.TopEnd)
+			) {
+				val (box, content) = createRefs()
+				Box(
+					Modifier
+						.fillMaxHeight(normalizedThumbSize)
+						.padding(
+							start = if (rightSide) 0.dp else padding,
+							end = if (!rightSide) 0.dp else padding,
+						)
+						.width(thickness)
+						.constrainAs(box) {
+							if (rightSide) end.linkTo(parent.end)
+							else start.linkTo(parent.start)
+						}
+				) {}
+
+				Box(
+					Modifier.constrainAs(content) {
+						top.linkTo(box.top)
+						bottom.linkTo(box.bottom)
+						if (rightSide) end.linkTo(box.start)
+						else start.linkTo(box.end)
+					}
+				) {
+					normalizedThumbSize
+					indicatorContent(
+						index = listState.firstVisibleItemIndex,
+						isThumbSelected = isSelected
+					)
+				}
+			}
+		}
+
 		BoxWithConstraints(
-            Modifier
-                .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
-                .alpha(alpha)
-                .fillMaxHeight()
-                .draggable(
-                    state = dragState,
-                    orientation = Orientation.Vertical,
-                    startDragImmediately = true,
-                    onDragStarted = { offset ->
-                        val newOffset = offset.y / constraints.maxHeight.toFloat()
-                        val currentOffset = normalizedOffsetPosition
-                        if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
-                            setDragOffset(currentOffset)
-                        else
-                            setScrollOffset(newOffset)
-                        isSelected = true
-                    },
-                    onDragStopped = {
-                        isSelected = false
-                    }
-                )
-                .absoluteOffset(x = if (rightSide) displacement.dp else -displacement.dp)
+			Modifier
+				.align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
+				.fillMaxHeight()
+				.draggable(
+					state = dragState,
+					orientation = Orientation.Vertical,
+					startDragImmediately = true,
+					onDragStarted = { offset ->
+						val newOffset = offset.y / constraints.maxHeight.toFloat()
+						val currentOffset = normalizedOffsetPosition
+						if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
+							setDragOffset(currentOffset)
+						else
+							setScrollOffset(newOffset)
+						isSelected = true
+					},
+					onDragStopped = {
+						isSelected = false
+					}
+				)
+				.graphicsLayer {
+					translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
+				}
 		) {
 			Box(
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .graphicsLayer {
-                        translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
-                    }
-                    .padding(horizontal = padding)
-                    .width(thickness)
-                    .clip(thumbShape)
-                    .background(if (isSelected) thumbSelectedColor else thumbColor)
-                    .fillMaxHeight(normalizedThumbSize)
+				Modifier
+					.align(Alignment.TopEnd)
+					.graphicsLayer {
+						translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
+					}
+					.padding(horizontal = padding)
+					.width(thickness)
+					.clip(thumbShape)
+					.background(if (isSelected) thumbSelectedColor else thumbColor)
+					.fillMaxHeight(normalizedThumbSize)
 			)
 		}
+
 	}
 }
