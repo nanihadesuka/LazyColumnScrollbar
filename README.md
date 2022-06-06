@@ -1,8 +1,9 @@
 [![](https://jitpack.io/v/nanihadesuka/LazyColumnScrollbar.svg)](https://jitpack.io/#nanihadesuka/LazyColumnScrollbar)
 [![](https://jitpack.io/v/nanihadesuka/LazyColumnScrollbar/month.svg)](https://jitpack.io/#nanihadesuka/LazyColumnScrollbar)
 
+`Copyright nani @2022`
 
-# LazyColumn scrollbar compose library
+# LazyColumn && Column scrollbar for jetpack compose
 
 Compose implementation of the scroll bar. Can drag, scroll smoothly and includes animations.
 
@@ -26,7 +27,7 @@ dependencies {
     }
 ```
 
-## How to use
+# How to use for lazyColumn
 
 Simply wrap the LazyColumn with it
 
@@ -86,3 +87,46 @@ fun LazyColumnScrollbar(
     content: @Composable () -> Unit
 )
 ```
+
+# How to use for Column
+Simply wrap the LazyColumn with it
+
+```kotlin
+val listData = (0..1000).toList()
+val listState = rememberLazyListState()
+
+ColumnScrollbar(listState) {
+    Column(
+        modifier = Modifier.verticalScroll(listState)
+    ) {
+        for (it in listData) {
+            Text(
+                text = "Item $it",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
+        }
+    }
+}
+```
+
+## ColumnScrollbar arguments
+
+```kotlin
+fun ColumnScrollbar(
+    state: ScrollState,
+    rightSide: Boolean = true,
+    thickness: Dp = 6.dp,
+    padding: Dp = 8.dp,
+    thumbMinHeight: Float = 0.1f,
+    thumbColor: Color = Color(0xFF2A59B6),
+    thumbSelectedColor: Color = Color(0xFF5281CA),
+    thumbShape: Shape = CircleShape,
+    indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
+    content: @Composable () -> Unit
+)
+```
+
+#License
+Copyright © 2022, [nani](https://github.com/nanihadesuka), Released under [MIT License](LICENSE)
