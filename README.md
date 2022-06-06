@@ -128,5 +128,5 @@ fun ColumnScrollbar(
 )
 ```
 
-#License
+# License
 Copyright © 2022, [nani](https://github.com/nanihadesuka), Released under [MIT License](LICENSE)
