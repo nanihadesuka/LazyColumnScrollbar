@@ -130,7 +130,8 @@ fun ColumnScrollbar(
     }
 
     fun setDragOffset(value: Float) {
-        dragOffset = value.coerceIn(0f, 1f - normalizedThumbSizeUpdated)
+        val maxValue = (1f - normalizedThumbSize).coerceAtLeast(0f)
+        dragOffset = value.coerceIn(0f, maxValue)
     }
 
     fun setScrollOffset(newOffset: Float) {
