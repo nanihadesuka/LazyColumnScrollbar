@@ -21,7 +21,7 @@ Add it to your app build.gradle
 
 ```groovy
 dependencies {
-        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.2.0'
+        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.3.0'
     }
 ```
 
@@ -81,6 +81,7 @@ fun LazyColumnScrollbar(
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
+    selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 )
@@ -121,6 +122,7 @@ fun ColumnScrollbar(
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
+    selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 )

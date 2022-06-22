@@ -42,6 +42,7 @@ fun LazyColumnScrollbar(
 	thumbColor: Color = Color(0xFF2A59B6),
 	thumbSelectedColor: Color = Color(0xFF5281CA),
 	thumbShape: Shape = CircleShape,
+	selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
 	indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 	content: @Composable () -> Unit
 ) {
@@ -56,7 +57,8 @@ fun LazyColumnScrollbar(
 			thumbColor = thumbColor,
 			thumbSelectedColor = thumbSelectedColor,
 			thumbShape = thumbShape,
-			indicatorContent = indicatorContent
+			indicatorContent = indicatorContent,
+			selectionMode = selectionMode,
 		)
 	}
 }
@@ -79,6 +81,7 @@ fun LazyColumnScrollbar(
 	thumbColor: Color = Color(0xFF2A59B6),
 	thumbSelectedColor: Color = Color(0xFF5281CA),
 	thumbShape: Shape = CircleShape,
+	selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
 	indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 ) {
 	val coroutineScope = rememberCoroutineScope()
@@ -231,7 +234,6 @@ fun LazyColumnScrollbar(
 						else start.linkTo(box.end)
 					}
 				) {
-					normalizedThumbSize
 					indicatorContent(
 						index = listState.firstVisibleItemIndex,
 						isThumbSelected = isSelected
@@ -247,15 +249,27 @@ fun LazyColumnScrollbar(
 				.draggable(
 					state = dragState,
 					orientation = Orientation.Vertical,
+					enabled = selectionMode != ScrollbarSelectionMode.Disabled,
 					startDragImmediately = true,
 					onDragStarted = { offset ->
 						val newOffset = offset.y / constraints.maxHeight.toFloat()
 						val currentOffset = normalizedOffsetPosition
-						if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
-							setDragOffset(currentOffset)
-						else
-							setScrollOffset(newOffset)
-						isSelected = true
+						when (selectionMode) {
+							ScrollbarSelectionMode.Full -> {
+								if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
+									setDragOffset(currentOffset)
+								else
+									setScrollOffset(newOffset)
+								isSelected = true
+							}
+							ScrollbarSelectionMode.Thumb -> {
+								if (newOffset in currentOffset..(currentOffset + normalizedThumbSize)) {
+									setDragOffset(currentOffset)
+									isSelected = true
+								}
+							}
+							ScrollbarSelectionMode.Disabled -> Unit
+						}
 					},
 					onDragStopped = {
 						isSelected = false

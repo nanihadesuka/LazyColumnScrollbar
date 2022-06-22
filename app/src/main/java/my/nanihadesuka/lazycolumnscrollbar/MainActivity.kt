@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import my.nanihadesuka.compose.ColumnScrollbar
 import my.nanihadesuka.compose.LazyColumnScrollbar
+import my.nanihadesuka.compose.ScrollbarSelectionMode
 import my.nanihadesuka.lazycolumnscrollbar.ui.theme.LazyColumnScrollbarTheme
 
 class MainActivity : ComponentActivity() {
@@ -38,8 +39,8 @@ class MainActivity : ComponentActivity() {
 fun MainView() {
     LazyColumnScrollbarTheme {
         Surface(color = MaterialTheme.colors.background) {
-//            LazyColumnView()
-            ColumnView()
+            LazyColumnView()
+//            ColumnView()
         }
     }
 }
@@ -57,6 +58,7 @@ fun LazyColumnView() {
     ) {
         LazyColumnScrollbar(
             listState,
+            selectionMode = ScrollbarSelectionMode.Thumb,
             indicatorContent = { index, isThumbSelected ->
                 Surface {
                     Text(
@@ -125,7 +127,8 @@ fun ColumnView() {
     ) {
         ColumnScrollbar(
             state = listState,
-            indicatorContent = indicatorContent
+            indicatorContent = indicatorContent,
+            selectionMode = ScrollbarSelectionMode.Disabled,
         ) {
             Column(
                 modifier = Modifier.verticalScroll(listState)
