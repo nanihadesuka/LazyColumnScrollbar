@@ -164,10 +164,6 @@ fun ColumnScrollbar(
             .alpha(alpha)
             .fillMaxWidth()
     ) {
-        val dragState = rememberDraggableState { delta ->
-            setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
-        }
-
         if (indicatorContent != null) BoxWithConstraints(
             Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
@@ -212,7 +208,11 @@ fun ColumnScrollbar(
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
                 .fillMaxHeight()
                 .draggable(
-                    state = dragState,
+                    state = rememberDraggableState { delta ->
+                        if (isSelected) {
+                            setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
+                        }
+                    },
                     orientation = Orientation.Vertical,
                     enabled = selectionMode != ScrollbarSelectionMode.Disabled,
                     startDragImmediately = true,

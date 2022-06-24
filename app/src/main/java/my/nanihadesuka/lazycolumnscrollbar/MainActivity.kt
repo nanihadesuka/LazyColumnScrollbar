@@ -74,7 +74,7 @@ fun LazyColumnView() {
                             .background(Color.Green)
                             .padding(8.dp)
                             .clip(CircleShape)
-                            .background(if (isThumbSelected) Color.Red else Color.White)
+                            .background(if (isThumbSelected) MaterialTheme.colors.surface else MaterialTheme.colors.background)
                             .padding(12.dp)
                     )
                 }
@@ -113,7 +113,7 @@ fun ColumnView() {
                     .background(Color.Green)
                     .padding(8.dp)
                     .clip(CircleShape)
-                    .background(if (isThumbSelected) Color.Red else Color.White)
+                    .background(if (isThumbSelected) MaterialTheme.colors.surface else MaterialTheme.colors.background)
                     .padding(12.dp)
             )
         }

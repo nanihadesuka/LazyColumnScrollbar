@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -195,10 +196,6 @@ fun LazyColumnScrollbar(
 			.alpha(alpha)
 			.fillMaxWidth()
 	) {
-		val dragState = rememberDraggableState { delta ->
-			setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
-		}
-
 		if (indicatorContent != null) BoxWithConstraints(
 			Modifier
 				.align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
@@ -247,7 +244,11 @@ fun LazyColumnScrollbar(
 				.align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
 				.fillMaxHeight()
 				.draggable(
-					state = dragState,
+					state = rememberDraggableState { delta ->
+						if (isSelected) {
+							setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
+						}
+					},
 					orientation = Orientation.Vertical,
 					enabled = selectionMode != ScrollbarSelectionMode.Disabled,
 					startDragImmediately = true,
