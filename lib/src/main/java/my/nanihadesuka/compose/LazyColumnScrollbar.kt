@@ -35,33 +35,35 @@ import kotlin.math.floor
  */
 @Composable
 fun LazyColumnScrollbar(
-	listState: LazyListState,
-	rightSide: Boolean = true,
-	thickness: Dp = 6.dp,
-	padding: Dp = 8.dp,
-	thumbMinHeight: Float = 0.1f,
-	thumbColor: Color = Color(0xFF2A59B6),
-	thumbSelectedColor: Color = Color(0xFF5281CA),
-	thumbShape: Shape = CircleShape,
-	selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
-	indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
-	content: @Composable () -> Unit
+    listState: LazyListState,
+    rightSide: Boolean = true,
+    thickness: Dp = 6.dp,
+    padding: Dp = 8.dp,
+    thumbMinHeight: Float = 0.1f,
+    thumbColor: Color = Color(0xFF2A59B6),
+    thumbSelectedColor: Color = Color(0xFF5281CA),
+    thumbShape: Shape = CircleShape,
+    selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+    enabled: Boolean = true,
+    indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
+    content: @Composable () -> Unit
 ) {
-	Box {
-		content()
-		LazyColumnScrollbar(
-			listState = listState,
-			rightSide = rightSide,
-			thickness = thickness,
-			padding = padding,
-			thumbMinHeight = thumbMinHeight,
-			thumbColor = thumbColor,
-			thumbSelectedColor = thumbSelectedColor,
-			thumbShape = thumbShape,
-			indicatorContent = indicatorContent,
-			selectionMode = selectionMode,
-		)
-	}
+    if (!enabled) content()
+    else Box {
+        content()
+        LazyColumnScrollbar(
+            listState = listState,
+            rightSide = rightSide,
+            thickness = thickness,
+            padding = padding,
+            thumbMinHeight = thumbMinHeight,
+            thumbColor = thumbColor,
+            thumbSelectedColor = thumbSelectedColor,
+            thumbShape = thumbShape,
+            indicatorContent = indicatorContent,
+            selectionMode = selectionMode,
+        )
+    }
 }
 
 /**
@@ -74,132 +76,132 @@ fun LazyColumnScrollbar(
  */
 @Composable
 fun LazyColumnScrollbar(
-	listState: LazyListState,
-	rightSide: Boolean = true,
-	thickness: Dp = 6.dp,
-	padding: Dp = 8.dp,
-	thumbMinHeight: Float = 0.1f,
-	thumbColor: Color = Color(0xFF2A59B6),
-	thumbSelectedColor: Color = Color(0xFF5281CA),
-	thumbShape: Shape = CircleShape,
-	selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
-	indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
+    listState: LazyListState,
+    rightSide: Boolean = true,
+    thickness: Dp = 6.dp,
+    padding: Dp = 8.dp,
+    thumbMinHeight: Float = 0.1f,
+    thumbColor: Color = Color(0xFF2A59B6),
+    thumbSelectedColor: Color = Color(0xFF5281CA),
+    thumbShape: Shape = CircleShape,
+    selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+    indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 ) {
 
-	val firstVisibleItemIndex =
-		remember { derivedStateOf { listState.firstVisibleItemIndex } }
-	val coroutineScope = rememberCoroutineScope()
+    val firstVisibleItemIndex =
+        remember { derivedStateOf { listState.firstVisibleItemIndex } }
+    val coroutineScope = rememberCoroutineScope()
 
-	var isSelected by remember { mutableStateOf(false) }
+    var isSelected by remember { mutableStateOf(false) }
 
-	var dragOffset by remember { mutableStateOf(0f) }
+    var dragOffset by remember { mutableStateOf(0f) }
 
-	fun LazyListItemInfo.fractionHiddenTop() =
-		if (size == 0) 0f else -offset.toFloat() / size.toFloat()
+    fun LazyListItemInfo.fractionHiddenTop() =
+        if (size == 0) 0f else -offset.toFloat() / size.toFloat()
 
-	fun LazyListItemInfo.fractionVisibleBottom(viewportEndOffset: Int) =
-		if (size == 0) 0f else (viewportEndOffset - offset).toFloat() / size.toFloat()
+    fun LazyListItemInfo.fractionVisibleBottom(viewportEndOffset: Int) =
+        if (size == 0) 0f else (viewportEndOffset - offset).toFloat() / size.toFloat()
 
-	val normalizedThumbSizeReal by remember {
-		derivedStateOf {
-			listState.layoutInfo.let {
-				if (it.totalItemsCount == 0)
-					return@let 0f
+    val normalizedThumbSizeReal by remember {
+        derivedStateOf {
+            listState.layoutInfo.let {
+                if (it.totalItemsCount == 0)
+                    return@let 0f
 
-				val firstPartial =
-					it.visibleItemsInfo.first().fractionHiddenTop()
-				val lastPartial =
-					1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
-				val realVisibleSize =
-					it.visibleItemsInfo.size.toFloat() - firstPartial - lastPartial
-				realVisibleSize / it.totalItemsCount.toFloat()
-			}
-		}
-	}
+                val firstPartial =
+                    it.visibleItemsInfo.first().fractionHiddenTop()
+                val lastPartial =
+                    1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
+                val realVisibleSize =
+                    it.visibleItemsInfo.size.toFloat() - firstPartial - lastPartial
+                realVisibleSize / it.totalItemsCount.toFloat()
+            }
+        }
+    }
 
-	val normalizedThumbSize by remember {
-		derivedStateOf {
-			normalizedThumbSizeReal.coerceAtLeast(thumbMinHeight)
-		}
-	}
+    val normalizedThumbSize by remember {
+        derivedStateOf {
+            normalizedThumbSizeReal.coerceAtLeast(thumbMinHeight)
+        }
+    }
 
-	fun offsetCorrection(top: Float): Float {
-		if (normalizedThumbSizeReal >= thumbMinHeight)
-			return top
-		val topRealMax = 1f - normalizedThumbSizeReal
-		val topMax = 1f - thumbMinHeight
-		return top * topMax / topRealMax
-	}
+    fun offsetCorrection(top: Float): Float {
+        if (normalizedThumbSizeReal >= thumbMinHeight)
+            return top
+        val topRealMax = 1f - normalizedThumbSizeReal
+        val topMax = 1f - thumbMinHeight
+        return top * topMax / topRealMax
+    }
 
-	fun offsetCorrectionInverse(top: Float): Float {
-		if (normalizedThumbSizeReal >= thumbMinHeight)
-			return top
-		val topRealMax = 1f - normalizedThumbSizeReal
-		val topMax = 1f - thumbMinHeight
-		return top * topRealMax / topMax
-	}
+    fun offsetCorrectionInverse(top: Float): Float {
+        if (normalizedThumbSizeReal >= thumbMinHeight)
+            return top
+        val topRealMax = 1f - normalizedThumbSizeReal
+        val topMax = 1f - thumbMinHeight
+        return top * topRealMax / topMax
+    }
 
-	val normalizedOffsetPosition by remember {
-		derivedStateOf {
-			listState.layoutInfo.let {
-				if (it.totalItemsCount == 0 || it.visibleItemsInfo.isEmpty())
-					return@let 0f
+    val normalizedOffsetPosition by remember {
+        derivedStateOf {
+            listState.layoutInfo.let {
+                if (it.totalItemsCount == 0 || it.visibleItemsInfo.isEmpty())
+                    return@let 0f
 
-				val top = it.visibleItemsInfo
-					.first()
-					.run { index.toFloat() + fractionHiddenTop() } / it.totalItemsCount.toFloat()
-				offsetCorrection(top)
-			}
-		}
-	}
+                val top = it.visibleItemsInfo
+                    .first()
+                    .run { index.toFloat() + fractionHiddenTop() } / it.totalItemsCount.toFloat()
+                offsetCorrection(top)
+            }
+        }
+    }
 
-	fun setDragOffset(value: Float) {
-		val maxValue = (1f - normalizedThumbSize).coerceAtLeast(0f)
-		dragOffset = value.coerceIn(0f, maxValue)
-	}
+    fun setDragOffset(value: Float) {
+        val maxValue = (1f - normalizedThumbSize).coerceAtLeast(0f)
+        dragOffset = value.coerceIn(0f, maxValue)
+    }
 
-	fun setScrollOffset(newOffset: Float) {
-		setDragOffset(newOffset)
-		val totalItemsCount = listState.layoutInfo.totalItemsCount.toFloat()
-		val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset)
-		val index: Int = floor(exactIndex).toInt()
-		val remainder: Float = exactIndex - floor(exactIndex)
+    fun setScrollOffset(newOffset: Float) {
+        setDragOffset(newOffset)
+        val totalItemsCount = listState.layoutInfo.totalItemsCount.toFloat()
+        val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset)
+        val index: Int = floor(exactIndex).toInt()
+        val remainder: Float = exactIndex - floor(exactIndex)
 
-		coroutineScope.launch {
-			listState.scrollToItem(index = index, scrollOffset = 0)
-			val offset = listState.layoutInfo.visibleItemsInfo
-				.firstOrNull()
-				?.size
-				?.let { it.toFloat() * remainder }
-				?.toInt() ?: 0
-			listState.scrollToItem(index = index, scrollOffset = offset)
-		}
-	}
+        coroutineScope.launch {
+            listState.scrollToItem(index = index, scrollOffset = 0)
+            val offset = listState.layoutInfo.visibleItemsInfo
+                .firstOrNull()
+                ?.size
+                ?.let { it.toFloat() * remainder }
+                ?.toInt() ?: 0
+            listState.scrollToItem(index = index, scrollOffset = offset)
+        }
+    }
 
-	val isInAction = listState.isScrollInProgress || isSelected
+    val isInAction = listState.isScrollInProgress || isSelected
 
-	val alpha by animateFloatAsState(
-		targetValue = if (isInAction) 1f else 0f,
-		animationSpec = tween(
-			durationMillis = if (isInAction) 75 else 500,
-			delayMillis = if (isInAction) 0 else 500
-		)
-	)
+    val alpha by animateFloatAsState(
+        targetValue = if (isInAction) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = if (isInAction) 75 else 500,
+            delayMillis = if (isInAction) 0 else 500
+        )
+    )
 
-	val displacement by animateFloatAsState(
-		targetValue = if (isInAction) 0f else 14f,
-		animationSpec = tween(
-			durationMillis = if (isInAction) 75 else 500,
-			delayMillis = if (isInAction) 0 else 500
-		)
-	)
+    val displacement by animateFloatAsState(
+        targetValue = if (isInAction) 0f else 14f,
+        animationSpec = tween(
+            durationMillis = if (isInAction) 75 else 500,
+            delayMillis = if (isInAction) 0 else 500
+        )
+    )
 
-	BoxWithConstraints(
+    BoxWithConstraints(
         Modifier
             .alpha(alpha)
             .fillMaxWidth()
-	) {
-		if (indicatorContent != null) BoxWithConstraints(
+    ) {
+        if (indicatorContent != null) BoxWithConstraints(
             Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
                 .fillMaxHeight()
@@ -207,12 +209,12 @@ fun LazyColumnScrollbar(
                     translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
                     translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
                 }
-		) {
-			ConstraintLayout(
-				Modifier.align(Alignment.TopEnd)
-			) {
-				val (box, content) = createRefs()
-				Box(
+        ) {
+            ConstraintLayout(
+                Modifier.align(Alignment.TopEnd)
+            ) {
+                val (box, content) = createRefs()
+                Box(
                     Modifier
                         .fillMaxHeight(normalizedThumbSize)
                         .padding(
@@ -224,25 +226,25 @@ fun LazyColumnScrollbar(
                             if (rightSide) end.linkTo(parent.end)
                             else start.linkTo(parent.start)
                         }
-				) {}
+                ) {}
 
-				Box(
-					Modifier.constrainAs(content) {
-						top.linkTo(box.top)
-						bottom.linkTo(box.bottom)
-						if (rightSide) end.linkTo(box.start)
-						else start.linkTo(box.end)
-					}
-				) {
-					indicatorContent(
-						index = firstVisibleItemIndex.value,
-						isThumbSelected = isSelected
-					)
-				}
-			}
-		}
+                Box(
+                    Modifier.constrainAs(content) {
+                        top.linkTo(box.top)
+                        bottom.linkTo(box.bottom)
+                        if (rightSide) end.linkTo(box.start)
+                        else start.linkTo(box.end)
+                    }
+                ) {
+                    indicatorContent(
+                        index = firstVisibleItemIndex.value,
+                        isThumbSelected = isSelected
+                    )
+                }
+            }
+        }
 
-		BoxWithConstraints(
+        BoxWithConstraints(
             Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
                 .fillMaxHeight()
@@ -282,8 +284,8 @@ fun LazyColumnScrollbar(
                 .graphicsLayer {
                     translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
                 }
-		) {
-			Box(
+        ) {
+            Box(
                 Modifier
                     .align(Alignment.TopEnd)
                     .graphicsLayer {
@@ -294,8 +296,8 @@ fun LazyColumnScrollbar(
                     .clip(thumbShape)
                     .background(if (isSelected) thumbSelectedColor else thumbColor)
                     .fillMaxHeight(normalizedThumbSize)
-			)
-		}
+            )
+        }
 
-	}
+    }
 }

@@ -41,11 +41,13 @@ fun ColumnScrollbar(
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
+    enabled: Boolean = true,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    BoxWithConstraints {
+    if (!enabled) content()
+    else BoxWithConstraints {
         content()
         ColumnScrollbar(
             state = state,
@@ -160,34 +162,34 @@ fun ColumnScrollbar(
     )
 
     BoxWithConstraints(
-		Modifier
-			.alpha(alpha)
-			.fillMaxWidth()
+        Modifier
+            .alpha(alpha)
+            .fillMaxWidth()
     ) {
         if (indicatorContent != null) BoxWithConstraints(
-			Modifier
-				.align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
-				.fillMaxHeight()
-				.graphicsLayer {
-					translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
-					translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
-				}) {
+            Modifier
+                .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
+                .fillMaxHeight()
+                .graphicsLayer {
+                    translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
+                    translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
+                }) {
             ConstraintLayout(
                 Modifier.align(Alignment.TopEnd)
             ) {
                 val (box, content) = createRefs()
                 Box(
-					Modifier
-						.fillMaxHeight(normalizedThumbSize)
-						.padding(
-							start = if (rightSide) 0.dp else padding,
-							end = if (!rightSide) 0.dp else padding,
-						)
-						.width(thickness)
-						.constrainAs(box) {
-							if (rightSide) end.linkTo(parent.end)
-							else start.linkTo(parent.start)
-						}) {}
+                    Modifier
+                        .fillMaxHeight(normalizedThumbSize)
+                        .padding(
+                            start = if (rightSide) 0.dp else padding,
+                            end = if (!rightSide) 0.dp else padding,
+                        )
+                        .width(thickness)
+                        .constrainAs(box) {
+                            if (rightSide) end.linkTo(parent.end)
+                            else start.linkTo(parent.start)
+                        }) {}
 
                 Box(Modifier.constrainAs(content) {
                     top.linkTo(box.top)
@@ -204,55 +206,55 @@ fun ColumnScrollbar(
         }
 
         BoxWithConstraints(
-			Modifier
-				.align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
-				.fillMaxHeight()
-				.draggable(
-					state = rememberDraggableState { delta ->
-						if (isSelected) {
-							setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
-						}
-					},
-					orientation = Orientation.Vertical,
-					enabled = selectionMode != ScrollbarSelectionMode.Disabled,
-					startDragImmediately = true,
-					onDragStarted = { offset ->
-						val newOffset = offset.y / constraints.maxHeight.toFloat()
-						val currentOffset = normalizedOffsetPosition
-						when (selectionMode) {
-							ScrollbarSelectionMode.Full -> {
-								if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated))
-									setDragOffset(currentOffset)
-								else
-									setScrollOffset(newOffset)
-								isSelected = true
-							}
-							ScrollbarSelectionMode.Thumb -> {
-								if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated)) {
-									setDragOffset(currentOffset)
-									isSelected = true
-								}
-							}
-							ScrollbarSelectionMode.Disabled -> Unit
-						}
-					},
-					onDragStopped = {
-						isSelected = false
-					})
-				.graphicsLayer {
-					translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
-				}) {
+            Modifier
+                .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
+                .fillMaxHeight()
+                .draggable(
+                    state = rememberDraggableState { delta ->
+                        if (isSelected) {
+                            setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
+                        }
+                    },
+                    orientation = Orientation.Vertical,
+                    enabled = selectionMode != ScrollbarSelectionMode.Disabled,
+                    startDragImmediately = true,
+                    onDragStarted = { offset ->
+                        val newOffset = offset.y / constraints.maxHeight.toFloat()
+                        val currentOffset = normalizedOffsetPosition
+                        when (selectionMode) {
+                            ScrollbarSelectionMode.Full -> {
+                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated))
+                                    setDragOffset(currentOffset)
+                                else
+                                    setScrollOffset(newOffset)
+                                isSelected = true
+                            }
+                            ScrollbarSelectionMode.Thumb -> {
+                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated)) {
+                                    setDragOffset(currentOffset)
+                                    isSelected = true
+                                }
+                            }
+                            ScrollbarSelectionMode.Disabled -> Unit
+                        }
+                    },
+                    onDragStopped = {
+                        isSelected = false
+                    })
+                .graphicsLayer {
+                    translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
+                }) {
             Box(
-				Modifier
-					.align(Alignment.TopEnd)
-					.graphicsLayer {
-						translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
-					}
-					.padding(horizontal = padding)
-					.width(thickness)
-					.clip(thumbShape)
-					.background(if (isSelected) thumbSelectedColor else thumbColor)
-					.fillMaxHeight(normalizedThumbSize))
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .graphicsLayer {
+                        translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
+                    }
+                    .padding(horizontal = padding)
+                    .width(thickness)
+                    .clip(thumbShape)
+                    .background(if (isSelected) thumbSelectedColor else thumbColor)
+                    .fillMaxHeight(normalizedThumbSize))
         }
     }
 }
