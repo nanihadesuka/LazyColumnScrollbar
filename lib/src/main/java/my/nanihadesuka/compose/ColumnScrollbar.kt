@@ -41,25 +41,28 @@ fun ColumnScrollbar(
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
+    enable:Boolean = false,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     BoxWithConstraints {
         content()
-        ColumnScrollbar(
-            state = state,
-            rightSide = rightSide,
-            thickness = thickness,
-            padding = padding,
-            thumbMinHeight = thumbMinHeight,
-            thumbColor = thumbColor,
-            thumbSelectedColor = thumbSelectedColor,
-            thumbShape = thumbShape,
-            visibleHeightDp = with(LocalDensity.current) { constraints.maxHeight.toDp() },
-            indicatorContent = indicatorContent,
-            selectionMode = selectionMode,
-        )
+        if(enable) {
+            ColumnScrollbar(
+                state = state,
+                rightSide = rightSide,
+                thickness = thickness,
+                padding = padding,
+                thumbMinHeight = thumbMinHeight,
+                thumbColor = thumbColor,
+                thumbSelectedColor = thumbSelectedColor,
+                thumbShape = thumbShape,
+                visibleHeightDp = with(LocalDensity.current) { constraints.maxHeight.toDp() },
+                indicatorContent = indicatorContent,
+                selectionMode = selectionMode,
+            )
+        }
     }
 }
 
