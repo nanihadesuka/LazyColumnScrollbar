@@ -5,6 +5,13 @@
 
 Compose implementation of the scroll bar. Can drag, scroll smoothly and includes animations.
 
+###Features:
+- Support for LazyColumn's sticky headers
+- Optional current position indicator
+- Multiple selection states (Disabled, Full or Thumb)
+- Customizable look
+- Easy integration with other composables
+
 ## Installation
 
 Add it in your root build.gradle at the end of  repositories:
@@ -21,7 +28,7 @@ Add it to your app build.gradle
 
 ```groovy
 dependencies {
-        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.4'
+        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.5'
     }
 ```
 

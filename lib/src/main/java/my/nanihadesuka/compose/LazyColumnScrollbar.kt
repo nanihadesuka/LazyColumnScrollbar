@@ -90,11 +90,29 @@ fun LazyColumnScrollbar(
 
     val firstVisibleItemIndex =
         remember { derivedStateOf { listState.firstVisibleItemIndex } }
+
     val coroutineScope = rememberCoroutineScope()
 
     var isSelected by remember { mutableStateOf(false) }
 
     var dragOffset by remember { mutableStateOf(0f) }
+
+    val realFirstVisibleItem by remember {
+        derivedStateOf {
+            listState.layoutInfo.visibleItemsInfo.firstOrNull {
+                it.index == listState.firstVisibleItemIndex
+            }
+        }
+    }
+
+    val isStickyHeaderInAction by remember {
+        derivedStateOf {
+            val realIndex = realFirstVisibleItem?.index ?: return@derivedStateOf false
+            val firstVisibleIndex = listState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
+                ?: return@derivedStateOf false
+            realIndex != firstVisibleIndex
+        }
+    }
 
     fun LazyListItemInfo.fractionHiddenTop() =
         if (size == 0) 0f else -offset.toFloat() / size.toFloat()
@@ -108,12 +126,13 @@ fun LazyColumnScrollbar(
                 if (it.totalItemsCount == 0)
                     return@let 0f
 
-                val firstPartial =
-                    it.visibleItemsInfo.first().fractionHiddenTop()
+                val firstItem = realFirstVisibleItem ?: return@let 0f
+                val firstPartial = firstItem.fractionHiddenTop()
                 val lastPartial =
                     1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
-                val realVisibleSize =
-                    it.visibleItemsInfo.size.toFloat() - firstPartial - lastPartial
+
+                val realSize = it.visibleItemsInfo.size - if (isStickyHeaderInAction) 1 else 0
+                val realVisibleSize = realSize.toFloat() - firstPartial - lastPartial
                 realVisibleSize / it.totalItemsCount.toFloat()
             }
         }
@@ -147,8 +166,8 @@ fun LazyColumnScrollbar(
                 if (it.totalItemsCount == 0 || it.visibleItemsInfo.isEmpty())
                     return@let 0f
 
-                val top = it.visibleItemsInfo
-                    .first()
+                val firstItem = realFirstVisibleItem ?: return@let 0f
+                val top = firstItem
                     .run { index.toFloat() + fractionHiddenTop() } / it.totalItemsCount.toFloat()
                 offsetCorrection(top)
             }
@@ -169,8 +188,7 @@ fun LazyColumnScrollbar(
 
         coroutineScope.launch {
             listState.scrollToItem(index = index, scrollOffset = 0)
-            val offset = listState.layoutInfo.visibleItemsInfo
-                .firstOrNull()
+            val offset = realFirstVisibleItem
                 ?.size
                 ?.let { it.toFloat() * remainder }
                 ?.toInt() ?: 0
