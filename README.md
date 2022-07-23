@@ -5,7 +5,7 @@
 
 Compose implementation of the scroll bar. Can drag, scroll smoothly and includes animations.
 
-###Features:
+### Features:
 - Support for LazyColumn's sticky headers
 - Optional current position indicator
 - Multiple selection states (Disabled, Full or Thumb)
