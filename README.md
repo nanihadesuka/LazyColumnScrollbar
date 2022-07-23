@@ -28,7 +28,7 @@ Add it to your app build.gradle
 
 ```groovy
 dependencies {
-        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.5'
+        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.5.1'
     }
 ```
 
