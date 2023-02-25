@@ -49,7 +49,7 @@ fun ColumnScrollbar(
     if (!enabled) content()
     else BoxWithConstraints {
         content()
-        ColumnScrollbar(
+        InternalColumnScrollbar(
             state = state,
             rightSide = rightSide,
             thickness = thickness,
@@ -66,7 +66,8 @@ fun ColumnScrollbar(
 }
 
 /**
- * Scrollbar for LazyColumn
+ * Scrollbar for Column
+ * Use this variation if you want to place the scrollbar independently of the Column position
  *
  * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
@@ -75,7 +76,7 @@ fun ColumnScrollbar(
  * @param visibleHeightDp Visible height of column view
  */
 @Composable
-fun ColumnScrollbar(
+fun InternalColumnScrollbar(
     state: ScrollState,
     rightSide: Boolean = true,
     thickness: Dp = 6.dp,

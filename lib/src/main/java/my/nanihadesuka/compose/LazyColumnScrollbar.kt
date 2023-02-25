@@ -18,7 +18,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -51,7 +50,7 @@ fun LazyColumnScrollbar(
     if (!enabled) content()
     else Box {
         content()
-        LazyColumnScrollbar(
+        InternalLazyColumnScrollbar(
             listState = listState,
             rightSide = rightSide,
             thickness = thickness,
@@ -68,6 +67,7 @@ fun LazyColumnScrollbar(
 
 /**
  * Scrollbar for LazyColumn
+ * Use this variation if you want to place the scrollbar independently of the LazyColumn position
  *
  * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
@@ -75,7 +75,7 @@ fun LazyColumnScrollbar(
  * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
  */
 @Composable
-fun LazyColumnScrollbar(
+fun InternalLazyColumnScrollbar(
     listState: LazyListState,
     rightSide: Boolean = true,
     thickness: Dp = 6.dp,
