@@ -90,7 +90,6 @@ fun InternalLazyColumnScrollbar(
     reverseLayout: Boolean = false,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 ) {
-
     val firstVisibleItemIndex =
         remember { derivedStateOf { listState.firstVisibleItemIndex } }
 
