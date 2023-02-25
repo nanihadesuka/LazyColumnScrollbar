@@ -7,10 +7,11 @@ Compose implementation of the scroll bar. Can drag, scroll smoothly and includes
 
 ### Features:
 - Support for LazyColumn's sticky headers
+- Support for LazyColumn's reverseLayout
 - Optional current position indicator
 - Multiple selection states (Disabled, Full or Thumb)
 - Customizable look
-- Easy integration with other composables
+- Easy integration with other other composables
 
 ## Installation
 
@@ -28,7 +29,7 @@ Add it to your app build.gradle
 
 ```groovy
 dependencies {
-        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.5.1'
+        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.6.0'
     }
 ```
 
@@ -89,6 +90,7 @@ fun LazyColumnScrollbar(
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+    reverseLayout: Boolean = false,
     enabled: Boolean = true,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit

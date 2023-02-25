@@ -29,7 +29,7 @@ import kotlin.math.floor
  *
  * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
- * @param padding   Padding of the scrollbar
+ * @param padding Padding of the scrollbar
  * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
  */
 @Composable
@@ -43,6 +43,7 @@ fun LazyColumnScrollbar(
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+    reverseLayout: Boolean = false,
     enabled: Boolean = true,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
@@ -59,8 +60,9 @@ fun LazyColumnScrollbar(
             thumbColor = thumbColor,
             thumbSelectedColor = thumbSelectedColor,
             thumbShape = thumbShape,
-            indicatorContent = indicatorContent,
             selectionMode = selectionMode,
+            reverseLayout = reverseLayout,
+            indicatorContent = indicatorContent,
         )
     }
 }
@@ -71,7 +73,7 @@ fun LazyColumnScrollbar(
  *
  * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
- * @param padding   Padding of the scrollbar
+ * @param padding Padding of the scrollbar
  * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
  */
 @Composable
@@ -85,6 +87,7 @@ fun InternalLazyColumnScrollbar(
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+    reverseLayout: Boolean = false,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 ) {
 
@@ -149,7 +152,10 @@ fun InternalLazyColumnScrollbar(
             return top
         val topRealMax = 1f - normalizedThumbSizeReal
         val topMax = 1f - thumbMinHeight
-        return top * topMax / topRealMax
+        return when {
+            reverseLayout -> (topRealMax - top) * topMax / topRealMax
+            else -> top * topMax / topRealMax
+        }
     }
 
     fun offsetCorrectionInverse(top: Float): Float {
@@ -268,16 +274,25 @@ fun InternalLazyColumnScrollbar(
                 .fillMaxHeight()
                 .draggable(
                     state = rememberDraggableState { delta ->
+                        val displace = if (reverseLayout) -delta else delta // side effect ?
                         if (isSelected) {
-                            setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
+                            setScrollOffset(dragOffset + displace / constraints.maxHeight.toFloat())
                         }
                     },
                     orientation = Orientation.Vertical,
                     enabled = selectionMode != ScrollbarSelectionMode.Disabled,
                     startDragImmediately = true,
-                    onDragStarted = { offset ->
-                        val newOffset = offset.y / constraints.maxHeight.toFloat()
-                        val currentOffset = normalizedOffsetPosition
+                    onDragStarted = onDragStarted@{ offset ->
+                        val maxHeight = constraints.maxHeight.toFloat()
+                        if (maxHeight <= 0f) return@onDragStarted
+                        val newOffset = when {
+                            reverseLayout -> (maxHeight - offset.y) / maxHeight
+                            else -> offset.y / maxHeight
+                        }
+                        val currentOffset = when {
+                            reverseLayout -> 1f - normalizedOffsetPosition - normalizedThumbSize
+                            else -> normalizedOffsetPosition
+                        }
                         when (selectionMode) {
                             ScrollbarSelectionMode.Full -> {
                                 if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
