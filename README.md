@@ -11,7 +11,7 @@ Compose implementation of the scroll bar. Can drag, scroll smoothly and includes
 - Optional current position indicator
 - Multiple selection states (Disabled, Full or Thumb)
 - Customizable look
-- Easy integration with other other composables
+- Easy integration with other composables
 
 ## Installation
 
