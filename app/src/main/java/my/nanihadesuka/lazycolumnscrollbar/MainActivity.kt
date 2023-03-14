@@ -52,7 +52,6 @@ fun LazyColumnView() {
     val listData = (0..1000).toList()
     val listState = rememberLazyListState()
 
-    val reverseLayout = false
     Box(
         modifier = Modifier
             .padding(16.dp)
@@ -61,8 +60,7 @@ fun LazyColumnView() {
     ) {
         LazyColumnScrollbar(
             listState,
-            selectionMode = ScrollbarSelectionMode.Full,
-            reverseLayout = reverseLayout,
+            selectionMode = ScrollbarSelectionMode.Thumb,
             indicatorContent = { index, isThumbSelected ->
                 Surface {
                     Text(
@@ -86,7 +84,7 @@ fun LazyColumnView() {
         ) {
             LazyColumn(
                 state = listState,
-                reverseLayout = reverseLayout
+                reverseLayout = false
             ) {
                 (0..3).forEach { number ->
                     stickyHeader {

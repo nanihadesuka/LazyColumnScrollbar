@@ -43,7 +43,6 @@ fun LazyColumnScrollbar(
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
-    reverseLayout: Boolean = false,
     enabled: Boolean = true,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
@@ -61,7 +60,6 @@ fun LazyColumnScrollbar(
             thumbSelectedColor = thumbSelectedColor,
             thumbShape = thumbShape,
             selectionMode = selectionMode,
-            reverseLayout = reverseLayout,
             indicatorContent = indicatorContent,
         )
     }
@@ -87,17 +85,17 @@ fun InternalLazyColumnScrollbar(
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
-    reverseLayout: Boolean = false,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 ) {
-    val firstVisibleItemIndex =
-        remember { derivedStateOf { listState.firstVisibleItemIndex } }
+    val firstVisibleItemIndex = remember { derivedStateOf { listState.firstVisibleItemIndex } }
 
     val coroutineScope = rememberCoroutineScope()
 
     var isSelected by remember { mutableStateOf(false) }
 
     var dragOffset by remember { mutableStateOf(0f) }
+
+    val reverseLayout by remember { derivedStateOf { listState.layoutInfo.reverseLayout } }
 
     val realFirstVisibleItem by remember {
         derivedStateOf {
