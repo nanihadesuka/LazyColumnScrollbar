@@ -1,5 +1,6 @@
 package my.nanihadesuka.compose
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -145,9 +146,14 @@ fun InternalLazyColumnScrollbar(
     }
 
     fun offsetCorrection(top: Float): Float {
-        if (normalizedThumbSizeReal >= thumbMinHeight)
-            return top
         val topRealMax = 1f - normalizedThumbSizeReal
+        if (normalizedThumbSizeReal >= thumbMinHeight) {
+            return when {
+                reverseLayout -> topRealMax - top
+                else -> top
+            }
+        }
+
         val topMax = 1f - thumbMinHeight
         return when {
             reverseLayout -> (topRealMax - top) * topMax / topRealMax
