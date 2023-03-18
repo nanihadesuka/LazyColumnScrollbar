@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -179,25 +180,28 @@ fun InternalColumnScrollbar(
                 Modifier.align(Alignment.TopEnd)
             ) {
                 val (box, content) = createRefs()
-                Box(
-                    Modifier
-                        .fillMaxHeight(normalizedThumbSize)
-                        .padding(
-                            start = if (rightSide) 0.dp else padding,
-                            end = if (!rightSide) 0.dp else padding,
-                        )
-                        .width(thickness)
-                        .constrainAs(box) {
-                            if (rightSide) end.linkTo(parent.end)
-                            else start.linkTo(parent.start)
-                        }) {}
+                Box(modifier = Modifier
+                    .fillMaxHeight(normalizedThumbSize)
+                    .padding(
+                        start = if (rightSide) 0.dp else padding,
+                        end = if (!rightSide) 0.dp else padding,
+                    )
+                    .width(thickness)
+                    .constrainAs(box) {
+                        if (rightSide) end.linkTo(parent.end)
+                        else start.linkTo(parent.start)
+                    }
+                )
 
-                Box(Modifier.constrainAs(content) {
-                    top.linkTo(box.top)
-                    bottom.linkTo(box.bottom)
-                    if (rightSide) end.linkTo(box.start)
-                    else start.linkTo(box.end)
-                }) {
+                Box(modifier = Modifier
+                    .constrainAs(content) {
+                        top.linkTo(box.top)
+                        bottom.linkTo(box.bottom)
+                        if (rightSide) end.linkTo(box.start)
+                        else start.linkTo(box.end)
+                    }
+                    .testTag(TestTagsScrollbar.scrollbarIndicator)
+                ) {
                     indicatorContent(
                         normalizedOffset = offsetCorrectionInverse(normalizedOffsetPosition),
                         isThumbSelected = isSelected
@@ -244,18 +248,21 @@ fun InternalColumnScrollbar(
                     })
                 .graphicsLayer {
                     translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
-                }) {
-            Box(
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .graphicsLayer {
-                        translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
-                    }
-                    .padding(horizontal = padding)
-                    .width(thickness)
-                    .clip(thumbShape)
-                    .background(if (isSelected) thumbSelectedColor else thumbColor)
-                    .fillMaxHeight(normalizedThumbSize))
+                }
+                .testTag(TestTagsScrollbar.scrollbarContainer)
+        ) {
+            Box(modifier = Modifier
+                .align(Alignment.TopEnd)
+                .graphicsLayer {
+                    translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
+                }
+                .padding(horizontal = padding)
+                .width(thickness)
+                .clip(thumbShape)
+                .background(if (isSelected) thumbSelectedColor else thumbColor)
+                .fillMaxHeight(normalizedThumbSize)
+                .testTag(TestTagsScrollbar.scrollbar)
+            )
         }
     }
 }
