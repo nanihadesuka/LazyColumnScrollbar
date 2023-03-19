@@ -1,7 +1,11 @@
 name: default
 run-name: Default CI
 
-on: [ push, pull_request ]
+on:
+  pull_request:
+    types: [opened, reopened]
+  push
+
 
 jobs:
   runLibUnitTests:
