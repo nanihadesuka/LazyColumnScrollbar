@@ -16,10 +16,10 @@ jobs:
         with:
           java-version: 11
 
-      - name: Setup Gradle version to 7.2.2
+      - name: Setup Gradle version to 7.3.3
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-version: 7.2.2
+          gradle-version: 7.3.3
 
       - name: Run unit tests
         run: |
