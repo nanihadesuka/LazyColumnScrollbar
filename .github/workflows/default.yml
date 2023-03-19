@@ -27,6 +27,3 @@ jobs:
       - name: Run unit tests
         run: |
           gradle tasks :lib:testDebugUnitTest
-
-
-
