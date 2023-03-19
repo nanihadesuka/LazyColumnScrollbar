@@ -4,8 +4,8 @@ run-name: Default CI
 on:
   pull_request:
     types: [opened, reopened]
-  push: *
-
+  push:
+  
 jobs:
   runLibUnitTests:
     name: Run lib unit tests
