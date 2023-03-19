@@ -1,5 +1,6 @@
 [![](https://jitpack.io/v/nanihadesuka/LazyColumnScrollbar.svg)](https://jitpack.io/#nanihadesuka/LazyColumnScrollbar)
 [![](https://jitpack.io/v/nanihadesuka/LazyColumnScrollbar/month.svg)](https://jitpack.io/#nanihadesuka/LazyColumnScrollbar)
+[![](https://github.com/nanihadesuka/LazyColumnScrollbar/actions/workflows/default.yml/badge.svg?branch=master)](https://github.com/nanihadesuka/LazyColumnScrollbar/commits/master)
 
 # LazyColumn && Column scrollbar for jetpack compose
 
@@ -12,6 +13,7 @@ Compose implementation of the scroll bar. Can drag, scroll smoothly and includes
 - Multiple selection states (Disabled, Full or Thumb)
 - Customizable look
 - Easy integration with other composables
+- UI tests
 
 ## Installation
 
