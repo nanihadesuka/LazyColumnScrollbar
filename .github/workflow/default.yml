@@ -1,0 +1,33 @@
+name: default
+run-name: Default CI
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+
+jobs:
+  runLibUnitTests:
+    name: Run lib unit tests
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v2
+
+      - name: Set up JDK environment
+        uses: actions/setup-java@v1.4.3
+        with:
+          java-version: 11
+
+      - name: Setup Gradle version to 7.2.2
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: 7.2.2
+
+      - name: Run unit tests
+        run: |
+          gradle tasks :lib:testDebugUnitTest
+
+
+
