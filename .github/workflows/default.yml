@@ -6,7 +6,6 @@ on:
     types: [opened, reopened]
   push
 
-
 jobs:
   runLibUnitTests:
     name: Run lib unit tests
