@@ -147,7 +147,7 @@ fun InternalLazyColumnScrollbar(
     }
 
     fun offsetCorrection(top: Float): Float {
-        val topRealMax = 1f - normalizedThumbSizeReal
+        val topRealMax = (1f - normalizedThumbSizeReal).coerceIn(0f, 1f)
         if (normalizedThumbSizeReal >= thumbMinHeight) {
             return when {
                 reverseLayout -> topRealMax - top
