@@ -10,8 +10,8 @@ android {
     defaultConfig {
         minSdk 21
         targetSdk 33
-        versionCode 13
-        versionName "1.6.2"
+        versionCode 14
+        versionName "1.6.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -58,7 +58,7 @@ afterEvaluate {
 
                 groupId = 'my.nanihadesuka.lazycolumnscrollbar'
                 artifactId = "lazycolumnscrollbar"
-                version = '1.0.0'
+                version = '1.6.3'
             }
         }
     }
