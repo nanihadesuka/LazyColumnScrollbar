@@ -1,6 +1,5 @@
 package my.nanihadesuka.compose
 
-
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +15,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,18 +26,17 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
     companion object {
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = " Items count: {0} ")
-        fun parametrizeListItemCount() = listOf<Array<Int>>(
-            arrayOf(0),
-            arrayOf(1),
-            arrayOf(10),
-            arrayOf(100)
-        )
+        fun parametrizeListItemCount() =
+            listOf<Array<Int>>(
+                arrayOf(0),
+                arrayOf(1),
+                arrayOf(10),
+                arrayOf(100)
+            )
     }
 
     @get:Rule
     val composeRule = createComposeRule()
-
-    // TODO: find why some of the test crash for LazyColumn swipe actions
 
     @Test
     fun `scrollbar enabled`() {
@@ -94,19 +91,34 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    @Ignore("Reason: Fatal exception in coroutines machinery for ... TestCoroutineScheduler")
-    fun `move scrollbar to the bottom`() {
+    fun `move scrollbar to the top - with reverse layout`() {
         if (itemCount == 0) return
 
-        setContent()
+        setContent(reverseLayout = true)
         scrollbarScreen(composeRule) {
-            moveScrollbarToBottom()
-            assert { isAtBottom() }
+            moveScrollbarToTop()
+            assert {
+                isAtTop()
+                isItemVisible(itemTag = itemTestTag(itemCount - 1))
+            }
         }
     }
 
     @Test
-    @Ignore("Reason: Fatal exception in coroutines machinery for ... TestCoroutineScheduler")
+    fun `move scrollbar to the bottom - with reverse layout`() {
+        if (itemCount == 0) return
+
+        setContent(reverseLayout = true)
+        scrollbarScreen(composeRule) {
+            moveScrollbarToBottom()
+            assert {
+                isAtBottom()
+                isItemVisible(itemTag = itemTestTag(0))
+            }
+        }
+    }
+
+    @Test
     fun `move scrollbar to the top`() {
         if (itemCount == 0) return
 
@@ -115,12 +127,30 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
             moveScrollbarToBottom()
             assert { isAtBottom() }
             moveScrollbarToTop()
-            assert { isAtTop() }
+            assert {
+                isAtTop()
+                isItemVisible(itemTag = itemTestTag(0))
+            }
         }
     }
 
     @Test
-    @Ignore("Reason: Fatal exception in coroutines machinery for ... TestCoroutineScheduler")
+    fun `move scrollbar to the bottom`() {
+        if (itemCount == 0) return
+
+        setContent()
+        scrollbarScreen(composeRule) {
+            moveScrollbarToTop()
+            assert { isAtTop() }
+            moveScrollbarToBottom()
+            assert {
+                isAtBottom()
+                isItemVisible(itemTag = itemTestTag(itemCount - 1))
+            }
+        }
+    }
+
+    @Test
     fun `move scrollbar to the bottom - with indicator`() {
         if (itemCount == 0) return
 
@@ -132,7 +162,6 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    @Ignore("Reason: Fatal exception in coroutines machinery for ... TestCoroutineScheduler")
     fun `move scrollbar to the top - with indicator`() {
         if (itemCount == 0) return
 
@@ -146,7 +175,6 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    @Ignore("Reason: Fatal exception in coroutines machinery for ... TestCoroutineScheduler")
     fun `scroll list to the bottom`() {
         if (itemCount == 0) return
 
@@ -158,7 +186,6 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    @Ignore("Reason: Fatal exception in coroutines machinery for ... TestCoroutineScheduler")
     fun `scroll list to the top`() {
         if (itemCount == 0) return
 
@@ -167,6 +194,30 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
             scrollListToItem(testTag = itemTestTag(itemCount - 1))
             assert { isAtBottom() }
             scrollListToItem(testTag = itemTestTag(0))
+            assert { isAtTop() }
+        }
+    }
+
+    @Test
+    fun `scroll list to the bottom - with reverse layout`() {
+        if (itemCount == 0) return
+
+        setContent(reverseLayout = true)
+        scrollbarScreen(composeRule) {
+            scrollListToItem(testTag = itemTestTag(itemCount - 1))
+            assert { isAtTop() }
+            scrollListToItem(testTag = itemTestTag(0))
+            assert { isAtBottom() }
+        }
+    }
+
+    @Test
+    fun `scroll list to the top - with reverse layout `() {
+        if (itemCount == 0) return
+
+        setContent(reverseLayout = true)
+        scrollbarScreen(composeRule) {
+            scrollListToItem(testTag = itemTestTag(itemCount - 1))
             assert { isAtTop() }
         }
     }
@@ -230,7 +281,6 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    @Ignore("Reason: Fatal exception in coroutines machinery for ... TestCoroutineScheduler")
     fun `scrollbar selection mode - Thumb`() {
         if (itemCount == 0) return
 
@@ -269,7 +319,6 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    @Ignore("Reason: Fatal exception in coroutines machinery for ... TestCoroutineScheduler")
     fun `scrollbar selection mode - Full`() {
         if (itemCount == 0) return
 
@@ -310,7 +359,8 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
         enabled: Boolean = true,
         selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
         indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
-        listItemsCount: Int = itemCount
+        listItemsCount: Int = itemCount,
+        reverseLayout: Boolean = false
     ) {
         composeRule.setContent {
             LazyColumnScrollbar(
@@ -326,7 +376,11 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
                 indicatorContent = indicatorContent,
                 selectionMode = selectionMode,
             ) {
-                LazyColumn(state = state, modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    state = state,
+                    modifier = Modifier.fillMaxSize(),
+                    reverseLayout = reverseLayout
+                ) {
                     items(listItemsCount, key = { it }) {
                         Text(
                             text = "Item $it",
