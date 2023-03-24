@@ -18,11 +18,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 
@@ -233,10 +233,10 @@ fun InternalLazyColumnScrollbar(
             Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
                 .fillMaxHeight()
-                .graphicsLayer {
-                    translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
+                .graphicsLayer(
+                    translationX = with(LocalDensity.current) { (if (rightSide) displacement.dp else -displacement.dp).toPx() },
                     translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
-                }
+                )
         ) {
             ConstraintLayout(
                 Modifier.align(Alignment.TopEnd)
@@ -270,6 +270,7 @@ fun InternalLazyColumnScrollbar(
                     )
                 }
             }
+
         }
 
         BoxWithConstraints(
@@ -318,22 +319,19 @@ fun InternalLazyColumnScrollbar(
                         isSelected = false
                     }
                 )
-                .graphicsLayer {
-                    translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
-                }
+                .graphicsLayer(translationX = with(LocalDensity.current) { (if (rightSide) displacement.dp else -displacement.dp).toPx() })
                 .testTag(TestTagsScrollbar.scrollbarContainer)
         ) {
-            Box(modifier = Modifier
-                .align(Alignment.TopEnd)
-                .graphicsLayer {
-                    translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
-                }
-                .padding(horizontal = padding)
-                .width(thickness)
-                .clip(thumbShape)
-                .background(if (isSelected) thumbSelectedColor else thumbColor)
-                .fillMaxHeight(normalizedThumbSize)
-                .testTag(TestTagsScrollbar.scrollbar)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .graphicsLayer(translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition)
+                    .padding(horizontal = padding)
+                    .width(thickness)
+                    .clip(thumbShape)
+                    .background(if (isSelected) thumbSelectedColor else thumbColor)
+                    .fillMaxHeight(normalizedThumbSize)
+                    .testTag(TestTagsScrollbar.scrollbar)
             )
         }
 
