@@ -97,6 +97,18 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
             }
         }
 
+        fun isItemVisible(itemTag: String) {
+            composeRule
+                .onNodeWithTag(itemTag)
+                .assertIsDisplayed()
+        }
+
+        fun isItemHidden(itemTag: String) {
+            composeRule
+                .onNodeWithTag(itemTag)
+                .assertIsNotDisplayed()
+        }
+
         fun isAtLeftSide(indicatorVisible: Boolean = false) {
             assertEqualWithTolerance(scrollbarBounds.left, 0.dp)
             if (indicatorVisible) {

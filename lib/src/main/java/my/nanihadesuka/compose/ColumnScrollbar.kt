@@ -117,7 +117,7 @@ fun InternalColumnScrollbar(
 
     fun offsetCorrection(top: Float): Float {
         val topRealMax = 1f
-        val topMax = 1f - normalizedThumbSizeUpdated
+        val topMax = (1f - normalizedThumbSizeUpdated).coerceIn(0f, 1f)
         return top * topMax / topRealMax
     }
 
