@@ -277,6 +277,45 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         }
     }
 
+    @Test
+    fun `scrollbar selection actionable - Always`() {
+        if (itemCount == 0) return
+
+        setContent(
+            selectionMode = ScrollbarSelectionMode.Full,
+            selectionActionable = ScrollbarSelectionActionable.Always,
+            thumbMinHeight = 0.1f,
+        )
+        scrollbarScreen(composeRule) {
+            assert { isAtTop() }
+            moveScrollbarToBottom(startFrom = 0.05f)
+            assert { isAtBottom() }
+            moveScrollbarToTop(startFrom = 0.5f)
+            assert { isAtTop() }
+            moveScrollbarToBottom(startFrom = 0.95f)
+            assert { isAtBottom() }
+        }
+    }
+
+    fun `scrollbar selection actionable - WhenVisible`() {
+        if (itemCount == 0) return
+
+        setContent(
+            selectionMode = ScrollbarSelectionMode.Full,
+            selectionActionable = ScrollbarSelectionActionable.WhenVisible,
+            thumbMinHeight = 0.1f,
+        )
+        scrollbarScreen(composeRule) {
+            assert { isAtTop() }
+            moveScrollbarToBottom(startFrom = 0.05f)
+            assert { isAtTop() }
+            moveScrollbarToTop(startFrom = 0.5f)
+            assert { isAtTop() }
+            moveScrollbarToBottom(startFrom = 0.95f)
+            assert { isAtBottom() }
+        }
+    }
+
     @Composable
     private fun IndicatorContent(value: Float) {
         Surface {
@@ -298,6 +337,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         thumbShape: Shape = CircleShape,
         enabled: Boolean = true,
         selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+        selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
         indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
         listItemsCount: Int = itemCount
     ) {
@@ -314,7 +354,8 @@ class ColumnScrollbarTest(private val itemCount: Int) {
                 thumbShape = thumbShape,
                 indicatorContent = indicatorContent,
                 selectionMode = selectionMode,
-            ) {
+                selectionActionable = selectionActionable,
+                ) {
                 Column(Modifier.verticalScroll(state = state)) {
                     repeat(listItemsCount) {
                         Text(

@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -44,6 +45,8 @@ fun ColumnScrollbar(
     thumbShape: Shape = CircleShape,
     enabled: Boolean = true,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+    selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
+    hideDelayMillis: Int = 400,
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
@@ -62,6 +65,8 @@ fun ColumnScrollbar(
             visibleHeightDp = with(LocalDensity.current) { constraints.maxHeight.toDp() },
             indicatorContent = indicatorContent,
             selectionMode = selectionMode,
+            selectionActionable = selectionActionable,
+            hideDelayMillis = hideDelayMillis,
         )
     }
 }
@@ -87,6 +92,8 @@ fun InternalColumnScrollbar(
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+    selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
+    hideDelayMillis: Int = 400,
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     visibleHeightDp: Dp,
 ) {
@@ -151,16 +158,33 @@ fun InternalColumnScrollbar(
 
     val isInAction = state.isScrollInProgress || isSelected
 
+    val isInActionSelectable = remember { mutableStateOf(isInAction) }
+    val durationAnimationMillis: Int = 500
+    LaunchedEffect(isInAction) {
+        if (isInAction) {
+            isInActionSelectable.value = true
+        } else {
+            delay(timeMillis = durationAnimationMillis.toLong() + hideDelayMillis.toLong())
+            isInActionSelectable.value = false
+        }
+    }
+
     val alpha by animateFloatAsState(
-        targetValue = if (isInAction) 1f else 0f, animationSpec = tween(
-            durationMillis = if (isInAction) 75 else 500, delayMillis = if (isInAction) 0 else 500
-        )
+        targetValue = if (isInAction) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = if (isInAction) 75 else durationAnimationMillis,
+            delayMillis = if (isInAction) 0 else hideDelayMillis
+        ),
+        label = "scrollbar alpha value"
     )
 
     val displacement by animateFloatAsState(
-        targetValue = if (isInAction) 0f else 14f, animationSpec = tween(
-            durationMillis = if (isInAction) 75 else 500, delayMillis = if (isInAction) 0 else 500
-        )
+        targetValue = if (isInAction) 0f else 14f,
+        animationSpec = tween(
+            durationMillis = if (isInAction) 75 else durationAnimationMillis,
+            delayMillis = if (isInAction) 0 else hideDelayMillis
+        ),
+        label = "scrollbar displacement value"
     )
 
     BoxWithConstraints(
@@ -226,21 +250,31 @@ fun InternalColumnScrollbar(
                     onDragStarted = { offset ->
                         val newOffset = offset.y / constraints.maxHeight.toFloat()
                         val currentOffset = normalizedOffsetPosition
-                        when (selectionMode) {
-                            ScrollbarSelectionMode.Full -> {
-                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated))
-                                    setDragOffset(currentOffset)
-                                else
-                                    setScrollOffset(newOffset)
-                                isSelected = true
-                            }
-                            ScrollbarSelectionMode.Thumb -> {
-                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated)) {
-                                    setDragOffset(currentOffset)
+
+                        val allowedToInteract = when (selectionActionable) {
+                            ScrollbarSelectionActionable.Always -> true
+                            ScrollbarSelectionActionable.WhenVisible -> isInActionSelectable.value
+                        }
+
+                        if (allowedToInteract) {
+                            when (selectionMode) {
+                                ScrollbarSelectionMode.Full -> {
+                                    if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated))
+                                        setDragOffset(currentOffset)
+                                    else
+                                        setScrollOffset(newOffset)
                                     isSelected = true
                                 }
+
+                                ScrollbarSelectionMode.Thumb -> {
+                                    if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated)) {
+                                        setDragOffset(currentOffset)
+                                        isSelected = true
+                                    }
+                                }
+
+                                ScrollbarSelectionMode.Disabled -> Unit
                             }
-                            ScrollbarSelectionMode.Disabled -> Unit
                         }
                     },
                     onDragStopped = {
