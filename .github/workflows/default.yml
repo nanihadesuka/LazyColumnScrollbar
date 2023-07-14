@@ -3,9 +3,13 @@ run-name: Default CI
 
 on:
   pull_request:
-    types: [reopened]
+    types:
+      - opened
+      - synchronize
   push:
-  
+    branches:
+      - master
+
 jobs:
   runLibUnitTests:
     name: Run lib unit tests
