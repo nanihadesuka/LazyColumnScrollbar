@@ -10,7 +10,8 @@ Compose implementation of the scroll bar. Can drag, scroll smoothly and includes
 - Support for LazyColumn's sticky headers
 - Support for LazyColumn's reverseLayout
 - Optional current position indicator
-- Multiple selection states (Disabled, Full or Thumb)
+- Multiple selection states (Disabled, Full, Thumb)
+- Multiple selection actionable states (Always, WhenVisible)
 - Customizable look
 - Easy integration with other composables
 - UI tests
@@ -31,8 +32,8 @@ Add it to your app build.gradle
 
 ```groovy
 dependencies {
-        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.6.3'
-    }
+        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.7.0'
+}
 ```
 
 # How to use for lazyColumn
@@ -58,22 +59,13 @@ LazyColumnScrollbar(listState) {
 ```
 
 indicatorContent example:
-```
+```kotlin
 indicatorContent = { index, isThumbSelected ->
     Text(
         text = "i: $index",
         Modifier
-            .clip(
-                RoundedCornerShape(
-                    topStart = 20.dp,
-                    bottomStart = 20.dp,
-                    bottomEnd = 16.dp
-                )
-            )
-            .background(Color.Green)
-            .padding(8.dp)
-            .clip(CircleShape)
-            .background(if (isThumbSelected) Color.Red else Color.Black)
+            .padding(4.dp)
+            .background(if (isThumbSelected) Color.Red else Color.Black, CircleShape)
             .padding(12.dp)
     )
 }
@@ -92,6 +84,8 @@ fun LazyColumnScrollbar(
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+    selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
+    hideDelayMillis: Int = 400,
     enabled: Boolean = true,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
@@ -135,6 +129,8 @@ fun ColumnScrollbar(
     thumbShape: Shape = CircleShape,
     enabled: Boolean = true,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+    selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
+    hideDelayMillis: Int = 400,
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 )

@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 
@@ -56,6 +58,8 @@ fun LazyColumnScrollbar(
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+    selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
+    hideDelayMillis: Int = 400,
     enabled: Boolean = true,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
@@ -71,6 +75,8 @@ fun LazyColumnScrollbar(
             thumbMinHeight = thumbMinHeight,
             thumbColor = thumbColor,
             thumbSelectedColor = thumbSelectedColor,
+            selectionActionable = selectionActionable,
+            hideDelayMillis = hideDelayMillis,
             thumbShape = thumbShape,
             selectionMode = selectionMode,
             indicatorContent = indicatorContent,
@@ -98,6 +104,8 @@ fun InternalLazyColumnScrollbar(
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
+    selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
+    hideDelayMillis: Int = 400,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 ) {
     val firstVisibleItemIndex = remember { derivedStateOf { listState.firstVisibleItemIndex } }
@@ -140,7 +148,8 @@ fun InternalLazyColumnScrollbar(
                     return@let 0f
 
                 val firstItem = realFirstVisibleItem ?: return@let 0f
-                val firstPartial = firstItem.fractionHiddenTop(listState.firstVisibleItemScrollOffset)
+                val firstPartial =
+                    firstItem.fractionHiddenTop(listState.firstVisibleItemScrollOffset)
                 val lastPartial =
                     1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
 
@@ -219,20 +228,33 @@ fun InternalLazyColumnScrollbar(
 
     val isInAction = listState.isScrollInProgress || isSelected
 
+    val isInActionSelectable = remember { mutableStateOf(isInAction) }
+    val durationAnimationMillis: Int = 500
+    LaunchedEffect(isInAction) {
+        if (isInAction) {
+            isInActionSelectable.value = true
+        } else {
+            delay(timeMillis = durationAnimationMillis.toLong() + hideDelayMillis.toLong())
+            isInActionSelectable.value = false
+        }
+    }
+
     val alpha by animateFloatAsState(
         targetValue = if (isInAction) 1f else 0f,
         animationSpec = tween(
-            durationMillis = if (isInAction) 75 else 500,
-            delayMillis = if (isInAction) 0 else 500
-        )
+            durationMillis = if (isInAction) 75 else durationAnimationMillis,
+            delayMillis = if (isInAction) 0 else hideDelayMillis
+        ),
+        label = "scrollbar alpha value"
     )
 
     val displacement by animateFloatAsState(
         targetValue = if (isInAction) 0f else 14f,
         animationSpec = tween(
-            durationMillis = if (isInAction) 75 else 500,
-            delayMillis = if (isInAction) 0 else 500
-        )
+            durationMillis = if (isInAction) 75 else durationAnimationMillis,
+            delayMillis = if (isInAction) 0 else hideDelayMillis
+        ),
+        label = "scrollbar displacement value"
     )
 
     BoxWithConstraints(
@@ -309,23 +331,31 @@ fun InternalLazyColumnScrollbar(
                             reverseLayout -> 1f - normalizedOffsetPosition - normalizedThumbSize
                             else -> normalizedOffsetPosition
                         }
-                        when (selectionMode) {
-                            ScrollbarSelectionMode.Full -> {
-                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
-                                    setDragOffset(currentOffset)
-                                else
-                                    setScrollOffset(newOffset)
-                                isSelected = true
-                            }
 
-                            ScrollbarSelectionMode.Thumb -> {
-                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSize)) {
-                                    setDragOffset(currentOffset)
+                        val allowedToInteract = when (selectionActionable) {
+                            ScrollbarSelectionActionable.Always -> true
+                            ScrollbarSelectionActionable.WhenVisible -> isInActionSelectable.value
+                        }
+
+                        if (allowedToInteract) {
+                            when (selectionMode) {
+                                ScrollbarSelectionMode.Full -> {
+                                    if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
+                                        setDragOffset(currentOffset)
+                                    else
+                                        setScrollOffset(newOffset)
                                     isSelected = true
                                 }
-                            }
 
-                            ScrollbarSelectionMode.Disabled -> Unit
+                                ScrollbarSelectionMode.Thumb -> {
+                                    if (newOffset in currentOffset..(currentOffset + normalizedThumbSize)) {
+                                        setDragOffset(currentOffset)
+                                        isSelected = true
+                                    }
+                                }
+
+                                ScrollbarSelectionMode.Disabled -> Unit
+                            }
                         }
                     },
                     onDragStopped = {
