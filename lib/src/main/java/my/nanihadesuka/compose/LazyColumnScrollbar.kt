@@ -6,11 +6,22 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -116,8 +127,8 @@ fun InternalLazyColumnScrollbar(
         }
     }
 
-    fun LazyListItemInfo.fractionHiddenTop() =
-        if (size == 0) 0f else -offset.toFloat() / size.toFloat()
+    fun LazyListItemInfo.fractionHiddenTop(firstItemOffset: Int) =
+        if (size == 0) 0f else firstItemOffset / size.toFloat()
 
     fun LazyListItemInfo.fractionVisibleBottom(viewportEndOffset: Int) =
         if (size == 0) 0f else (viewportEndOffset - offset).toFloat() / size.toFloat()
@@ -129,7 +140,7 @@ fun InternalLazyColumnScrollbar(
                     return@let 0f
 
                 val firstItem = realFirstVisibleItem ?: return@let 0f
-                val firstPartial = firstItem.fractionHiddenTop()
+                val firstPartial = firstItem.fractionHiddenTop(listState.firstVisibleItemScrollOffset)
                 val lastPartial =
                     1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
 
@@ -178,7 +189,7 @@ fun InternalLazyColumnScrollbar(
 
                 val firstItem = realFirstVisibleItem ?: return@let 0f
                 val top = firstItem
-                    .run { index.toFloat() + fractionHiddenTop() } / it.totalItemsCount.toFloat()
+                    .run { index.toFloat() + fractionHiddenTop(listState.firstVisibleItemScrollOffset) } / it.totalItemsCount.toFloat()
                 offsetCorrection(top)
             }
         }
@@ -306,12 +317,14 @@ fun InternalLazyColumnScrollbar(
                                     setScrollOffset(newOffset)
                                 isSelected = true
                             }
+
                             ScrollbarSelectionMode.Thumb -> {
                                 if (newOffset in currentOffset..(currentOffset + normalizedThumbSize)) {
                                     setDragOffset(currentOffset)
                                     isSelected = true
                                 }
                             }
+
                             ScrollbarSelectionMode.Disabled -> Unit
                         }
                     },

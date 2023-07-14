@@ -49,7 +49,7 @@ fun MainView() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LazyColumnView() {
-    val listData = (0..1000).toList()
+    val listData = (0..30).toList()
     val listState = rememberLazyListState()
 
     Box(
