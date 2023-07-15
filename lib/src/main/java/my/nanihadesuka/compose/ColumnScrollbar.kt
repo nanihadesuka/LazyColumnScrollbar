@@ -55,6 +55,7 @@ fun ColumnScrollbar(
         content()
         InternalColumnScrollbar(
             state = state,
+            modifier = Modifier,
             rightSide = rightSide,
             thickness = thickness,
             padding = padding,
@@ -84,6 +85,7 @@ fun ColumnScrollbar(
 @Composable
 fun InternalColumnScrollbar(
     state: ScrollState,
+    modifier: Modifier = Modifier,
     rightSide: Boolean = true,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
@@ -188,7 +190,7 @@ fun InternalColumnScrollbar(
     )
 
     BoxWithConstraints(
-        Modifier
+        modifier = modifier
             .alpha(alpha)
             .fillMaxWidth()
     ) {
