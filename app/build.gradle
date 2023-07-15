@@ -4,6 +4,7 @@ plugins {
 }
 
 android {
+    namespace 'my.nanihadesuka.lazycolumnscrollbar.sample'
     compileSdk 33
 
     defaultConfig {
@@ -36,7 +37,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion "1.4.3"
+        kotlinCompilerExtensionVersion compose_compiler_version
     }
     packagingOptions {
         resources {
