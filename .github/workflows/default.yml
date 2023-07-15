@@ -9,14 +9,11 @@ on:
   push:
     branches:
       - master
-      - dev
-      - '*-dev'
-      - 'dev-*'
 
 jobs:
   runLibUnitTests:
     name: Run lib unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Clone repo
         uses: actions/checkout@v3
