@@ -9,24 +9,28 @@ on:
   push:
     branches:
       - master
+      - dev
+      - '*-dev'
+      - 'dev-*'
 
 jobs:
   runLibUnitTests:
     name: Run lib unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Clone repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up JDK environment
-        uses: actions/setup-java@v1.4.3
+        uses: actions/setup-java@v3
         with:
-          java-version: 11
+          java-version: '17'
+          distribution: 'temurin'
 
-      - name: Setup Gradle version to 7.3.3
+      - name: Setup Gradle version
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-version: 7.3.3
+          gradle-version: 8.2.1
 
       - name: Run unit tests
         run: |
