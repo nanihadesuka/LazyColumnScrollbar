@@ -69,6 +69,7 @@ fun LazyColumnScrollbar(
         content()
         InternalLazyColumnScrollbar(
             listState = listState,
+            modifier = Modifier,
             rightSide = rightSide,
             thickness = thickness,
             padding = padding,
@@ -96,6 +97,7 @@ fun LazyColumnScrollbar(
 @Composable
 fun InternalLazyColumnScrollbar(
     listState: LazyListState,
+    modifier: Modifier = Modifier,
     rightSide: Boolean = true,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
@@ -258,7 +260,7 @@ fun InternalLazyColumnScrollbar(
     )
 
     BoxWithConstraints(
-        Modifier
+        modifier = modifier
             .alpha(alpha)
             .fillMaxWidth()
     ) {
