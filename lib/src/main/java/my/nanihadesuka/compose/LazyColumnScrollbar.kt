@@ -261,7 +261,6 @@ fun InternalLazyColumnScrollbar(
 
     BoxWithConstraints(
         modifier = modifier
-            .alpha(alpha)
             .fillMaxWidth()
     ) {
         val maxHeightFloat = constraints.maxHeight.toFloat()
@@ -283,6 +282,7 @@ fun InternalLazyColumnScrollbar(
                     .clip(thumbShape)
                     .width(thickness)
                     .fillMaxHeight(normalizedThumbSize)
+                    .alpha(alpha)
                     .background(if (isSelected) thumbSelectedColor else thumbColor)
                     .constrainAs(box) {
                         if (rightSide) end.linkTo(parent.end)
@@ -294,6 +294,7 @@ fun InternalLazyColumnScrollbar(
             if (indicatorContent != null) {
                 Box(
                     modifier = Modifier
+                        .alpha(alpha)
                         .constrainAs(content) {
                             top.linkTo(box.top)
                             bottom.linkTo(box.bottom)
