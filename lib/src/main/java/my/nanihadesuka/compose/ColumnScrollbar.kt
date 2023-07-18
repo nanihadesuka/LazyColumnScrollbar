@@ -207,39 +207,42 @@ fun InternalColumnScrollbar(
             .alpha(alpha)
             .fillMaxWidth()
     ) {
-        if (indicatorContent != null) BoxWithConstraints(
-            Modifier
+        ConstraintLayout(
+            modifier = Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
-                .fillMaxHeight()
                 .graphicsLayer {
                     translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
                     translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
-                }) {
-            ConstraintLayout(
-                Modifier.align(Alignment.TopEnd)
-            ) {
-                val (box, content) = createRefs()
-                Box(modifier = Modifier
-                    .fillMaxHeight(normalizedThumbSize)
+                }
+        ) {
+            val (box, content) = createRefs()
+            Box(
+                modifier = Modifier
                     .padding(
                         start = if (rightSide) 0.dp else padding,
                         end = if (!rightSide) 0.dp else padding,
                     )
+                    .clip(thumbShape)
                     .width(thickness)
+                    .fillMaxHeight(normalizedThumbSize)
+                    .background(if (isSelected) thumbSelectedColor else thumbColor)
                     .constrainAs(box) {
                         if (rightSide) end.linkTo(parent.end)
                         else start.linkTo(parent.start)
                     }
-                )
+                    .testTag(TestTagsScrollbar.scrollbar)
+            )
 
-                Box(modifier = Modifier
-                    .constrainAs(content) {
-                        top.linkTo(box.top)
-                        bottom.linkTo(box.bottom)
-                        if (rightSide) end.linkTo(box.start)
-                        else start.linkTo(box.end)
-                    }
-                    .testTag(TestTagsScrollbar.scrollbarIndicator)
+            if (indicatorContent != null) {
+                Box(
+                    modifier = Modifier
+                        .constrainAs(content) {
+                            top.linkTo(box.top)
+                            bottom.linkTo(box.bottom)
+                            if (rightSide) end.linkTo(box.start)
+                            else start.linkTo(box.end)
+                        }
+                        .testTag(TestTagsScrollbar.scrollbarIndicator)
                 ) {
                     indicatorContent(
                         normalizedOffset = offsetCorrectionInverse(normalizedOffsetPosition),
@@ -249,9 +252,10 @@ fun InternalColumnScrollbar(
             }
         }
 
-        BoxWithConstraints(
-            Modifier
+        Box(
+            modifier = Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
+                .width(padding * 2 + thickness)
                 .fillMaxHeight()
                 .draggable(
                     state = rememberDraggableState { delta ->
@@ -294,24 +298,12 @@ fun InternalColumnScrollbar(
                     },
                     onDragStopped = {
                         isSelected = false
-                    })
+                    }
+                )
                 .graphicsLayer {
                     translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
                 }
                 .testTag(TestTagsScrollbar.scrollbarContainer)
-        ) {
-            Box(modifier = Modifier
-                .align(Alignment.TopEnd)
-                .graphicsLayer {
-                    translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
-                }
-                .padding(horizontal = padding)
-                .width(thickness)
-                .clip(thumbShape)
-                .background(if (isSelected) thumbSelectedColor else thumbColor)
-                .fillMaxHeight(normalizedThumbSize)
-                .testTag(TestTagsScrollbar.scrollbar)
-            )
-        }
+        )
     }
 }
