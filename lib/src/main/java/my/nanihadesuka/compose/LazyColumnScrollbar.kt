@@ -261,43 +261,47 @@ fun InternalLazyColumnScrollbar(
 
     BoxWithConstraints(
         modifier = modifier
-            .alpha(alpha)
             .fillMaxWidth()
     ) {
-        if (indicatorContent != null) BoxWithConstraints(
-            Modifier
+        val maxHeightFloat = constraints.maxHeight.toFloat()
+        ConstraintLayout(
+            modifier = Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
-                .fillMaxHeight()
                 .graphicsLayer(
                     translationX = with(LocalDensity.current) { (if (rightSide) displacement.dp else -displacement.dp).toPx() },
-                    translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
+                    translationY = maxHeightFloat * normalizedOffsetPosition
                 )
         ) {
-            ConstraintLayout(
-                Modifier.align(Alignment.TopEnd)
-            ) {
-                val (box, content) = createRefs()
-                Box(modifier = Modifier
-                    .fillMaxHeight(normalizedThumbSize)
+            val (box, content) = createRefs()
+            Box(
+                modifier = Modifier
                     .padding(
                         start = if (rightSide) 0.dp else padding,
                         end = if (!rightSide) 0.dp else padding,
                     )
+                    .clip(thumbShape)
                     .width(thickness)
+                    .fillMaxHeight(normalizedThumbSize)
+                    .alpha(alpha)
+                    .background(if (isSelected) thumbSelectedColor else thumbColor)
                     .constrainAs(box) {
                         if (rightSide) end.linkTo(parent.end)
                         else start.linkTo(parent.start)
                     }
-                )
+                    .testTag(TestTagsScrollbar.scrollbar)
+            )
 
-                Box(modifier = Modifier
-                    .constrainAs(content) {
-                        top.linkTo(box.top)
-                        bottom.linkTo(box.bottom)
-                        if (rightSide) end.linkTo(box.start)
-                        else start.linkTo(box.end)
-                    }
-                    .testTag(TestTagsScrollbar.scrollbarIndicator)
+            if (indicatorContent != null) {
+                Box(
+                    modifier = Modifier
+                        .alpha(alpha)
+                        .constrainAs(content) {
+                            top.linkTo(box.top)
+                            bottom.linkTo(box.bottom)
+                            if (rightSide) end.linkTo(box.start)
+                            else start.linkTo(box.end)
+                        }
+                        .testTag(TestTagsScrollbar.scrollbarIndicator),
                 ) {
                     indicatorContent(
                         index = firstVisibleItemIndex.value,
@@ -305,80 +309,66 @@ fun InternalLazyColumnScrollbar(
                     )
                 }
             }
-
         }
 
-        BoxWithConstraints(
-            Modifier
+        @Composable
+        fun DraggableBar() = Box(
+            modifier = Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
+                .width(padding * 2 + thickness)
                 .fillMaxHeight()
                 .draggable(
                     state = rememberDraggableState { delta ->
                         val displace = if (reverseLayout) -delta else delta // side effect ?
                         if (isSelected) {
-                            setScrollOffset(dragOffset + displace / constraints.maxHeight.toFloat())
+                            setScrollOffset(dragOffset + displace / maxHeightFloat)
                         }
                     },
                     orientation = Orientation.Vertical,
                     enabled = selectionMode != ScrollbarSelectionMode.Disabled,
                     startDragImmediately = true,
                     onDragStarted = onDragStarted@{ offset ->
-                        val maxHeight = constraints.maxHeight.toFloat()
-                        if (maxHeight <= 0f) return@onDragStarted
+                        if (maxHeightFloat <= 0f) return@onDragStarted
                         val newOffset = when {
-                            reverseLayout -> (maxHeight - offset.y) / maxHeight
-                            else -> offset.y / maxHeight
+                            reverseLayout -> (maxHeightFloat - offset.y) / maxHeightFloat
+                            else -> offset.y / maxHeightFloat
                         }
                         val currentOffset = when {
                             reverseLayout -> 1f - normalizedOffsetPosition - normalizedThumbSize
                             else -> normalizedOffsetPosition
                         }
 
-                        val allowedToInteract = when (selectionActionable) {
-                            ScrollbarSelectionActionable.Always -> true
-                            ScrollbarSelectionActionable.WhenVisible -> isInActionSelectable.value
-                        }
+                        when (selectionMode) {
+                            ScrollbarSelectionMode.Full -> {
+                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
+                                    setDragOffset(currentOffset)
+                                else
+                                    setScrollOffset(newOffset)
+                                isSelected = true
+                            }
 
-                        if (allowedToInteract) {
-                            when (selectionMode) {
-                                ScrollbarSelectionMode.Full -> {
-                                    if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
-                                        setDragOffset(currentOffset)
-                                    else
-                                        setScrollOffset(newOffset)
+                            ScrollbarSelectionMode.Thumb -> {
+                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSize)) {
+                                    setDragOffset(currentOffset)
                                     isSelected = true
                                 }
-
-                                ScrollbarSelectionMode.Thumb -> {
-                                    if (newOffset in currentOffset..(currentOffset + normalizedThumbSize)) {
-                                        setDragOffset(currentOffset)
-                                        isSelected = true
-                                    }
-                                }
-
-                                ScrollbarSelectionMode.Disabled -> Unit
                             }
+
+                            ScrollbarSelectionMode.Disabled -> Unit
                         }
                     },
                     onDragStopped = {
                         isSelected = false
                     }
                 )
-                .graphicsLayer(translationX = with(LocalDensity.current) { (if (rightSide) displacement.dp else -displacement.dp).toPx() })
                 .testTag(TestTagsScrollbar.scrollbarContainer)
-        ) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .graphicsLayer(translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition)
-                    .padding(horizontal = padding)
-                    .width(thickness)
-                    .clip(thumbShape)
-                    .background(if (isSelected) thumbSelectedColor else thumbColor)
-                    .fillMaxHeight(normalizedThumbSize)
-                    .testTag(TestTagsScrollbar.scrollbar)
-            )
-        }
+        )
 
+        if (
+            when (selectionActionable) {
+                ScrollbarSelectionActionable.Always -> true
+                ScrollbarSelectionActionable.WhenVisible -> isInActionSelectable.value
+            }
+        ) { DraggableBar() }
     }
 }
