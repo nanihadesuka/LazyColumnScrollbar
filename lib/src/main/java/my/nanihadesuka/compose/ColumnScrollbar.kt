@@ -253,7 +253,8 @@ fun InternalColumnScrollbar(
             }
         }
 
-        Box(
+        @Composable
+        fun DraggableBar() = Box(
             modifier = Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
                 .width(padding * 2 + thickness)
@@ -271,40 +272,37 @@ fun InternalColumnScrollbar(
                         val newOffset = offset.y / maxHeightFloat
                         val currentOffset = normalizedOffsetPosition
 
-                        val allowedToInteract = when (selectionActionable) {
-                            ScrollbarSelectionActionable.Always -> true
-                            ScrollbarSelectionActionable.WhenVisible -> isInActionSelectable.value
-                        }
+                        when (selectionMode) {
+                            ScrollbarSelectionMode.Full -> {
+                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated))
+                                    setDragOffset(currentOffset)
+                                else
+                                    setScrollOffset(newOffset)
+                                isSelected = true
+                            }
 
-                        if (allowedToInteract) {
-                            when (selectionMode) {
-                                ScrollbarSelectionMode.Full -> {
-                                    if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated))
-                                        setDragOffset(currentOffset)
-                                    else
-                                        setScrollOffset(newOffset)
+                            ScrollbarSelectionMode.Thumb -> {
+                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated)) {
+                                    setDragOffset(currentOffset)
                                     isSelected = true
                                 }
-
-                                ScrollbarSelectionMode.Thumb -> {
-                                    if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated)) {
-                                        setDragOffset(currentOffset)
-                                        isSelected = true
-                                    }
-                                }
-
-                                ScrollbarSelectionMode.Disabled -> Unit
                             }
+
+                            ScrollbarSelectionMode.Disabled -> Unit
                         }
                     },
                     onDragStopped = {
                         isSelected = false
                     }
                 )
-                .graphicsLayer {
-                    translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
-                }
                 .testTag(TestTagsScrollbar.scrollbarContainer)
         )
+
+        if (
+            when (selectionActionable) {
+                ScrollbarSelectionActionable.Always -> true
+                ScrollbarSelectionActionable.WhenVisible -> isInActionSelectable.value
+            }
+        ) { DraggableBar() }
     }
 }
