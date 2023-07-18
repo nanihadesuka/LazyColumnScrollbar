@@ -207,12 +207,13 @@ fun InternalColumnScrollbar(
             .alpha(alpha)
             .fillMaxWidth()
     ) {
+        val maxHeightFloat = constraints.maxHeight.toFloat()
         ConstraintLayout(
             modifier = Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
                 .graphicsLayer {
                     translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
-                    translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
+                    translationY = maxHeightFloat * normalizedOffsetPosition
                 }
         ) {
             val (box, content) = createRefs()
@@ -260,14 +261,14 @@ fun InternalColumnScrollbar(
                 .draggable(
                     state = rememberDraggableState { delta ->
                         if (isSelected) {
-                            setScrollOffset(dragOffset + delta / constraints.maxHeight.toFloat())
+                            setScrollOffset(dragOffset + delta / maxHeightFloat)
                         }
                     },
                     orientation = Orientation.Vertical,
                     enabled = selectionMode != ScrollbarSelectionMode.Disabled,
                     startDragImmediately = true,
                     onDragStarted = { offset ->
-                        val newOffset = offset.y / constraints.maxHeight.toFloat()
+                        val newOffset = offset.y / maxHeightFloat
                         val currentOffset = normalizedOffsetPosition
 
                         val allowedToInteract = when (selectionActionable) {

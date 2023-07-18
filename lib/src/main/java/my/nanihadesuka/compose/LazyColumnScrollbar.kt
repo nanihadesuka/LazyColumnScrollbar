@@ -264,12 +264,13 @@ fun InternalLazyColumnScrollbar(
             .alpha(alpha)
             .fillMaxWidth()
     ) {
+        val maxHeightFloat = constraints.maxHeight.toFloat()
         ConstraintLayout(
             modifier = Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
                 .graphicsLayer(
                     translationX = with(LocalDensity.current) { (if (rightSide) displacement.dp else -displacement.dp).toPx() },
-                    translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
+                    translationY = maxHeightFloat * normalizedOffsetPosition
                 )
         ) {
             val (box, content) = createRefs()
@@ -318,18 +319,17 @@ fun InternalLazyColumnScrollbar(
                     state = rememberDraggableState { delta ->
                         val displace = if (reverseLayout) -delta else delta // side effect ?
                         if (isSelected) {
-                            setScrollOffset(dragOffset + displace / constraints.maxHeight.toFloat())
+                            setScrollOffset(dragOffset + displace / maxHeightFloat)
                         }
                     },
                     orientation = Orientation.Vertical,
                     enabled = selectionMode != ScrollbarSelectionMode.Disabled,
                     startDragImmediately = true,
                     onDragStarted = onDragStarted@{ offset ->
-                        val maxHeight = constraints.maxHeight.toFloat()
-                        if (maxHeight <= 0f) return@onDragStarted
+                        if (maxHeightFloat <= 0f) return@onDragStarted
                         val newOffset = when {
-                            reverseLayout -> (maxHeight - offset.y) / maxHeight
-                            else -> offset.y / maxHeight
+                            reverseLayout -> (maxHeightFloat - offset.y) / maxHeightFloat
+                            else -> offset.y / maxHeightFloat
                         }
                         val currentOffset = when {
                             reverseLayout -> 1f - normalizedOffsetPosition - normalizedThumbSize
