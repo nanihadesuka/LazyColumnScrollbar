@@ -51,6 +51,7 @@ import kotlin.math.floor
 fun LazyColumnScrollbar(
     listState: LazyListState,
     rightSide: Boolean = true,
+    alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
     thumbMinHeight: Float = 0.1f,
@@ -71,6 +72,7 @@ fun LazyColumnScrollbar(
             listState = listState,
             modifier = Modifier,
             rightSide = rightSide,
+            alwaysShowScrollBar = alwaysShowScrollBar,
             thickness = thickness,
             padding = padding,
             thumbMinHeight = thumbMinHeight,
@@ -99,6 +101,7 @@ fun InternalLazyColumnScrollbar(
     listState: LazyListState,
     modifier: Modifier = Modifier,
     rightSide: Boolean = true,
+    alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
     thumbMinHeight: Float = 0.1f,
@@ -228,7 +231,7 @@ fun InternalLazyColumnScrollbar(
         }
     }
 
-    val isInAction = listState.isScrollInProgress || isSelected
+    val isInAction = listState.isScrollInProgress || isSelected || alwaysShowScrollBar
 
     val isInActionSelectable = remember { mutableStateOf(isInAction) }
     val durationAnimationMillis: Int = 500
@@ -369,6 +372,8 @@ fun InternalLazyColumnScrollbar(
                 ScrollbarSelectionActionable.Always -> true
                 ScrollbarSelectionActionable.WhenVisible -> isInActionSelectable.value
             }
-        ) { DraggableBar() }
+        ) {
+            DraggableBar()
+        }
     }
 }
