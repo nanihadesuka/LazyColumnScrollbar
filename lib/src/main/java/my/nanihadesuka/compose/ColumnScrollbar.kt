@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 fun ColumnScrollbar(
     state: ScrollState,
     rightSide: Boolean = true,
+    alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
     thumbMinHeight: Float = 0.1f,
@@ -70,6 +71,7 @@ fun ColumnScrollbar(
             state = state,
             modifier = Modifier,
             rightSide = rightSide,
+            alwaysShowScrollBar = alwaysShowScrollBar,
             thickness = thickness,
             padding = padding,
             thumbMinHeight = thumbMinHeight,
@@ -100,6 +102,7 @@ fun InternalColumnScrollbar(
     state: ScrollState,
     modifier: Modifier = Modifier,
     rightSide: Boolean = true,
+    alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
     thumbMinHeight: Float = 0.1f,
@@ -171,7 +174,7 @@ fun InternalColumnScrollbar(
         }
     }
 
-    val isInAction = state.isScrollInProgress || isSelected
+    val isInAction = state.isScrollInProgress || isSelected || alwaysShowScrollBar
 
     val isInActionSelectable = remember { mutableStateOf(isInAction) }
     val durationAnimationMillis: Int = 500
@@ -304,6 +307,8 @@ fun InternalColumnScrollbar(
                 ScrollbarSelectionActionable.Always -> true
                 ScrollbarSelectionActionable.WhenVisible -> isInActionSelectable.value
             }
-        ) { DraggableBar() }
+        ) {
+            DraggableBar()
+        }
     }
 }

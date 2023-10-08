@@ -65,6 +65,7 @@ fun LazyColumnView() {
         LazyColumnScrollbar(
             listState,
             selectionMode = ScrollbarSelectionMode.Thumb,
+            alwaysShowScrollBar = true,
             indicatorContent = { index, isThumbSelected ->
                 Surface {
                     Text(
@@ -152,6 +153,7 @@ fun ColumnView() {
             state = listState,
             indicatorContent = indicatorContent,
             selectionMode = ScrollbarSelectionMode.Disabled,
+            alwaysShowScrollBar = true,
         ) {
             Column(
                 modifier = Modifier.verticalScroll(listState)

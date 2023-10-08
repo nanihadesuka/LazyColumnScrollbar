@@ -175,6 +175,34 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
+    fun `always show scrollbar false`() {
+        if (itemCount == 0) return
+
+        setContent(
+            alwaysShowScrollBar = false,
+        )
+
+        scrollbarScreen(composeRule) {
+            // not visible without scrolling
+            assert { isItemHidden(TestTagsScrollbar.scrollbar) }
+        }
+    }
+
+    @Test
+    fun `always show scrollbar true`() {
+        if (itemCount == 0) return
+
+        setContent(
+            alwaysShowScrollBar = true,
+        )
+
+        scrollbarScreen(composeRule) {
+            // always visible without scrolling
+            assert { isItemVisible(TestTagsScrollbar.scrollbar) }
+        }
+    }
+
+    @Test
     fun `scroll list to the bottom`() {
         if (itemCount == 0) return
 
@@ -389,6 +417,7 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
     private fun setContent(
         state: LazyListState = LazyListState(),
         rightSide: Boolean = true,
+        alwaysShowScrollBar: Boolean = false,
         thickness: Dp = 6.dp,
         padding: Dp = 8.dp,
         thumbMinHeight: Float = 0.1f,
@@ -406,6 +435,7 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
             LazyColumnScrollbar(
                 listState = state,
                 rightSide = rightSide,
+                alwaysShowScrollBar = alwaysShowScrollBar,
                 thickness = thickness,
                 padding = padding,
                 enabled = enabled,
