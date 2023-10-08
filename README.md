@@ -77,6 +77,7 @@ indicatorContent = { index, isThumbSelected ->
 fun LazyColumnScrollbar(
     listState: LazyListState,
     rightSide: Boolean = true,
+    alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
     thumbMinHeight: Float = 0.1f,
@@ -121,6 +122,7 @@ ColumnScrollbar(listState) {
 fun ColumnScrollbar(
     state: ScrollState,
     rightSide: Boolean = true,
+    alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
     thumbMinHeight: Float = 0.1f,
