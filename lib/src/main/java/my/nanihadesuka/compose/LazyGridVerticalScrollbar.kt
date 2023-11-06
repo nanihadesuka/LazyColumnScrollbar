@@ -40,13 +40,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.floor
 
 /**
- * @Author: walt-zhong
- * @Date: 2023/11/1
- * @Email: 2511255880@qq.com
- * @Description:scroller for LazyVerticalGrid
- */
-
-/**
  * @param state LazyGridState
  * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
