@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -462,7 +463,12 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
                             modifier = Modifier.aspectRatio(1f),
                             color = Color.Yellow
                         ) {
-
+                            Text(
+                                text = "Item $it",
+                                modifier = Modifier
+                                    .padding(24.dp)
+                                    .testTag(itemTestTag(it))
+                            )
                         }
                     }
                 }

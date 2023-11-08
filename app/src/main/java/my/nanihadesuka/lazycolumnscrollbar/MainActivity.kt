@@ -32,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -161,7 +162,8 @@ fun lazyGridView(){
                             .padding(8.dp)
                             .clip(CircleShape)
                             .background(if (isThumbSelected) Color.Blue else Color.Yellow)
-                            .padding(12.dp)
+                            .padding(12.dp),
+                        color = Color.Red
                     )
                 }
             }
@@ -178,6 +180,12 @@ fun lazyGridView(){
                         modifier = Modifier.aspectRatio(1f),
                         color = Color.Yellow
                     ) {
+                        Text(
+                            text = "Item $it",
+                            modifier = Modifier
+                                .padding(24.dp),
+                            color = Color.Black
+                        )
 
                     }
                 }
