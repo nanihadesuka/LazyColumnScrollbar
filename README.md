@@ -7,8 +7,9 @@
 Compose implementation of the scroll bar. Can drag, scroll smoothly and includes animations.
 
 ### Features:
-- Support for LazyColumn's sticky headers
-- Support for LazyColumn's reverseLayout
+- Supports LazyColumn, LazyVerticalGrid & Column 
+- Support sticky headers
+- Support reverseLayout
 - Optional current position indicator
 - Multiple selection states (Disabled, Full, Thumb)
 - Multiple selection actionable states (Always, WhenVisible)
@@ -32,11 +33,11 @@ Add it to your app build.gradle
 
 ```groovy
 dependencies {
-        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.8.0'
+        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.9.0'
 }
 ```
 
-# How to use for lazyColumn
+# How to use for LazyColumn
 
 Simply wrap the LazyColumn with it
 
@@ -91,6 +92,41 @@ fun LazyColumnScrollbar(
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 )
+```
+
+# How to use for LazyVerticalGrid
+
+Simply wrap the LazyVerticalGrid with it
+
+```kotlin
+val listData = (0..1000).toList()
+val lazyGridState = rememberLazyGridState()
+
+LazyGridVerticalScrollbar(lazyGridState) {
+    LazyVerticalGrid(state = lazyGridState) {
+        items(listData) {
+            Text(
+                text = "Item $it",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(6.dp)
+            )
+        }
+    }
+}
+```
+
+indicatorContent example:
+```kotlin
+indicatorContent = { index, isThumbSelected ->
+    Text(
+        text = "i: $index",
+        Modifier
+            .padding(4.dp)
+            .background(if (isThumbSelected) Color.Red else Color.Black, CircleShape)
+            .padding(12.dp)
+    )
+}
 ```
 
 # How to use for Column
