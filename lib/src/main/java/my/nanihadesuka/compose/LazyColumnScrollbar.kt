@@ -219,11 +219,14 @@ fun InternalLazyColumnScrollbar(
         val totalItemsCount = listState.layoutInfo.totalItemsCount.toFloat()
         val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset)
         val index: Int = floor(exactIndex).toInt()
+        val targetItemInfo = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }
         val remainder: Float = exactIndex - floor(exactIndex)
 
         coroutineScope.launch {
-            listState.scrollToItem(index = index, scrollOffset = 0)
-            val offset = realFirstVisibleItem
+            if (targetItemInfo == null) {
+                listState.scrollToItem(index = index, scrollOffset = 0)
+            }
+            val offset = (targetItemInfo ?: realFirstVisibleItem)
                 ?.size
                 ?.let { it.toFloat() * remainder }
                 ?.toInt() ?: 0
