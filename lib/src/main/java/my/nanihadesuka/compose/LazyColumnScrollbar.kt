@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -219,18 +220,15 @@ fun InternalLazyColumnScrollbar(
         val totalItemsCount = listState.layoutInfo.totalItemsCount.toFloat()
         val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset)
         val index: Int = floor(exactIndex).toInt()
-        val targetItemInfo = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }
         val remainder: Float = exactIndex - floor(exactIndex)
 
         coroutineScope.launch {
-            if (targetItemInfo == null) {
-                listState.scrollToItem(index = index, scrollOffset = 0)
-            }
-            val offset = (targetItemInfo ?: realFirstVisibleItem)
+            listState.scrollToItem(index = index, scrollOffset = 0)
+            val offset = realFirstVisibleItem
                 ?.size
                 ?.let { it.toFloat() * remainder }
-                ?.toInt() ?: 0
-            listState.scrollToItem(index = index, scrollOffset = offset)
+                ?: 0f
+            listState.scrollBy(offset)
         }
     }
 
