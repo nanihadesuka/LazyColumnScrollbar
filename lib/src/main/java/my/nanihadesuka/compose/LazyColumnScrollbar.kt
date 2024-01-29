@@ -51,6 +51,7 @@ import kotlin.math.floor
 @Composable
 fun LazyColumnScrollbar(
     listState: LazyListState,
+    modifier: Modifier = Modifier,
     rightSide: Boolean = true,
     alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
@@ -67,7 +68,7 @@ fun LazyColumnScrollbar(
     content: @Composable () -> Unit
 ) {
     if (!enabled) content()
-    else Box {
+    else Box(modifier = modifier) {
         content()
         InternalLazyColumnScrollbar(
             listState = listState,
