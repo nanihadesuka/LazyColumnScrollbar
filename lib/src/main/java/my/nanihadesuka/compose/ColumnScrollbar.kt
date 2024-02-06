@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ColumnScrollbar(
     state: ScrollState,
+    modifier: Modifier = Modifier,
     rightSide: Boolean = true,
     alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
@@ -65,7 +66,7 @@ fun ColumnScrollbar(
     content: @Composable () -> Unit
 ) {
     if (!enabled) content()
-    else BoxWithConstraints {
+    else BoxWithConstraints(modifier = modifier) {
         content()
         InternalColumnScrollbar(
             state = state,
