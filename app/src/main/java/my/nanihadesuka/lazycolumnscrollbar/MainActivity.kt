@@ -1,6 +1,7 @@
 package my.nanihadesuka.lazycolumnscrollbar
 
 import android.os.Bundle
+import android.widget.GridView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -9,9 +10,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -20,9 +22,11 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -50,17 +54,51 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+enum class TypeTab {
+    LazyColumn, Column, LazyGrid
+}
+
 @Preview(showBackground = true)
 @Composable
 fun MainView() {
     LazyColumnScrollbarTheme {
         Surface(color = MaterialTheme.colors.background) {
-            LazyColumnView()
-//            ColumnView()
-//            lazyGridView()
+            val tab = rememberSaveable { mutableStateOf(TypeTab.LazyColumn) }
+            Column {
+                Row {
+                    Text(
+                        text = TypeTab.LazyColumn.name,
+                        Modifier.selectable(
+                            selected = tab.value == TypeTab.LazyColumn,
+                            onClick = { tab.value = TypeTab.LazyColumn },
+                        )
+                    )
+                    Text(
+                        text = TypeTab.Column.name,
+                        Modifier.selectable(
+                            selected = tab.value == TypeTab.Column,
+                            onClick = { tab.value = TypeTab.Column },
+                        )
+                    )
+                    Text(
+                        text = TypeTab.LazyGrid.name,
+                        Modifier.selectable(
+                            selected = tab.value == TypeTab.LazyGrid,
+                            onClick = { tab.value = TypeTab.LazyGrid },
+                        )
+                    )
+                }
+
+                when (tab.value) {
+                    TypeTab.LazyColumn -> LazyColumnView()
+                    TypeTab.Column -> ColumnView()
+                    TypeTab.LazyGrid -> LazyGridView()
+                }
+            }
         }
     }
 }
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -101,7 +139,8 @@ fun LazyColumnView() {
         ) {
             LazyColumn(
                 state = listState,
-                reverseLayout = false
+                reverseLayout = true,
+                contentPadding = PaddingValues(vertical = 300.dp)
             ) {
                 (0..3).forEach { number ->
                     stickyHeader {
@@ -132,7 +171,7 @@ fun LazyColumnView() {
 }
 
 @Composable
-fun lazyGridView(){
+fun LazyGridView() {
     val photos by rememberSaveable {
         mutableStateOf(List(100) { it })
     }
@@ -143,7 +182,7 @@ fun lazyGridView(){
             .padding(16.dp)
             .border(width = 1.dp, MaterialTheme.colors.primary)
             .padding(1.dp)
-    ){
+    ) {
         LazyGridVerticalScrollbar(
             state = lazyGridState,
             selectionMode = ScrollbarSelectionMode.Thumb,
@@ -169,13 +208,13 @@ fun lazyGridView(){
                     )
                 }
             }
-        ){
+        ) {
             LazyVerticalGrid(
                 state = lazyGridState,
                 columns = GridCells.Adaptive(minSize = 128.dp),
                 verticalArrangement = Arrangement.spacedBy(3.dp),
                 horizontalArrangement = Arrangement.spacedBy(3.dp),
-                ) {
+            ) {
                 items(photos.size, key = { it }) {
                     Surface(
                         elevation = 3.dp,

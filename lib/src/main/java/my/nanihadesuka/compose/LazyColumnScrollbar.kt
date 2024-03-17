@@ -157,8 +157,9 @@ fun InternalLazyColumnScrollbar(
                 val firstItem = realFirstVisibleItem ?: return@let 0f
                 val firstPartial =
                     firstItem.fractionHiddenTop(listState.firstVisibleItemScrollOffset)
-                val lastPartial =
-                    1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
+                val lastPartial = 1f - it.visibleItemsInfo.last().fractionVisibleBottom(
+                    it.viewportEndOffset - it.afterContentPadding
+                )
 
                 val realSize = it.visibleItemsInfo.size - if (isStickyHeaderInAction) 1 else 0
                 val realVisibleSize = realSize.toFloat() - firstPartial - lastPartial
