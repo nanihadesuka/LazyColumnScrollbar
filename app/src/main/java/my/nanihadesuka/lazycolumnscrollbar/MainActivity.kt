@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -54,9 +55,9 @@ class MainActivity : ComponentActivity() {
 fun MainView() {
     LazyColumnScrollbarTheme {
         Surface(color = MaterialTheme.colors.background) {
-          //  LazyColumnView()
+            LazyColumnView()
 //            ColumnView()
-            lazyGridView()
+//            lazyGridView()
         }
     }
 }
@@ -122,6 +123,7 @@ fun LazyColumnView() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
+                            .padding(vertical = 30.dp)
                     )
                 }
             }
