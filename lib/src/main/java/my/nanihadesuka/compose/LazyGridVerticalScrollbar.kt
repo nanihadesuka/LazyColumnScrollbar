@@ -2,7 +2,6 @@ package my.nanihadesuka.compose
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -13,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,7 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,18 +37,18 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.floor
 
 /**
- * Scrollbar for Column
- *
+ * @param state LazyGridState
  * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
- * @param padding   Padding of the scrollbar
+ * @param padding Padding of the scrollbar
  * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
  */
 @Composable
-fun ColumnScrollbar(
-    state: ScrollState,
+fun LazyGridVerticalScrollbar(
+    state: LazyGridState,
     modifier: Modifier = Modifier,
     rightSide: Boolean = true,
     alwaysShowScrollBar: Boolean = false,
@@ -58,18 +58,18 @@ fun ColumnScrollbar(
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
-    enabled: Boolean = true,
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
     selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
     hideDelayMillis: Int = 400,
-    indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
+    enabled: Boolean = true,
+    indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     if (!enabled) content()
-    else BoxWithConstraints(modifier = modifier) {
+    else Box(modifier = modifier) {
         content()
-        InternalColumnScrollbar(
-            state = state,
+        InternalLazyGridVerticalScrollbar(
+            gridState = state,
             modifier = Modifier,
             rightSide = rightSide,
             alwaysShowScrollBar = alwaysShowScrollBar,
@@ -78,29 +78,25 @@ fun ColumnScrollbar(
             thumbMinHeight = thumbMinHeight,
             thumbColor = thumbColor,
             thumbSelectedColor = thumbSelectedColor,
-            thumbShape = thumbShape,
-            visibleHeightDp = with(LocalDensity.current) { constraints.maxHeight.toDp() },
-            indicatorContent = indicatorContent,
-            selectionMode = selectionMode,
             selectionActionable = selectionActionable,
             hideDelayMillis = hideDelayMillis,
+            thumbShape = thumbShape,
+            selectionMode = selectionMode,
+            indicatorContent = indicatorContent,
         )
     }
 }
 
 /**
- * Scrollbar for Column
- * Use this variation if you want to place the scrollbar independently of the Column position
- *
+ * internal function
  * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
- * @param padding   Padding of the scrollbar
+ * @param padding Padding of the scrollbar
  * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
- * @param visibleHeightDp Visible height of column view
  */
 @Composable
-fun InternalColumnScrollbar(
-    state: ScrollState,
+internal fun InternalLazyGridVerticalScrollbar(
+    gridState: LazyGridState,
     modifier: Modifier = Modifier,
     rightSide: Boolean = true,
     alwaysShowScrollBar: Boolean = false,
@@ -113,52 +109,101 @@ fun InternalColumnScrollbar(
     selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
     selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
     hideDelayMillis: Int = 400,
-    indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
-    visibleHeightDp: Dp,
+    indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 ) {
+    val firstVisibleItemIndex = remember { derivedStateOf { gridState.firstVisibleItemIndex } }
+
     val coroutineScope = rememberCoroutineScope()
 
     var isSelected by remember { mutableStateOf(false) }
 
     var dragOffset by remember { mutableStateOf(0f) }
 
-    val fullHeightDp = with(LocalDensity.current) { state.maxValue.toDp() + visibleHeightDp }
+    val reverseLayout by remember { derivedStateOf { gridState.layoutInfo.reverseLayout } }
 
-    val normalizedThumbSizeReal by remember(visibleHeightDp, state.maxValue) {
+    val realFirstVisibleItem by remember {
         derivedStateOf {
-            if (fullHeightDp == 0.dp) 1f else {
-                val normalizedDp = visibleHeightDp / fullHeightDp
-                normalizedDp.coerceIn(0f, 1f)
+            gridState.layoutInfo.visibleItemsInfo.firstOrNull {
+                it.index == gridState.firstVisibleItemIndex
             }
         }
     }
 
-    val normalizedThumbSize by remember(normalizedThumbSizeReal) {
+    val isStickyHeaderInAction by remember {
+        derivedStateOf {
+            val realIndex = realFirstVisibleItem?.index ?: return@derivedStateOf false
+            val firstVisibleIndex = gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
+                ?: return@derivedStateOf false
+            realIndex != firstVisibleIndex
+        }
+    }
+
+    fun LazyGridItemInfo.fractionHiddenTop(firstItemOffset: Int) =
+        if (size.height == 0) 0f else firstItemOffset / size.height.toFloat()
+
+    fun LazyGridItemInfo.fractionVisibleBottom(viewportEndOffset: Int) =
+        if (size.height == 0) 0f else (viewportEndOffset - offset.y).toFloat() / size.height.toFloat()
+
+    val normalizedThumbSizeReal by remember {
+        derivedStateOf {
+            gridState.layoutInfo.let {
+                if (it.totalItemsCount == 0)
+                    return@let 0f
+
+                val firstItem = realFirstVisibleItem ?: return@let 0f
+                val firstPartial =
+                    firstItem.fractionHiddenTop(gridState.firstVisibleItemScrollOffset)
+                val lastPartial =
+                    1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
+
+                val realSize = it.visibleItemsInfo.size - if (isStickyHeaderInAction) 1 else 0
+                val realVisibleSize = realSize.toFloat() - firstPartial - lastPartial
+                realVisibleSize / it.totalItemsCount.toFloat()
+            }
+        }
+    }
+
+    val normalizedThumbSize by remember {
         derivedStateOf {
             normalizedThumbSizeReal.coerceAtLeast(thumbMinHeight)
         }
     }
 
-    val normalizedThumbSizeUpdated by rememberUpdatedState(newValue = normalizedThumbSize)
-
     fun offsetCorrection(top: Float): Float {
-        val topRealMax = 1f
-        val topMax = (1f - normalizedThumbSizeUpdated).coerceIn(0f, 1f)
-        return top * topMax / topRealMax
+        val topRealMax = (1f - normalizedThumbSizeReal).coerceIn(0f, 1f)
+        if (normalizedThumbSizeReal >= thumbMinHeight) {
+            return when {
+                reverseLayout -> topRealMax - top
+                else -> top
+            }
+        }
+
+        val topMax = 1f - thumbMinHeight
+        return when {
+            reverseLayout -> (topRealMax - top) * topMax / topRealMax
+            else -> top * topMax / topRealMax
+        }
     }
 
     fun offsetCorrectionInverse(top: Float): Float {
-        val topRealMax = 1f
-        val topMax = 1f - normalizedThumbSizeUpdated
-        if (topMax == 0f) return top
-        return (top * topRealMax / topMax).coerceAtLeast(0f)
+        if (normalizedThumbSizeReal >= thumbMinHeight)
+            return top
+        val topRealMax = 1f - normalizedThumbSizeReal
+        val topMax = 1f - thumbMinHeight
+        return top * topRealMax / topMax
     }
 
     val normalizedOffsetPosition by remember {
         derivedStateOf {
-            if (state.maxValue == 0) return@derivedStateOf 0f
-            val normalized = state.value.toFloat() / state.maxValue.toFloat()
-            offsetCorrection(normalized)
+            gridState.layoutInfo.let {
+                if (it.totalItemsCount == 0 || it.visibleItemsInfo.isEmpty())
+                    return@let 0f
+
+                val firstItem = realFirstVisibleItem ?: return@let 0f
+                val top = firstItem
+                    .run { index.toFloat() + fractionHiddenTop(gridState.firstVisibleItemScrollOffset) } / it.totalItemsCount.toFloat()
+                offsetCorrection(top)
+            }
         }
     }
 
@@ -169,13 +214,22 @@ fun InternalColumnScrollbar(
 
     fun setScrollOffset(newOffset: Float) {
         setDragOffset(newOffset)
-        val exactIndex = offsetCorrectionInverse(state.maxValue * dragOffset).toInt()
+        val totalItemsCount = gridState.layoutInfo.totalItemsCount.toFloat()
+        val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset)
+        val index: Int = floor(exactIndex).toInt()
+        val remainder: Float = exactIndex - floor(exactIndex)
+
         coroutineScope.launch {
-            state.scrollTo(exactIndex)
+            gridState.scrollToItem(index = index, scrollOffset = 0)
+            val offset = realFirstVisibleItem
+                ?.size
+                ?.let { it.height.toFloat() * remainder }
+                ?.toInt() ?: 0
+            gridState.scrollToItem(index = index, scrollOffset = offset)
         }
     }
 
-    val isInAction = state.isScrollInProgress || isSelected || alwaysShowScrollBar
+    val isInAction = gridState.isScrollInProgress || isSelected || alwaysShowScrollBar
 
     val isInActionSelectable = remember { mutableStateOf(isInAction) }
     val durationAnimationMillis: Int = 500
@@ -214,10 +268,10 @@ fun InternalColumnScrollbar(
         ConstraintLayout(
             modifier = Modifier
                 .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
-                .graphicsLayer {
-                    translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
+                .graphicsLayer(
+                    translationX = with(LocalDensity.current) { (if (rightSide) displacement.dp else -displacement.dp).toPx() },
                     translationY = maxHeightFloat * normalizedOffsetPosition
-                }
+                )
         ) {
             val (box, content) = createRefs()
             Box(
@@ -248,11 +302,11 @@ fun InternalColumnScrollbar(
                             if (rightSide) end.linkTo(box.start)
                             else start.linkTo(box.end)
                         }
-                        .testTag(TestTagsScrollbar.scrollbarIndicator)
+                        .testTag(TestTagsScrollbar.scrollbarIndicator),
                 ) {
                     indicatorContent(
-                        normalizedOffset = offsetCorrectionInverse(normalizedOffsetPosition),
-                        isThumbSelected = isSelected
+                        firstVisibleItemIndex.value,
+                        isSelected
                     )
                 }
             }
@@ -266,20 +320,28 @@ fun InternalColumnScrollbar(
                 .fillMaxHeight()
                 .draggable(
                     state = rememberDraggableState { delta ->
+                        val displace = if (reverseLayout) -delta else delta // side effect ?
                         if (isSelected) {
-                            setScrollOffset(dragOffset + delta / maxHeightFloat)
+                            setScrollOffset(dragOffset + displace / maxHeightFloat)
                         }
                     },
                     orientation = Orientation.Vertical,
                     enabled = selectionMode != ScrollbarSelectionMode.Disabled,
                     startDragImmediately = true,
-                    onDragStarted = { offset ->
-                        val newOffset = offset.y / maxHeightFloat
-                        val currentOffset = normalizedOffsetPosition
+                    onDragStarted = onDragStarted@{ offset ->
+                        if (maxHeightFloat <= 0f) return@onDragStarted
+                        val newOffset = when {
+                            reverseLayout -> (maxHeightFloat - offset.y) / maxHeightFloat
+                            else -> offset.y / maxHeightFloat
+                        }
+                        val currentOffset = when {
+                            reverseLayout -> 1f - normalizedOffsetPosition - normalizedThumbSize
+                            else -> normalizedOffsetPosition
+                        }
 
                         when (selectionMode) {
                             ScrollbarSelectionMode.Full -> {
-                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated))
+                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
                                     setDragOffset(currentOffset)
                                 else
                                     setScrollOffset(newOffset)
@@ -287,7 +349,7 @@ fun InternalColumnScrollbar(
                             }
 
                             ScrollbarSelectionMode.Thumb -> {
-                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated)) {
+                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSize)) {
                                     setDragOffset(currentOffset)
                                     isSelected = true
                                 }
