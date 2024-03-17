@@ -6,11 +6,11 @@ plugins {
 
 android {
     namespace 'my.nanihadesuka.lazycolumnscrollbar'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         versionCode 19
         versionName "1.9.0"
 
