@@ -1,6 +1,9 @@
 [![](https://jitpack.io/v/nanihadesuka/LazyColumnScrollbar.svg)](https://jitpack.io/#nanihadesuka/LazyColumnScrollbar)
 [![](https://jitpack.io/v/nanihadesuka/LazyColumnScrollbar/month.svg)](https://jitpack.io/#nanihadesuka/LazyColumnScrollbar)
-[![](https://github.com/nanihadesuka/LazyColumnScrollbar/actions/workflows/default.yml/badge.svg?branch=master)](https://github.com/nanihadesuka/LazyColumnScrollbar/commits/master)
+[![](https://github.com/nanihadesuka/LazyColumnScrollbar/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/nanihadesuka/LazyColumnScrollbar/commits/master)
+[![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/nanihadesuka/LazyColumnScrollbar/blob/main/LICENSE)
+![Foo23 - Bar](https://img.shields.io/badge/Kotlin-1.9.23-339933)
+![Foo23 - Bar](https://img.shields.io/badge/Compose_BOM-2024.04.00-339933)
 
 # LazyColumn && Column scrollbar for jetpack compose
 
