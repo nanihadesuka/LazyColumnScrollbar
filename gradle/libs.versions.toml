@@ -1,9 +1,9 @@
 [versions]
-kotlin = "1.9.22"
+kotlin = "1.9.23"
 plugin-agp = "8.1.4"
 
-compose-bom = "2024.02.02"
-compose-compiler = "1.5.10"
+compose-bom = "2024.04.00"
+compose-compiler = "1.5.11"
 
 activityCompose = "1.8.2"
 appcompat = "1.6.1"
