@@ -1,43 +1,31 @@
 package my.nanihadesuka.compose
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import my.nanihadesuka.compose.foundation.ScrollbarLayoutSettings
+import my.nanihadesuka.compose.foundation.ScrollbarLayoutSide
+import my.nanihadesuka.compose.foundation.VerticalScrollbarLayout
 import kotlin.math.floor
 
 /**
@@ -236,147 +224,79 @@ fun InternalLazyColumnScrollbar(
 
     val isInAction = listState.isScrollInProgress || isSelected || alwaysShowScrollBar
 
-    val isInActionSelectable = remember { mutableStateOf(isInAction) }
-    val durationAnimationMillis: Int = 500
-    LaunchedEffect(isInAction) {
-        if (isInAction) {
-            isInActionSelectable.value = true
-        } else {
-            delay(timeMillis = durationAnimationMillis.toLong() + hideDelayMillis.toLong())
-            isInActionSelectable.value = false
-        }
-    }
-
-    val alpha by animateFloatAsState(
-        targetValue = if (isInAction) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = if (isInAction) 75 else durationAnimationMillis,
-            delayMillis = if (isInAction) 0 else hideDelayMillis
-        ),
-        label = "scrollbar alpha value"
-    )
-
-    val displacement by animateFloatAsState(
-        targetValue = if (isInAction) 0f else 14f,
-        animationSpec = tween(
-            durationMillis = if (isInAction) 75 else durationAnimationMillis,
-            delayMillis = if (isInAction) 0 else hideDelayMillis
-        ),
-        label = "scrollbar displacement value"
-    )
-
     BoxWithConstraints(
-        modifier = modifier
-            .fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         val maxHeightFloat = constraints.maxHeight.toFloat()
-        ConstraintLayout(
-            modifier = Modifier
-                .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
-                .graphicsLayer(
-                    translationX = with(LocalDensity.current) { (if (rightSide) displacement.dp else -displacement.dp).toPx() },
-                    translationY = maxHeightFloat * normalizedOffsetPosition
-                )
-        ) {
-            val (box, content) = createRefs()
-            Box(
-                modifier = Modifier
-                    .padding(
-                        start = if (rightSide) 0.dp else padding,
-                        end = if (!rightSide) 0.dp else padding,
-                    )
-                    .clip(thumbShape)
-                    .width(thickness)
-                    .fillMaxHeight(normalizedThumbSize)
-                    .alpha(alpha)
-                    .background(if (isSelected) thumbSelectedColor else thumbColor)
-                    .constrainAs(box) {
-                        if (rightSide) end.linkTo(parent.end)
-                        else start.linkTo(parent.start)
+        VerticalScrollbarLayout(
+            scrollbarSizeNormalized = normalizedThumbSize,
+            normalizedOffset = normalizedOffsetPosition,
+            isInAction = isInAction,
+            settings = ScrollbarLayoutSettings(
+                durationAnimationMillis = 500,
+                hideDelayMillis = hideDelayMillis,
+                scrollbarPadding = padding,
+                thumbShape = thumbShape,
+                thumbThickness = thickness,
+                thumbColor = if (isSelected) thumbSelectedColor else thumbColor,
+                side = if (rightSide) ScrollbarLayoutSide.End else ScrollbarLayoutSide.Start,
+                selectionActionable = selectionActionable,
+            ),
+            indicator = when (indicatorContent) {
+                null -> null
+                else -> {
+                    {
+                        indicatorContent(
+                            index = firstVisibleItemIndex.value,
+                            isThumbSelected = isSelected
+                        )
                     }
-                    .testTag(TestTagsScrollbar.scrollbar)
-            )
-
-            if (indicatorContent != null) {
-                Box(
-                    modifier = Modifier
-                        .alpha(alpha)
-                        .constrainAs(content) {
-                            top.linkTo(box.top)
-                            bottom.linkTo(box.bottom)
-                            if (rightSide) end.linkTo(box.start)
-                            else start.linkTo(box.end)
-                        }
-                        .testTag(TestTagsScrollbar.scrollbarIndicator),
-                ) {
-                    indicatorContent(
-                        index = firstVisibleItemIndex.value,
-                        isThumbSelected = isSelected
-                    )
                 }
-            }
-        }
+            },
+            draggableModifier = Modifier.draggable(
+                state = rememberDraggableState { delta ->
+                    val displace = if (reverseLayout) -delta else delta // side effect ?
+                    if (isSelected) {
+                        setScrollOffset(dragOffset + displace / maxHeightFloat)
+                    }
+                },
+                orientation = Orientation.Vertical,
+                enabled = selectionMode != ScrollbarSelectionMode.Disabled,
+                startDragImmediately = true,
+                onDragStarted = onDragStarted@{ offset ->
+                    if (maxHeightFloat <= 0f) return@onDragStarted
+                    val newOffset = when {
+                        reverseLayout -> (maxHeightFloat - offset.y) / maxHeightFloat
+                        else -> offset.y / maxHeightFloat
+                    }
+                    val currentOffset = when {
+                        reverseLayout -> 1f - normalizedOffsetPosition - normalizedThumbSize
+                        else -> normalizedOffsetPosition
+                    }
 
-        @Composable
-        fun DraggableBar() = Box(
-            modifier = Modifier
-                .align(if (rightSide) Alignment.TopEnd else Alignment.TopStart)
-                .width(padding * 2 + thickness)
-                .fillMaxHeight()
-                .draggable(
-                    state = rememberDraggableState { delta ->
-                        val displace = if (reverseLayout) -delta else delta // side effect ?
-                        if (isSelected) {
-                            setScrollOffset(dragOffset + displace / maxHeightFloat)
-                        }
-                    },
-                    orientation = Orientation.Vertical,
-                    enabled = selectionMode != ScrollbarSelectionMode.Disabled,
-                    startDragImmediately = true,
-                    onDragStarted = onDragStarted@{ offset ->
-                        if (maxHeightFloat <= 0f) return@onDragStarted
-                        val newOffset = when {
-                            reverseLayout -> (maxHeightFloat - offset.y) / maxHeightFloat
-                            else -> offset.y / maxHeightFloat
-                        }
-                        val currentOffset = when {
-                            reverseLayout -> 1f - normalizedOffsetPosition - normalizedThumbSize
-                            else -> normalizedOffsetPosition
+                    when (selectionMode) {
+                        ScrollbarSelectionMode.Full -> {
+                            if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
+                                setDragOffset(currentOffset)
+                            else
+                                setScrollOffset(newOffset)
+                            isSelected = true
                         }
 
-                        when (selectionMode) {
-                            ScrollbarSelectionMode.Full -> {
-                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSize))
-                                    setDragOffset(currentOffset)
-                                else
-                                    setScrollOffset(newOffset)
+                        ScrollbarSelectionMode.Thumb -> {
+                            if (newOffset in currentOffset..(currentOffset + normalizedThumbSize)) {
+                                setDragOffset(currentOffset)
                                 isSelected = true
                             }
-
-                            ScrollbarSelectionMode.Thumb -> {
-                                if (newOffset in currentOffset..(currentOffset + normalizedThumbSize)) {
-                                    setDragOffset(currentOffset)
-                                    isSelected = true
-                                }
-                            }
-
-                            ScrollbarSelectionMode.Disabled -> Unit
                         }
-                    },
-                    onDragStopped = {
-                        isSelected = false
-                    }
-                )
-                .testTag(TestTagsScrollbar.scrollbarContainer)
-        )
 
-        if (
-            when (selectionActionable) {
-                ScrollbarSelectionActionable.Always -> true
-                ScrollbarSelectionActionable.WhenVisible -> isInActionSelectable.value
-            }
-        ) {
-            DraggableBar()
-        }
+                        ScrollbarSelectionMode.Disabled -> Unit
+                    }
+                },
+                onDragStopped = {
+                    isSelected = false
+                }
+            )
+        )
     }
 }

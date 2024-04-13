@@ -172,6 +172,7 @@ fun InternalColumnScrollbar(
         VerticalScrollbarLayout(
             scrollbarSizeNormalized = normalizedThumbSize,
             normalizedOffset = normalizedOffsetPosition,
+            isInAction = isInAction,
             settings = ScrollbarLayoutSettings(
                 durationAnimationMillis = 500,
                 hideDelayMillis = hideDelayMillis,
@@ -193,7 +194,6 @@ fun InternalColumnScrollbar(
                     }
                 }
             },
-            isInAction = isInAction,
             draggableModifier = Modifier.draggable(
                 state = rememberDraggableState { delta ->
                     if (isSelected) {

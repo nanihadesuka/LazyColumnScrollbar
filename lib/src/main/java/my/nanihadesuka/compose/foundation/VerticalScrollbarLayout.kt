@@ -33,8 +33,8 @@ import my.nanihadesuka.compose.TestTagsScrollbar
 internal fun VerticalScrollbarLayout(
     scrollbarSizeNormalized: Float,
     normalizedOffset: Float,
-    settings: ScrollbarLayoutSettings,
     isInAction: Boolean,
+    settings: ScrollbarLayoutSettings,
     modifier: Modifier = Modifier,
     draggableModifier: Modifier,
     indicator: (@Composable () -> Unit)?,
