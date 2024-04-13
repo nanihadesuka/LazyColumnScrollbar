@@ -31,8 +31,8 @@ import my.nanihadesuka.compose.TestTagsScrollbar
 
 @Composable
 internal fun VerticalScrollbarLayout(
-    scrollbarSizeNormalized: Float,
-    normalizedOffset: Float,
+    thumbSizeNormalized: Float,
+    thumbOffsetNormalized: Float,
     isInAction: Boolean,
     settings: ScrollbarLayoutSettings,
     modifier: Modifier = Modifier,
@@ -78,8 +78,8 @@ internal fun VerticalScrollbarLayout(
                 Box(
                     modifier = Modifier
                         .sizeIn(
-                            minHeight = maxHeight * scrollbarSizeNormalized,
-                            maxHeight = maxHeight * scrollbarSizeNormalized
+                            minHeight = maxHeight * thumbSizeNormalized,
+                            maxHeight = maxHeight * thumbSizeNormalized
                         )
                         .padding(
                             start = if (settings.side == ScrollbarLayoutSide.Start) settings.scrollbarPadding else 0.dp,
@@ -117,7 +117,7 @@ internal fun VerticalScrollbarLayout(
                     val placeableIndicator = placeables[1]
                     val placeableScrollbarArea = placeables[2]
 
-                    val offset = (constraints.maxHeight.toFloat() * normalizedOffset).toInt()
+                    val offset = (constraints.maxHeight.toFloat() * thumbOffsetNormalized).toInt()
 
                     val hideDispPx = when (settings.side) {
                         ScrollbarLayoutSide.Start -> -hideDisplacement.roundToPx()
@@ -158,8 +158,8 @@ internal fun VerticalScrollbarLayout(
 @Composable
 private fun LayoutPreview() {
     VerticalScrollbarLayout(
-        scrollbarSizeNormalized = 0.2f,
-        normalizedOffset = 0.4f,
+        thumbSizeNormalized = 0.2f,
+        thumbOffsetNormalized = 0.4f,
         settings = ScrollbarLayoutSettings(
             durationAnimationMillis = 500,
             hideDelayMillis = 400,

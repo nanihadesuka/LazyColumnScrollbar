@@ -229,8 +229,8 @@ fun InternalLazyColumnScrollbar(
     ) {
         val maxHeightFloat = constraints.maxHeight.toFloat()
         VerticalScrollbarLayout(
-            scrollbarSizeNormalized = normalizedThumbSize,
-            normalizedOffset = normalizedOffsetPosition,
+            thumbSizeNormalized = normalizedThumbSize,
+            thumbOffsetNormalized = normalizedOffsetPosition,
             isInAction = isInAction,
             settings = ScrollbarLayoutSettings(
                 durationAnimationMillis = 500,
