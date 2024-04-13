@@ -13,6 +13,7 @@ junit = "4.13.2"
 lifecycleRuntimeKtx = "2.7.0"
 material = "1.11.0"
 robolectric = "4.11.1"
+uiTooling = "1.6.5"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -32,6 +33,7 @@ androidx-compose-constraintlayout = { module = "androidx.constraintlayout:constr
 
 junit = { module = "junit:junit", version.ref = "junit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
 
 
 [plugins]

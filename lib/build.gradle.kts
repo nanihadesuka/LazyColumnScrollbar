@@ -78,9 +78,10 @@ dependencies {
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.ui.ui)
     implementation(libs.androidx.compose.constraintlayout)
+    implementation(libs.androidx.compose.ui.tooling.preview)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.compose.ui.test.junit4)
