@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -109,7 +110,7 @@ fun InternalLazyColumnScrollbar(
 
     var isSelected by remember { mutableStateOf(false) }
 
-    var dragOffset by remember { mutableStateOf(0f) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
 
     val reverseLayout by remember { derivedStateOf { listState.layoutInfo.reverseLayout } }
 
@@ -247,8 +248,8 @@ fun InternalLazyColumnScrollbar(
                 else -> {
                     {
                         indicatorContent(
-                            index = firstVisibleItemIndex.value,
-                            isThumbSelected = isSelected
+                            firstVisibleItemIndex.value,
+                            isSelected
                         )
                     }
                 }

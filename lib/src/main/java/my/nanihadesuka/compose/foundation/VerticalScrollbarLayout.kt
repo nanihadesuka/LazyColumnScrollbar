@@ -119,7 +119,7 @@ internal fun VerticalScrollbarLayout(
 
                     val offset = (constraints.maxHeight.toFloat() * thumbOffsetNormalized).toInt()
 
-                    val hideDispPx = when (settings.side) {
+                    val hideDisplacementPx = when (settings.side) {
                         ScrollbarLayoutSide.Start -> -hideDisplacement.roundToPx()
                         ScrollbarLayoutSide.End -> +hideDisplacement.roundToPx()
                     }
@@ -128,7 +128,7 @@ internal fun VerticalScrollbarLayout(
                         x = when (settings.side) {
                             ScrollbarLayoutSide.Start -> 0
                             ScrollbarLayoutSide.End -> constraints.maxWidth - placeableThumb.width
-                        } + hideDispPx,
+                        } + hideDisplacementPx,
                         y = offset
                     )
 
@@ -136,7 +136,7 @@ internal fun VerticalScrollbarLayout(
                         x = when (settings.side) {
                             ScrollbarLayoutSide.Start -> 0 + placeableThumb.width
                             ScrollbarLayoutSide.End -> constraints.maxWidth - placeableThumb.width - placeableIndicator.width
-                        } + hideDispPx,
+                        } + hideDisplacementPx,
                         y = offset + placeableThumb.height / 2 - placeableIndicator.height / 2
                     )
                     placeableScrollbarArea.placeRelative(
@@ -175,7 +175,7 @@ private fun LayoutPreview() {
         isInAction = true,
         indicator = {
             Text(
-                text = "geregte",
+                text = "I'm groot",
                 modifier = Modifier
                     .background(Color.White)
                     .padding(14.dp)
