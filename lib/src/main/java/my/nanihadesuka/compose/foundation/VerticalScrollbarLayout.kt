@@ -1,4 +1,4 @@
-package my.nanihadesuka.compose.fundation
+package my.nanihadesuka.compose.foundation
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState

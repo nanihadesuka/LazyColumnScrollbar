@@ -22,9 +22,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import my.nanihadesuka.compose.fundation.ScrollbarLayoutSettings
-import my.nanihadesuka.compose.fundation.ScrollbarLayoutSide
-import my.nanihadesuka.compose.fundation.VerticalScrollbarLayout
+import my.nanihadesuka.compose.foundation.ScrollbarLayoutSettings
+import my.nanihadesuka.compose.foundation.ScrollbarLayoutSide
+import my.nanihadesuka.compose.foundation.VerticalScrollbarLayout
 
 /**
  * Scrollbar for Column

@@ -1,4 +1,4 @@
-package my.nanihadesuka.compose.fundation
+package my.nanihadesuka.compose.foundation
 
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
