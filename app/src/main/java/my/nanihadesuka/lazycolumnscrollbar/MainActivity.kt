@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import my.nanihadesuka.compose.ColumnScrollbar
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.LazyGridVerticalScrollbar
+import my.nanihadesuka.compose.ScrollbarSelectionActionable
 import my.nanihadesuka.compose.ScrollbarSelectionMode
 import my.nanihadesuka.lazycolumnscrollbar.ui.theme.LazyColumnScrollbarTheme
 
@@ -63,29 +64,35 @@ enum class TypeTab {
 fun MainView() {
     LazyColumnScrollbarTheme {
         Surface(color = MaterialTheme.colors.background) {
-            val tab = rememberSaveable { mutableStateOf(TypeTab.LazyColumn) }
+            val tab = rememberSaveable { mutableStateOf(TypeTab.Column) }
             Column {
-                Row {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = TypeTab.LazyColumn.name,
-                        Modifier.selectable(
-                            selected = tab.value == TypeTab.LazyColumn,
-                            onClick = { tab.value = TypeTab.LazyColumn },
-                        )
+                        Modifier
+                            .selectable(
+                                selected = tab.value == TypeTab.LazyColumn,
+                                onClick = { tab.value = TypeTab.LazyColumn },
+                            )
+                            .padding(12.dp)
                     )
                     Text(
                         text = TypeTab.Column.name,
-                        Modifier.selectable(
-                            selected = tab.value == TypeTab.Column,
-                            onClick = { tab.value = TypeTab.Column },
-                        )
+                        Modifier
+                            .selectable(
+                                selected = tab.value == TypeTab.Column,
+                                onClick = { tab.value = TypeTab.Column },
+                            )
+                            .padding(12.dp)
                     )
                     Text(
                         text = TypeTab.LazyGrid.name,
-                        Modifier.selectable(
-                            selected = tab.value == TypeTab.LazyGrid,
-                            onClick = { tab.value = TypeTab.LazyGrid },
-                        )
+                        Modifier
+                            .selectable(
+                                selected = tab.value == TypeTab.LazyGrid,
+                                onClick = { tab.value = TypeTab.LazyGrid },
+                            )
+                            .padding(12.dp)
                     )
                 }
 
@@ -255,7 +262,7 @@ fun ColumnView() {
                     .background(Color.Green)
                     .padding(8.dp)
                     .clip(CircleShape)
-                    .background(if (isThumbSelected) MaterialTheme.colors.surface else MaterialTheme.colors.background)
+                    .background(if (isThumbSelected) Color.Red else MaterialTheme.colors.background)
                     .padding(12.dp)
             )
         }
@@ -270,8 +277,10 @@ fun ColumnView() {
         ColumnScrollbar(
             state = listState,
             indicatorContent = indicatorContent,
-            selectionMode = ScrollbarSelectionMode.Disabled,
-            alwaysShowScrollBar = true,
+            selectionMode = ScrollbarSelectionMode.Thumb,
+            selectionActionable = ScrollbarSelectionActionable.WhenVisible,
+            alwaysShowScrollBar = false,
+            rightSide = false
         ) {
             Column(
                 modifier = Modifier.verticalScroll(listState)
