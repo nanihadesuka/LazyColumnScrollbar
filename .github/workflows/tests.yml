@@ -1,5 +1,5 @@
-name: default
-run-name: Default CI
+name: UI tests
+run-name: Library UI tests
 
 on:
   pull_request:
