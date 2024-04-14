@@ -118,6 +118,23 @@ internal fun InternalLazyGridVerticalScrollbar(
         }
     }
 
+    // Workaround to know indirectly how many columns are being used (LazyGridState doesn't store it)
+    val nColumns by remember {
+        derivedStateOf {
+            var count = 0
+            for (item in gridState.layoutInfo.visibleItemsInfo) {
+                if (item.column == -1)
+                    break
+                if (count == item.column) {
+                    count += 1
+                } else {
+                    break
+                }
+            }
+            count.coerceAtLeast(1)
+        }
+    }
+
     val isStickyHeaderInAction by remember {
         derivedStateOf {
             val realIndex = realFirstVisibleItem?.index ?: return@derivedStateOf false
@@ -145,9 +162,10 @@ internal fun InternalLazyGridVerticalScrollbar(
                 val lastPartial =
                     1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
 
-                val realSize = it.visibleItemsInfo.size - if (isStickyHeaderInAction) 1 else 0
+                val realSize =
+                    (it.visibleItemsInfo.size / nColumns) - if (isStickyHeaderInAction) 1 else 0
                 val realVisibleSize = realSize.toFloat() - firstPartial - lastPartial
-                realVisibleSize / it.totalItemsCount.toFloat()
+                realVisibleSize / (it.totalItemsCount / nColumns).toFloat()
             }
         }
     }
@@ -189,8 +207,9 @@ internal fun InternalLazyGridVerticalScrollbar(
                     return@let 0f
 
                 val firstItem = realFirstVisibleItem ?: return@let 0f
-                val top = firstItem
-                    .run { index.toFloat() + fractionHiddenTop(gridState.firstVisibleItemScrollOffset) } / it.totalItemsCount.toFloat()
+                val top = firstItem.run {
+                    (index / nColumns).toFloat() + fractionHiddenTop(gridState.firstVisibleItemScrollOffset)
+                } / (it.totalItemsCount / nColumns).toFloat()
                 offsetCorrection(top)
             }
         }
@@ -203,9 +222,9 @@ internal fun InternalLazyGridVerticalScrollbar(
 
     fun setScrollOffset(newOffset: Float) {
         setDragOffset(newOffset)
-        val totalItemsCount = gridState.layoutInfo.totalItemsCount.toFloat()
+        val totalItemsCount = gridState.layoutInfo.totalItemsCount.toFloat() / nColumns.toFloat()
         val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset)
-        val index: Int = floor(exactIndex).toInt()
+        val index: Int = floor(exactIndex).toInt() * nColumns
         val remainder: Float = exactIndex - floor(exactIndex)
 
         coroutineScope.launch {
