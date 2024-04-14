@@ -8,24 +8,16 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.foundation.ScrollbarLayoutSettings
 import my.nanihadesuka.compose.foundation.ScrollbarLayoutSide
 import my.nanihadesuka.compose.foundation.VerticalScrollbarLayout
+import my.nanihadesuka.compose.foundation.rememberScrollStateController
 
 /**
  * Scrollbar for Column
@@ -105,122 +97,47 @@ fun InternalColumnScrollbar(
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     visibleHeightDp: Dp,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
-    var isSelected by remember { mutableStateOf(false) }
-
-    var dragOffset by remember { mutableFloatStateOf(0f) }
-
-    val fullHeightDp = with(LocalDensity.current) { state.maxValue.toDp() + visibleHeightDp }
-
-    val normalizedThumbSizeReal by remember(visibleHeightDp, state.maxValue) {
-        derivedStateOf {
-            if (fullHeightDp == 0.dp) 1f else {
-                val normalizedDp = visibleHeightDp / fullHeightDp
-                normalizedDp.coerceIn(0f, 1f)
-            }
-        }
-    }
-
-    val normalizedThumbSize by remember(normalizedThumbSizeReal) {
-        derivedStateOf {
-            normalizedThumbSizeReal.coerceAtLeast(thumbMinHeight)
-        }
-    }
-
-    val normalizedThumbSizeUpdated by rememberUpdatedState(newValue = normalizedThumbSize)
-
-    fun offsetCorrection(top: Float): Float {
-        val topRealMax = 1f
-        val topMax = (1f - normalizedThumbSizeUpdated).coerceIn(0f, 1f)
-        return top * topMax / topRealMax
-    }
-
-    fun offsetCorrectionInverse(top: Float): Float {
-        val topRealMax = 1f
-        val topMax = 1f - normalizedThumbSizeUpdated
-        if (topMax == 0f) return top
-        return (top * topRealMax / topMax).coerceAtLeast(0f)
-    }
-
-    val normalizedOffsetPosition by remember {
-        derivedStateOf {
-            if (state.maxValue == 0) return@derivedStateOf 0f
-            val normalized = state.value.toFloat() / state.maxValue.toFloat()
-            offsetCorrection(normalized)
-        }
-    }
-
-    fun setDragOffset(value: Float) {
-        val maxValue = (1f - normalizedThumbSize).coerceAtLeast(0f)
-        dragOffset = value.coerceIn(0f, maxValue)
-    }
-
-    fun setScrollOffset(newOffset: Float) {
-        setDragOffset(newOffset)
-        val exactIndex = offsetCorrectionInverse(state.maxValue * dragOffset).toInt()
-        coroutineScope.launch {
-            state.scrollTo(exactIndex)
-        }
-    }
-
-    val isInAction = state.isScrollInProgress || isSelected || alwaysShowScrollBar
+    val controller = rememberScrollStateController(
+        state = state,
+        visibleLengthDp = visibleHeightDp,
+        thumbMinLength = thumbMinHeight,
+        alwaysShowScrollBar = alwaysShowScrollBar,
+        selectionMode = selectionMode,
+    )
 
     BoxWithConstraints(
         modifier = modifier.fillMaxSize()
     ) {
         val maxHeightFloat = constraints.maxHeight.toFloat()
         VerticalScrollbarLayout(
-            thumbSizeNormalized = normalizedThumbSize,
-            thumbOffsetNormalized = normalizedOffsetPosition,
-            thumbIsInAction = isInAction,
+            thumbSizeNormalized = controller.normalizedThumbSize.value,
+            thumbOffsetNormalized = controller.normalizedOffsetPosition.value,
+            thumbIsInAction = controller.thumbIsInAction.value,
             settings = ScrollbarLayoutSettings(
                 durationAnimationMillis = 500,
                 hideDelayMillis = hideDelayMillis,
                 scrollbarPadding = padding,
                 thumbShape = thumbShape,
                 thumbThickness = thickness,
-                thumbColor = if (isSelected) thumbSelectedColor else thumbColor,
+                thumbColor = if (controller.isSelected.value) thumbSelectedColor else thumbColor,
                 side = if (rightSide) ScrollbarLayoutSide.End else ScrollbarLayoutSide.Start,
                 selectionActionable = selectionActionable,
             ),
             indicator = indicatorContent?.let {
-                { it(offsetCorrectionInverse(normalizedOffsetPosition), isSelected) }
+                { it(controller.indicatorNormalizedOffset(), controller.isSelected.value) }
             },
             draggableModifier = Modifier.draggable(
                 state = rememberDraggableState { delta ->
-                    if (isSelected) {
-                        setScrollOffset(dragOffset + delta / maxHeightFloat)
-                    }
+                    controller.onDragState(delta, maxHeightFloat)
                 },
                 orientation = Orientation.Vertical,
                 enabled = selectionMode != ScrollbarSelectionMode.Disabled,
                 startDragImmediately = true,
                 onDragStarted = { offset ->
-                    val newOffset = offset.y / maxHeightFloat
-                    val currentOffset = normalizedOffsetPosition
-
-                    when (selectionMode) {
-                        ScrollbarSelectionMode.Full -> {
-                            if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated))
-                                setDragOffset(currentOffset)
-                            else
-                                setScrollOffset(newOffset)
-                            isSelected = true
-                        }
-
-                        ScrollbarSelectionMode.Thumb -> {
-                            if (newOffset in currentOffset..(currentOffset + normalizedThumbSizeUpdated)) {
-                                setDragOffset(currentOffset)
-                                isSelected = true
-                            }
-                        }
-
-                        ScrollbarSelectionMode.Disabled -> Unit
-                    }
+                    controller.onDragStarted(offset.y, maxHeightFloat)
                 },
                 onDragStopped = {
-                    isSelected = false
+                    controller.onDragStopped()
                 }
             )
         )

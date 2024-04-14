@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -41,15 +42,17 @@ internal fun rememberScrollStateController(
         }
     }
 
-    val normalizedThumbSize = remember(normalizedThumbSizeReal) {
+    val normalizedThumbSize = remember(normalizedThumbSizeReal.value) {
         derivedStateOf {
             normalizedThumbSizeReal.value.coerceAtLeast(thumbMinLength)
         }
     }
 
+    val normalizedThumbSizeUpdated = rememberUpdatedState(newValue = normalizedThumbSize.value)
+
     fun offsetCorrection(top: Float): Float {
         val topRealMax = 1f
-        val topMax = (1f - normalizedThumbSize.value).coerceIn(0f, 1f)
+        val topMax = (1f - normalizedThumbSizeUpdated.value).coerceIn(0f, 1f)
         return top * topMax / topRealMax
     }
 
@@ -60,6 +63,7 @@ internal fun rememberScrollStateController(
             offsetCorrection(normalized)
         }
     }
+    val normalizedOffsetPositionUpdated = rememberUpdatedState(normalizedOffsetPosition.value)
 
     val thumbIsInAction = remember(alwaysShowScrollBar) {
         derivedStateOf {
@@ -67,10 +71,10 @@ internal fun rememberScrollStateController(
         }
     }
 
-    return remember {
+    return remember(alwaysShowScrollBar, normalizedThumbSizeReal.value) {
         ScrollStateController(
-            normalizedThumbSize = normalizedThumbSize,
-            normalizedOffsetPosition = normalizedOffsetPosition,
+            normalizedThumbSize = normalizedThumbSizeUpdated,
+            normalizedOffsetPosition = normalizedOffsetPositionUpdated,
             thumbIsInAction = thumbIsInAction,
             _isSelected = isSelected,
             dragOffset = dragOffset,
