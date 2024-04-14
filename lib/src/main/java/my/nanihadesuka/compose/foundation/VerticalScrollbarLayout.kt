@@ -5,9 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -71,110 +69,110 @@ internal fun VerticalScrollbarLayout(
         label = "scrollbar displacement value"
     )
 
-    BoxWithConstraints {
-        Layout(
-            content = {
-                Box(
-                    modifier = Modifier
-                        .height(maxHeight * thumbSizeNormalized)
-                        .padding(
-                            start = if (settings.side == ScrollbarLayoutSide.Start) settings.scrollbarPadding else 0.dp,
-                            end = if (settings.side == ScrollbarLayoutSide.End) settings.scrollbarPadding else 0.dp,
-                        )
+    Layout(
+        content = {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight(thumbSizeNormalized)
+                    .padding(
+                        start = if (settings.side == ScrollbarLayoutSide.Start) settings.scrollbarPadding else 0.dp,
+                        end = if (settings.side == ScrollbarLayoutSide.End) settings.scrollbarPadding else 0.dp,
+                    )
+                    .alpha(hideAlpha)
+                    .clip(settings.thumbShape)
+                    .width(settings.thumbThickness)
+                    .background(settings.thumbColor)
+                    .testTag(TestTagsScrollbar.scrollbar)
+            )
+            when (indicator) {
+                null -> Box(Modifier)
+                else -> Box(
+                    Modifier
+                        .testTag(TestTagsScrollbar.scrollbarIndicator)
                         .alpha(hideAlpha)
-                        .clip(settings.thumbShape)
-                        .width(settings.thumbThickness)
-                        .background(settings.thumbColor)
-                        .testTag(TestTagsScrollbar.scrollbar)
-                )
-                when (indicator) {
-                    null -> Box(Modifier)
-                    else -> Box(
-                        Modifier
-                            .testTag(TestTagsScrollbar.scrollbarIndicator)
-                            .alpha(hideAlpha)
-                    ) {
-                        indicator()
-                    }
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(settings.scrollbarPadding * 2 + settings.thumbThickness)
-                        .run { if (activeDraggableModifier) then(draggableModifier) else this }
-                        .testTag(TestTagsScrollbar.scrollbarContainer)
-                )
-            },
-            measurePolicy = { measurables, constraints ->
-                val placeables = measurables.map { it.measure(constraints) }
-
-                layout(constraints.maxWidth, constraints.maxHeight) {
-                    val placeableThumb = placeables[0]
-                    val placeableIndicator = placeables[1]
-                    val placeableScrollbarArea = placeables[2]
-
-                    val offset = (constraints.maxHeight.toFloat() * thumbOffsetNormalized).toInt()
-
-                    val hideDisplacementPx = when (settings.side) {
-                        ScrollbarLayoutSide.Start -> -hideDisplacement.roundToPx()
-                        ScrollbarLayoutSide.End -> +hideDisplacement.roundToPx()
-                    }
-
-                    placeableThumb.placeRelative(
-                        x = when (settings.side) {
-                            ScrollbarLayoutSide.Start -> 0
-                            ScrollbarLayoutSide.End -> constraints.maxWidth - placeableThumb.width
-                        } + hideDisplacementPx,
-                        y = offset
-                    )
-
-                    placeableIndicator.placeRelative(
-                        x = when (settings.side) {
-                            ScrollbarLayoutSide.Start -> 0 + placeableThumb.width
-                            ScrollbarLayoutSide.End -> constraints.maxWidth - placeableThumb.width - placeableIndicator.width
-                        } + hideDisplacementPx,
-                        y = offset + placeableThumb.height / 2 - placeableIndicator.height / 2
-                    )
-                    placeableScrollbarArea.placeRelative(
-                        x = when (settings.side) {
-                            ScrollbarLayoutSide.Start -> 0
-                            ScrollbarLayoutSide.End -> constraints.maxWidth - placeableScrollbarArea.width
-                        },
-                        y = 0
-                    )
-
+                ) {
+                    indicator()
                 }
             }
-        )
-    }
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(settings.scrollbarPadding * 2 + settings.thumbThickness)
+                    .run { if (activeDraggableModifier) then(draggableModifier) else this }
+                    .testTag(TestTagsScrollbar.scrollbarContainer)
+            )
+        },
+        measurePolicy = { measurables, constraints ->
+            val placeables = measurables.map { it.measure(constraints) }
+
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                val placeableThumb = placeables[0]
+                val placeableIndicator = placeables[1]
+                val placeableScrollbarArea = placeables[2]
+
+                val offset = (constraints.maxHeight.toFloat() * thumbOffsetNormalized).toInt()
+
+                val hideDisplacementPx = when (settings.side) {
+                    ScrollbarLayoutSide.Start -> -hideDisplacement.roundToPx()
+                    ScrollbarLayoutSide.End -> +hideDisplacement.roundToPx()
+                }
+
+                placeableThumb.placeRelative(
+                    x = when (settings.side) {
+                        ScrollbarLayoutSide.Start -> 0
+                        ScrollbarLayoutSide.End -> constraints.maxWidth - placeableThumb.width
+                    } + hideDisplacementPx,
+                    y = offset
+                )
+
+                placeableIndicator.placeRelative(
+                    x = when (settings.side) {
+                        ScrollbarLayoutSide.Start -> 0 + placeableThumb.width
+                        ScrollbarLayoutSide.End -> constraints.maxWidth - placeableThumb.width - placeableIndicator.width
+                    } + hideDisplacementPx,
+                    y = offset + placeableThumb.height / 2 - placeableIndicator.height / 2
+                )
+                placeableScrollbarArea.placeRelative(
+                    x = when (settings.side) {
+                        ScrollbarLayoutSide.Start -> 0
+                        ScrollbarLayoutSide.End -> constraints.maxWidth - placeableScrollbarArea.width
+                    },
+                    y = 0
+                )
+
+            }
+        }
+    )
 }
 
 
 @Preview(widthDp = 320, heightDp = 600)
 @Composable
 private fun LayoutPreview() {
-    VerticalScrollbarLayout(
-        thumbSizeNormalized = 0.2f,
-        thumbOffsetNormalized = 0.4f,
-        settings = ScrollbarLayoutSettings(
-            durationAnimationMillis = 500,
-            hideDelayMillis = 400,
-            scrollbarPadding = 8.dp,
-            thumbShape = CircleShape,
-            thumbThickness = 6.dp,
-            thumbColor = Color.Red,
-            side = ScrollbarLayoutSide.Start,
-            selectionActionable = ScrollbarSelectionActionable.Always
-        ),
-        draggableModifier = Modifier,
-        thumbIsInAction = true,
-        indicator = {
-            Text(
-                text = "I'm groot",
-                modifier = Modifier
-                    .background(Color.White)
-                    .padding(14.dp)
-            )
-        },
-    )
+    Box {
+        VerticalScrollbarLayout(
+            thumbSizeNormalized = 0.2f,
+            thumbOffsetNormalized = 0.4f,
+            settings = ScrollbarLayoutSettings(
+                durationAnimationMillis = 500,
+                hideDelayMillis = 400,
+                scrollbarPadding = 8.dp,
+                thumbShape = CircleShape,
+                thumbThickness = 6.dp,
+                thumbColor = Color.Red,
+                side = ScrollbarLayoutSide.Start,
+                selectionActionable = ScrollbarSelectionActionable.Always
+            ),
+            draggableModifier = Modifier,
+            thumbIsInAction = true,
+            indicator = {
+                Text(
+                    text = "I'm groot",
+                    modifier = Modifier
+                        .background(Color.White)
+                        .padding(14.dp)
+                )
+            },
+        )
+    }
 }
