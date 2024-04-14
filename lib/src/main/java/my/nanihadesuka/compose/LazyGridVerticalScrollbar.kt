@@ -228,7 +228,7 @@ internal fun InternalLazyGridVerticalScrollbar(
         VerticalScrollbarLayout(
             thumbSizeNormalized = normalizedThumbSize,
             thumbOffsetNormalized = normalizedOffsetPosition,
-            isInAction = isInAction,
+            thumbIsInAction = isInAction,
             settings = ScrollbarLayoutSettings(
                 durationAnimationMillis = 500,
                 hideDelayMillis = hideDelayMillis,
@@ -239,16 +239,8 @@ internal fun InternalLazyGridVerticalScrollbar(
                 side = if (rightSide) ScrollbarLayoutSide.End else ScrollbarLayoutSide.Start,
                 selectionActionable = selectionActionable
             ),
-            indicator = when (indicatorContent) {
-                null -> null
-                else -> {
-                    {
-                        indicatorContent(
-                            firstVisibleItemIndex.value,
-                            isSelected,
-                        )
-                    }
-                }
+            indicator = indicatorContent?.let {
+                { it(firstVisibleItemIndex.value, isSelected) }
             },
             draggableModifier = Modifier.draggable(
                 state = rememberDraggableState { delta ->

@@ -173,7 +173,7 @@ fun InternalColumnScrollbar(
         VerticalScrollbarLayout(
             thumbSizeNormalized = normalizedThumbSize,
             thumbOffsetNormalized = normalizedOffsetPosition,
-            isInAction = isInAction,
+            thumbIsInAction = isInAction,
             settings = ScrollbarLayoutSettings(
                 durationAnimationMillis = 500,
                 hideDelayMillis = hideDelayMillis,
@@ -184,16 +184,8 @@ fun InternalColumnScrollbar(
                 side = if (rightSide) ScrollbarLayoutSide.End else ScrollbarLayoutSide.Start,
                 selectionActionable = selectionActionable,
             ),
-            indicator = when (indicatorContent) {
-                null -> null
-                else -> {
-                    {
-                        indicatorContent(
-                            offsetCorrectionInverse(normalizedOffsetPosition),
-                            isSelected
-                        )
-                    }
-                }
+            indicator = indicatorContent?.let {
+                { it(offsetCorrectionInverse(normalizedOffsetPosition), isSelected) }
             },
             draggableModifier = Modifier.draggable(
                 state = rememberDraggableState { delta ->

@@ -7,8 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
@@ -33,15 +33,14 @@ import my.nanihadesuka.compose.TestTagsScrollbar
 internal fun VerticalScrollbarLayout(
     thumbSizeNormalized: Float,
     thumbOffsetNormalized: Float,
-    isInAction: Boolean,
+    thumbIsInAction: Boolean,
     settings: ScrollbarLayoutSettings,
-    modifier: Modifier = Modifier,
     draggableModifier: Modifier,
     indicator: (@Composable () -> Unit)?,
 ) {
-    val isInActionSelectable = remember { mutableStateOf(isInAction) }
-    LaunchedEffect(isInAction) {
-        if (isInAction) {
+    val isInActionSelectable = remember { mutableStateOf(thumbIsInAction) }
+    LaunchedEffect(thumbIsInAction) {
+        if (thumbIsInAction) {
             isInActionSelectable.value = true
         } else {
             delay(timeMillis = settings.durationAnimationMillis.toLong() + settings.hideDelayMillis.toLong())
@@ -55,32 +54,29 @@ internal fun VerticalScrollbarLayout(
     }
 
     val hideAlpha by animateFloatAsState(
-        targetValue = if (isInAction) 1f else 0f,
+        targetValue = if (thumbIsInAction) 1f else 0f,
         animationSpec = tween(
-            durationMillis = if (isInAction) 75 else settings.durationAnimationMillis,
-            delayMillis = if (isInAction) 0 else settings.hideDelayMillis
+            durationMillis = if (thumbIsInAction) 75 else settings.durationAnimationMillis,
+            delayMillis = if (thumbIsInAction) 0 else settings.hideDelayMillis
         ),
         label = "scrollbar alpha value"
     )
 
     val hideDisplacement by animateDpAsState(
-        targetValue = if (isInAction) 0.dp else 14.dp,
+        targetValue = if (thumbIsInAction) 0.dp else 14.dp,
         animationSpec = tween(
-            durationMillis = if (isInAction) 75 else settings.durationAnimationMillis,
-            delayMillis = if (isInAction) 0 else settings.hideDelayMillis
+            durationMillis = if (thumbIsInAction) 75 else settings.durationAnimationMillis,
+            delayMillis = if (thumbIsInAction) 0 else settings.hideDelayMillis
         ),
         label = "scrollbar displacement value"
     )
 
-    BoxWithConstraints(modifier) {
+    BoxWithConstraints {
         Layout(
             content = {
                 Box(
                     modifier = Modifier
-                        .sizeIn(
-                            minHeight = maxHeight * thumbSizeNormalized,
-                            maxHeight = maxHeight * thumbSizeNormalized
-                        )
+                        .height(maxHeight * thumbSizeNormalized)
                         .padding(
                             start = if (settings.side == ScrollbarLayoutSide.Start) settings.scrollbarPadding else 0.dp,
                             end = if (settings.side == ScrollbarLayoutSide.End) settings.scrollbarPadding else 0.dp,
@@ -170,9 +166,8 @@ private fun LayoutPreview() {
             side = ScrollbarLayoutSide.Start,
             selectionActionable = ScrollbarSelectionActionable.Always
         ),
-        modifier = Modifier,
         draggableModifier = Modifier,
-        isInAction = true,
+        thumbIsInAction = true,
         indicator = {
             Text(
                 text = "I'm groot",
