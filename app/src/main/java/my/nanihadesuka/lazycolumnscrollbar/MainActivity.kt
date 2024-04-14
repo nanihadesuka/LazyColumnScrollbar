@@ -1,7 +1,6 @@
 package my.nanihadesuka.lazycolumnscrollbar
 
 import android.os.Bundle
-import android.widget.GridView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -26,7 +25,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -37,7 +35,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -64,7 +61,7 @@ enum class TypeTab {
 fun MainView() {
     LazyColumnScrollbarTheme {
         Surface(color = MaterialTheme.colors.background) {
-            val tab = rememberSaveable { mutableStateOf(TypeTab.Column) }
+            val tab = rememberSaveable { mutableStateOf(TypeTab.LazyGrid) }
             Column {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
@@ -124,24 +121,7 @@ fun LazyColumnView() {
             selectionMode = ScrollbarSelectionMode.Thumb,
             alwaysShowScrollBar = true,
             indicatorContent = { index, isThumbSelected ->
-                Surface {
-                    Text(
-                        text = "i: $index",
-                        Modifier
-                            .clip(
-                                RoundedCornerShape(
-                                    topStart = 20.dp,
-                                    bottomStart = 20.dp,
-                                    bottomEnd = 16.dp
-                                )
-                            )
-                            .background(Color.Green)
-                            .padding(8.dp)
-                            .clip(CircleShape)
-                            .background(if (isThumbSelected) MaterialTheme.colors.surface else MaterialTheme.colors.background)
-                            .padding(12.dp)
-                    )
-                }
+                Indicator(text = "i : $index", isThumbSelected = isThumbSelected)
             }
         ) {
             LazyColumn(
@@ -179,7 +159,7 @@ fun LazyColumnView() {
 
 @Composable
 fun LazyGridView() {
-    val photos by rememberSaveable {
+    val items by rememberSaveable {
         mutableStateOf(List(100) { it })
     }
 
@@ -195,25 +175,7 @@ fun LazyGridView() {
             selectionMode = ScrollbarSelectionMode.Thumb,
             alwaysShowScrollBar = true,
             indicatorContent = { index, isThumbSelected ->
-                Surface {
-                    Text(
-                        text = "i: $index",
-                        modifier = Modifier
-                            .clip(
-                                RoundedCornerShape(
-                                    topStart = 20.dp,
-                                    bottomStart = 20.dp,
-                                    bottomEnd = 16.dp
-                                )
-                            )
-                            .background(Color.Green)
-                            .padding(8.dp)
-                            .clip(CircleShape)
-                            .background(if (isThumbSelected) Color.Blue else Color.Yellow)
-                            .padding(12.dp),
-                        color = Color.Red
-                    )
-                }
+                Indicator(text = "i:$index", isThumbSelected = isThumbSelected)
             }
         ) {
             LazyVerticalGrid(
@@ -222,7 +184,7 @@ fun LazyGridView() {
                 verticalArrangement = Arrangement.spacedBy(3.dp),
                 horizontalArrangement = Arrangement.spacedBy(3.dp),
             ) {
-                items(photos.size, key = { it }) {
+                items(items.size, key = { it }) {
                     Surface(
                         elevation = 3.dp,
                         modifier = Modifier.aspectRatio(1f),
@@ -248,24 +210,10 @@ fun ColumnView() {
     val listData = (0..100).toList()
     val listState = rememberScrollState()
     val indicatorContent = @Composable { normalizedOffset: Float, isThumbSelected: Boolean ->
-        Surface {
-            Text(
-                text = "i: ${"%.2f".format(normalizedOffset)}",
-                Modifier
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 20.dp,
-                            bottomStart = 20.dp,
-                            bottomEnd = 16.dp
-                        )
-                    )
-                    .background(Color.Green)
-                    .padding(8.dp)
-                    .clip(CircleShape)
-                    .background(if (isThumbSelected) Color.Red else MaterialTheme.colors.background)
-                    .padding(12.dp)
-            )
-        }
+        Indicator(
+            text = "i: ${"%.2f".format(normalizedOffset)}",
+            isThumbSelected = isThumbSelected
+        )
     }
 
     Box(
@@ -295,5 +243,28 @@ fun ColumnView() {
                 }
             }
         }
+    }
+}
+
+
+@Composable
+fun Indicator(text: String, isThumbSelected: Boolean) {
+    Surface {
+        Text(
+            text = text,
+            Modifier
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 20.dp,
+                        bottomStart = 20.dp,
+                        bottomEnd = 16.dp
+                    )
+                )
+                .background(Color.Green)
+                .padding(8.dp)
+                .clip(CircleShape)
+                .background(if (isThumbSelected) Color.Red else MaterialTheme.colors.background)
+                .padding(12.dp)
+        )
     }
 }
