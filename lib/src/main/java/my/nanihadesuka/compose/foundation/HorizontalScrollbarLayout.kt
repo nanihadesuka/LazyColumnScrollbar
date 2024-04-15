@@ -4,10 +4,11 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -28,13 +29,14 @@ import my.nanihadesuka.compose.ScrollbarSelectionActionable
 import my.nanihadesuka.compose.TestTagsScrollbar
 
 @Composable
-internal fun VerticalScrollbarLayout(
+internal fun HorizontalScrollbarLayout(
     thumbSizeNormalized: Float,
     thumbOffsetNormalized: Float,
     thumbIsInAction: Boolean,
     settings: ScrollbarLayoutSettings,
     draggableModifier: Modifier,
     indicator: (@Composable () -> Unit)?,
+    modifier: Modifier = Modifier,
 ) {
     val isInActionSelectable = remember { mutableStateOf(thumbIsInAction) }
     LaunchedEffect(thumbIsInAction) {
@@ -70,17 +72,18 @@ internal fun VerticalScrollbarLayout(
     )
 
     Layout(
+        modifier = modifier,
         content = {
             Box(
                 modifier = Modifier
-                    .fillMaxHeight(thumbSizeNormalized)
+                    .fillMaxWidth(thumbSizeNormalized)
                     .padding(
-                        start = if (settings.side == ScrollbarLayoutSide.Start) settings.scrollbarPadding else 0.dp,
-                        end = if (settings.side == ScrollbarLayoutSide.End) settings.scrollbarPadding else 0.dp,
+                        top = if (settings.side == ScrollbarLayoutSide.Start) settings.scrollbarPadding else 0.dp,
+                        bottom = if (settings.side == ScrollbarLayoutSide.End) settings.scrollbarPadding else 0.dp,
                     )
                     .alpha(hideAlpha)
                     .clip(settings.thumbShape)
-                    .width(settings.thumbThickness)
+                    .height(settings.thumbThickness)
                     .background(settings.thumbColor)
                     .testTag(TestTagsScrollbar.scrollbarThumb)
             )
@@ -96,8 +99,8 @@ internal fun VerticalScrollbarLayout(
             }
             Box(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .width(settings.scrollbarPadding * 2 + settings.thumbThickness)
+                    .fillMaxWidth()
+                    .height(settings.scrollbarPadding * 2 + settings.thumbThickness)
                     .run { if (activeDraggableModifier) then(draggableModifier) else this }
                     .testTag(TestTagsScrollbar.scrollbarContainer)
             )
@@ -110,7 +113,7 @@ internal fun VerticalScrollbarLayout(
                 val placeableIndicator = placeables[1]
                 val placeableScrollbarArea = placeables[2]
 
-                val offset = (constraints.maxHeight.toFloat() * thumbOffsetNormalized).toInt()
+                val offset = (constraints.maxWidth.toFloat() * thumbOffsetNormalized).toInt()
 
                 val hideDisplacementPx = when (settings.side) {
                     ScrollbarLayoutSide.Start -> -hideDisplacement.roundToPx()
@@ -118,28 +121,26 @@ internal fun VerticalScrollbarLayout(
                 }
 
                 placeableThumb.placeRelative(
-                    x = when (settings.side) {
+                    y = when (settings.side) {
                         ScrollbarLayoutSide.Start -> 0
-                        ScrollbarLayoutSide.End -> constraints.maxWidth - placeableThumb.width
+                        ScrollbarLayoutSide.End -> constraints.maxHeight - placeableThumb.height
                     } + hideDisplacementPx,
-                    y = offset
+                    x = offset
                 )
-
                 placeableIndicator.placeRelative(
-                    x = when (settings.side) {
-                        ScrollbarLayoutSide.Start -> 0 + placeableThumb.width
-                        ScrollbarLayoutSide.End -> constraints.maxWidth - placeableThumb.width - placeableIndicator.width
+                    y = when (settings.side) {
+                        ScrollbarLayoutSide.Start -> 0 + placeableThumb.height
+                        ScrollbarLayoutSide.End -> constraints.maxHeight - placeableThumb.height - placeableIndicator.height
                     } + hideDisplacementPx,
-                    y = offset + placeableThumb.height / 2 - placeableIndicator.height / 2
+                    x = offset + placeableThumb.width / 2 - placeableIndicator.width / 2
                 )
                 placeableScrollbarArea.placeRelative(
-                    x = when (settings.side) {
+                    y = when (settings.side) {
                         ScrollbarLayoutSide.Start -> 0
-                        ScrollbarLayoutSide.End -> constraints.maxWidth - placeableScrollbarArea.width
+                        ScrollbarLayoutSide.End -> constraints.maxHeight - placeableScrollbarArea.height
                     },
-                    y = 0
+                    x = 0
                 )
-
             }
         }
     )
@@ -149,8 +150,14 @@ internal fun VerticalScrollbarLayout(
 @Preview(widthDp = 320, heightDp = 600)
 @Composable
 private fun LayoutPreview() {
-    Box {
-        VerticalScrollbarLayout(
+    Box(
+        modifier = Modifier
+            .padding(4.dp)
+            .padding(bottom = 30.dp)
+    ) {
+        HorizontalScrollbarLayout(
+            modifier = Modifier
+                .border(1.dp, Color.Green),
             thumbSizeNormalized = 0.2f,
             thumbOffsetNormalized = 0.4f,
             settings = ScrollbarLayoutSettings(
@@ -160,7 +167,7 @@ private fun LayoutPreview() {
                 thumbShape = CircleShape,
                 thumbThickness = 6.dp,
                 thumbColor = Color.Red,
-                side = ScrollbarLayoutSide.Start,
+                side = ScrollbarLayoutSide.End,
                 selectionActionable = ScrollbarSelectionActionable.Always
             ),
             draggableModifier = Modifier,

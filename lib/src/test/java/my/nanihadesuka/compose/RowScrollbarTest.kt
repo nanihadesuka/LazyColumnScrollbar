@@ -2,7 +2,7 @@ package my.nanihadesuka.compose
 
 
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -16,13 +16,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import my.nanihadesuka.compose.foundation.ScrollbarLayoutSide
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.ParameterizedRobolectricTestRunner
 
 @RunWith(ParameterizedRobolectricTestRunner::class)
-class ColumnScrollbarTest(private val itemCount: Int) {
+class RowScrollbarTest(private val itemCount: Int) {
 
     companion object {
         @JvmStatic
@@ -55,91 +56,91 @@ class ColumnScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    fun `scrollbar is at right side`() {
-        setContent(rightSide = true)
+    fun `scrollbar is at bottom side`() {
+        setContent(bottomSide = true)
         scrollbarScreen(composeRule) {
-            assert { isScrollbarAtRightSide() }
+            assert { isScrollbarAtBottomSide() }
         }
     }
 
     @Test
-    fun `scrollbar is at left side`() {
-        setContent(rightSide = false)
+    fun `scrollbar is at top side`() {
+        setContent(bottomSide = false)
         scrollbarScreen(composeRule) {
-            assert { isScrollbarAtLeftSide() }
+            assert { isScrollbarAtTopSide() }
         }
     }
 
     @Test
-    fun `scrollbar is at right side - with indicator`() {
-        setContent(rightSide = true, indicatorContent = { value, _ -> IndicatorContent(value) })
+    fun `scrollbar is at bottom side - with indicator`() {
+        setContent(bottomSide = true, indicatorContent = { value, _ -> IndicatorContent(value) })
         scrollbarScreen(composeRule) {
             assert {
-                isScrollbarAtRightSide(indicatorVisible = true)
+                isScrollbarAtBottomSide(indicatorVisible = true)
             }
         }
     }
 
     @Test
-    fun `scrollbar is at left side - with indicator`() {
-        setContent(rightSide = false, indicatorContent = { value, _ -> IndicatorContent(value) })
+    fun `scrollbar is at top side - with indicator`() {
+        setContent(bottomSide = false, indicatorContent = { value, _ -> IndicatorContent(value) })
         scrollbarScreen(composeRule) {
             assert {
-                isScrollbarAtLeftSide(indicatorVisible = true)
+                isScrollbarAtTopSide(indicatorVisible = true)
             }
         }
     }
 
     @Test
-    fun `move scrollbar to the bottom`() {
+    fun `move thumb to the right`() {
         if (itemCount == 0) return
 
         setContent()
         scrollbarScreen(composeRule) {
-            moveThumbToBottom()
-            assert { isThumbAtBottom() }
+            moveThumbToRight()
+            assert { isThumbAtRight() }
         }
     }
 
     @Test
-    fun `move scrollbar to the top`() {
+    fun `move thumb to the left`() {
         if (itemCount == 0) return
 
         setContent()
         scrollbarScreen(composeRule) {
-            moveThumbToBottom()
-            assert { isThumbAtBottom() }
-            moveThumbToTop()
-            assert { isThumbAtTop() }
+            moveThumbToRight()
+            assert { isThumbAtRight() }
+            moveThumbToLeft()
+            assert { isThumbAtLeft() }
         }
     }
 
     @Test
-    fun `move scrollbar to the bottom - with indicator`() {
+    fun `move thumb to the right - with indicator`() {
         if (itemCount == 0) return
 
         setContent(indicatorContent = { value, _ -> IndicatorContent(value) })
         scrollbarScreen(composeRule) {
-            moveThumbToBottom()
-            assert { isThumbAtBottom(indicatorVisible = true) }
+            moveThumbToRight()
+            assert { isThumbAtRight(indicatorVisible = true) }
         }
     }
 
     @Test
-    fun `move scrollbar to the top - with indicator`() {
+    fun `move thumb to the left - with indicator`() {
         if (itemCount == 0) return
 
         setContent(indicatorContent = { value, _ -> IndicatorContent(value) })
         scrollbarScreen(composeRule) {
-            moveThumbToBottom()
-            assert { isThumbAtBottom(indicatorVisible = true) }
-            moveThumbToTop()
-            assert { isThumbAtTop(indicatorVisible = true) }
+            moveThumbToRight()
+            assert { isThumbAtRight(indicatorVisible = true) }
+            moveThumbToLeft()
+            assert { isThumbAtLeft(indicatorVisible = true) }
         }
     }
 
     @Test
-    fun `always show scrollbar false`() {
+    fun `always show thumb false`() {
         if (itemCount == 0) return
 
         setContent(
@@ -153,7 +154,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    fun `always show scrollbar true`() {
+    fun `always show thumb true`() {
         if (itemCount == 0) return
 
         setContent(
@@ -167,26 +168,26 @@ class ColumnScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    fun `scroll list to the bottom`() {
+    fun `scroll list to the end`() {
         if (itemCount == 0) return
 
         setContent()
         scrollbarScreen(composeRule) {
             scrollListToItem(testTag = itemTestTag(itemCount - 1))
-            assert { isThumbAtBottom() }
+            assert { isThumbAtRight() }
         }
     }
 
     @Test
-    fun `scroll list to the top`() {
+    fun `scroll list to the start`() {
         if (itemCount == 0) return
 
         setContent()
         scrollbarScreen(composeRule) {
             scrollListToItem(testTag = itemTestTag(itemCount - 1))
-            assert { isThumbAtBottom() }
+            assert { isThumbAtRight() }
             scrollListToItem(testTag = itemTestTag(0))
-            assert { isThumbAtTop() }
+            assert { isThumbAtLeft() }
         }
     }
 
@@ -204,7 +205,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         setContent(padding = 10.dp)
         scrollbarScreen(composeRule) {
             assert {
-                hasThumbHorizontalPadding(10.dp)
+                hasThumbVerticalPadding(10.dp)
             }
         }
     }
@@ -214,17 +215,17 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         setContent(thickness = 7.dp)
         scrollbarScreen(composeRule) {
             assert {
-                hasThumbHorizontalThickness(7.dp)
+                hasThumbVerticalThickness(7.dp)
             }
         }
     }
 
     @Test
-    fun `scrollbar thumb min height`() {
-        setContent(thumbMinHeight = 0.2f)
+    fun `scrollbar thumb min length`() {
+        setContent(thumbMinLength = 0.2f)
         scrollbarScreen(composeRule) {
             assert {
-                hasThumbMinHeightOrGreater(minValue = 0.2f)
+                hasThumbMinWidthOrGreater(minValue = 0.2f)
             }
         }
     }
@@ -235,16 +236,16 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
         setContent(
             selectionMode = ScrollbarSelectionMode.Disabled,
-            thumbMinHeight = 0.1f,
+            thumbMinLength = 0.1f,
         )
         scrollbarScreen(composeRule) {
-            assert { isThumbAtTop() }
-            moveThumbToBottom(startFrom = 0.05f)
-            assert { isThumbAtTop() }
-            moveThumbToBottom(startFrom = 0.5f)
-            assert { isThumbAtTop() }
-            moveThumbToBottom(startFrom = 0.95f)
-            assert { isThumbAtTop() }
+            assert { isThumbAtLeft() }
+            moveThumbToRight(startFrom = 0.05f)
+            assert { isThumbAtLeft() }
+            moveThumbToRight(startFrom = 0.5f)
+            assert { isThumbAtLeft() }
+            moveThumbToRight(startFrom = 0.95f)
+            assert { isThumbAtLeft() }
         }
     }
 
@@ -254,34 +255,34 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
         setContent(
             selectionMode = ScrollbarSelectionMode.Thumb,
-            thumbMinHeight = 0.1f,
+            thumbMinLength = 0.1f,
         )
         scrollbarScreen(composeRule) {
             assert {
-                isThumbAtTop()
-                hasThumbMinHeightOrGreater(0.1f)
+                isThumbAtLeft()
+                hasThumbMinWidthOrGreater(0.1f)
             }
-            moveThumbToBottom(startFrom = 0.05f)
-            assert { isThumbAtBottom() }
-            moveThumbToTop(startFrom = 0.95f)
-            assert { isThumbAtTop() }
+            moveThumbToRight(startFrom = 0.05f)
+            assert { isThumbAtRight() }
+            moveThumbToLeft(startFrom = 0.95f)
+            assert { isThumbAtLeft() }
 
             // Now try select outside thumb area
-            if (getThumbHeight() < 0.11f) {
-                moveThumbToBottom(startFrom = 0.2f)
-                assert { isThumbAtTop() }
-                moveThumbToBottom(startFrom = 0.6f)
-                assert { isThumbAtTop() }
-            } else if (getThumbHeight() < 0.4f) {
-                moveThumbToBottom(startFrom = 0.5f)
-                assert { isThumbAtTop() }
-                moveThumbToBottom(startFrom = 0.8f)
-                assert { isThumbAtTop() }
-            } else if (getThumbHeight() < 0.6f) {
-                moveThumbToBottom(startFrom = 0.7f)
-                assert { isThumbAtTop() }
-                moveThumbToBottom(startFrom = 0.8f)
-                assert { isThumbAtTop() }
+            if (getThumbWidth() < 0.11f) {
+                moveThumbToRight(startFrom = 0.2f)
+                assert { isThumbAtLeft() }
+                moveThumbToRight(startFrom = 0.6f)
+                assert { isThumbAtLeft() }
+            } else if (getThumbWidth() < 0.4f) {
+                moveThumbToRight(startFrom = 0.5f)
+                assert { isThumbAtLeft() }
+                moveThumbToRight(startFrom = 0.8f)
+                assert { isThumbAtLeft() }
+            } else if (getThumbWidth() < 0.6f) {
+                moveThumbToRight(startFrom = 0.7f)
+                assert { isThumbAtLeft() }
+                moveThumbToRight(startFrom = 0.8f)
+                assert { isThumbAtLeft() }
             }
         }
     }
@@ -292,16 +293,16 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
         setContent(
             selectionMode = ScrollbarSelectionMode.Full,
-            thumbMinHeight = 0.1f,
+            thumbMinLength = 0.1f,
         )
         scrollbarScreen(composeRule) {
-            assert { isThumbAtTop() }
-            moveThumbToBottom(startFrom = 0.05f)
-            assert { isThumbAtBottom() }
-            moveThumbToTop(startFrom = 0.5f)
-            assert { isThumbAtTop() }
-            moveThumbToBottom(startFrom = 0.95f)
-            assert { isThumbAtBottom() }
+            assert { isThumbAtLeft() }
+            moveThumbToRight(startFrom = 0.05f)
+            assert { isThumbAtRight() }
+            moveThumbToLeft(startFrom = 0.5f)
+            assert { isThumbAtLeft() }
+            moveThumbToRight(startFrom = 0.95f)
+            assert { isThumbAtRight() }
         }
     }
 
@@ -312,16 +313,16 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         setContent(
             selectionMode = ScrollbarSelectionMode.Full,
             selectionActionable = ScrollbarSelectionActionable.Always,
-            thumbMinHeight = 0.1f,
+            thumbMinLength = 0.1f,
         )
         scrollbarScreen(composeRule) {
-            assert { isThumbAtTop() }
-            moveThumbToBottom(startFrom = 0.05f)
-            assert { isThumbAtBottom() }
-            moveThumbToTop(startFrom = 0.5f)
-            assert { isThumbAtTop() }
-            moveThumbToBottom(startFrom = 0.95f)
-            assert { isThumbAtBottom() }
+            assert { isThumbAtLeft() }
+            moveThumbToRight(startFrom = 0.05f)
+            assert { isThumbAtRight() }
+            moveThumbToLeft(startFrom = 0.5f)
+            assert { isThumbAtLeft() }
+            moveThumbToRight(startFrom = 0.95f)
+            assert { isThumbAtRight() }
         }
     }
 
@@ -331,16 +332,16 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         setContent(
             selectionMode = ScrollbarSelectionMode.Full,
             selectionActionable = ScrollbarSelectionActionable.WhenVisible,
-            thumbMinHeight = 0.1f,
+            thumbMinLength = 0.1f,
         )
         scrollbarScreen(composeRule) {
-            assert { isThumbAtTop() }
-            moveThumbToBottom(startFrom = 0.05f)
-            assert { isThumbAtTop() }
-            moveThumbToTop(startFrom = 0.5f)
-            assert { isThumbAtTop() }
-            moveThumbToBottom(startFrom = 0.95f)
-            assert { isThumbAtBottom() }
+            assert { isThumbAtLeft() }
+            moveThumbToRight(startFrom = 0.05f)
+            assert { isThumbAtLeft() }
+            moveThumbToLeft(startFrom = 0.5f)
+            assert { isThumbAtLeft() }
+            moveThumbToRight(startFrom = 0.95f)
+            assert { isThumbAtRight() }
         }
     }
 
@@ -356,11 +357,11 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     private fun setContent(
         state: ScrollState = ScrollState(initial = 0),
-        rightSide: Boolean = true,
+        bottomSide: Boolean = true,
         alwaysShowScrollBar: Boolean = false,
         thickness: Dp = 6.dp,
         padding: Dp = 8.dp,
-        thumbMinHeight: Float = 0.1f,
+        thumbMinLength: Float = 0.1f,
         thumbColor: Color = Color(0xFF2A59B6),
         thumbSelectedColor: Color = Color(0xFF5281CA),
         thumbShape: Shape = CircleShape,
@@ -371,14 +372,14 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         listItemsCount: Int = itemCount
     ) {
         composeRule.setContent {
-            ColumnScrollbar(
+            RowScrollbar(
                 state = state,
-                rightSide = rightSide,
+                side = if (bottomSide) ScrollbarLayoutSide.End else ScrollbarLayoutSide.Start,
                 alwaysShowScrollBar = alwaysShowScrollBar,
                 thickness = thickness,
                 padding = padding,
                 enabled = enabled,
-                thumbMinHeight = thumbMinHeight,
+                thumbMinLength = thumbMinLength,
                 thumbColor = thumbColor,
                 thumbSelectedColor = thumbSelectedColor,
                 thumbShape = thumbShape,
@@ -386,7 +387,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
                 selectionMode = selectionMode,
                 selectionActionable = selectionActionable,
             ) {
-                Column(Modifier.verticalScroll(state = state)) {
+                Row(Modifier.verticalScroll(state = state)) {
                     repeat(listItemsCount) {
                         Text(
                             text = "Item $it",
