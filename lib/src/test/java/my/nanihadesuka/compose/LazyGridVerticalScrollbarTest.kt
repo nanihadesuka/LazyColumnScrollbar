@@ -61,7 +61,7 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
     fun `scrollbar is at right side`() {
         setContent(rightSide = true)
         scrollbarScreen(composeRule) {
-            assert { isAtRightSide() }
+            assert { isScrollbarAtRightSide() }
         }
     }
 
@@ -69,7 +69,7 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
     fun `scrollbar is at left side`() {
         setContent(rightSide = false)
         scrollbarScreen(composeRule) {
-            assert { isAtLeftSide() }
+            assert { isScrollbarAtLeftSide() }
         }
     }
 
@@ -78,7 +78,7 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
         setContent(rightSide = true, indicatorContent = { value, _ -> IndicatorContent(value) })
         scrollbarScreen(composeRule) {
             assert {
-                isAtRightSide(indicatorVisible = true)
+                isScrollbarAtRightSide(indicatorVisible = true)
             }
         }
     }
@@ -88,7 +88,7 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
         setContent(rightSide = false, indicatorContent = { value, _ -> IndicatorContent(value) })
         scrollbarScreen(composeRule) {
             assert {
-                isAtLeftSide(indicatorVisible = true)
+                isScrollbarAtLeftSide(indicatorVisible = true)
             }
         }
     }
@@ -99,9 +99,9 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
 
         setContent(reverseLayout = true)
         scrollbarScreen(composeRule) {
-            moveScrollbarToTop()
+            moveThumbToTop()
             assert {
-                isAtTop()
+                isThumbAtTop()
                 isItemVisible(itemTag = itemTestTag(itemCount - 1))
             }
         }
@@ -113,9 +113,9 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
 
         setContent(reverseLayout = true)
         scrollbarScreen(composeRule) {
-            moveScrollbarToBottom()
+            moveThumbToBottom()
             assert {
-                isAtBottom()
+                isThumbAtBottom()
                 isItemVisible(itemTag = itemTestTag(0))
             }
         }
@@ -127,11 +127,11 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
 
         setContent()
         scrollbarScreen(composeRule) {
-            moveScrollbarToBottom()
-            assert { isAtBottom() }
-            moveScrollbarToTop()
+            moveThumbToBottom()
+            assert { isThumbAtBottom() }
+            moveThumbToTop()
             assert {
-                isAtTop()
+                isThumbAtTop()
                 isItemVisible(itemTag = itemTestTag(0))
             }
         }
@@ -143,11 +143,11 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
 
         setContent()
         scrollbarScreen(composeRule) {
-            moveScrollbarToTop()
-            assert { isAtTop() }
-            moveScrollbarToBottom()
+            moveThumbToTop()
+            assert { isThumbAtTop() }
+            moveThumbToBottom()
             assert {
-                isAtBottom()
+                isThumbAtBottom()
                 isItemVisible(itemTag = itemTestTag(itemCount - 1))
             }
         }
@@ -159,8 +159,8 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
 
         setContent(indicatorContent = { value, _ -> IndicatorContent(value) })
         scrollbarScreen(composeRule) {
-            moveScrollbarToBottom(startFrom = 0.05f)
-            assert { isAtBottom(indicatorVisible = true) }
+            moveThumbToBottom(startFrom = 0.05f)
+            assert { isThumbAtBottom(indicatorVisible = true) }
         }
     }
 
@@ -170,10 +170,10 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
 
         setContent(indicatorContent = { value, _ -> IndicatorContent(value) })
         scrollbarScreen(composeRule) {
-            moveScrollbarToBottom()
-            assert { isAtBottom(indicatorVisible = true) }
-            moveScrollbarToTop()
-            assert { isAtTop(indicatorVisible = true) }
+            moveThumbToBottom()
+            assert { isThumbAtBottom(indicatorVisible = true) }
+            moveThumbToTop()
+            assert { isThumbAtTop(indicatorVisible = true) }
         }
     }
 
@@ -187,7 +187,7 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
 
         scrollbarScreen(composeRule) {
             // not visible without scrolling
-            assert { isItemHidden(TestTagsScrollbar.scrollbar) }
+            assert { isItemHidden(TestTagsScrollbar.scrollbarThumb) }
         }
     }
 
@@ -201,7 +201,7 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
 
         scrollbarScreen(composeRule) {
             // always visible without scrolling
-            assert { isItemVisible(TestTagsScrollbar.scrollbar) }
+            assert { isItemVisible(TestTagsScrollbar.scrollbarThumb) }
         }
     }
 
@@ -212,7 +212,7 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
         setContent()
         scrollbarScreen(composeRule) {
             scrollListToItem(testTag = itemTestTag(itemCount - 1))
-            assert { isAtBottom() }
+            assert { isThumbAtBottom() }
         }
     }
 
@@ -223,9 +223,9 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
         setContent()
         scrollbarScreen(composeRule) {
             scrollListToItem(testTag = itemTestTag(itemCount - 1))
-            assert { isAtBottom() }
+            assert { isThumbAtBottom() }
             scrollListToItem(testTag = itemTestTag(0))
-            assert { isAtTop() }
+            assert { isThumbAtTop() }
         }
     }
 
@@ -236,9 +236,9 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
         setContent(reverseLayout = true)
         scrollbarScreen(composeRule) {
             scrollListToItem(testTag = itemTestTag(itemCount - 1))
-            assert { isAtTop() }
+            assert { isThumbAtTop() }
             scrollListToItem(testTag = itemTestTag(0))
-            assert { isAtBottom() }
+            assert { isThumbAtBottom() }
         }
     }
 
@@ -249,7 +249,7 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
         setContent(reverseLayout = true)
         scrollbarScreen(composeRule) {
             scrollListToItem(testTag = itemTestTag(itemCount - 1))
-            assert { isAtTop() }
+            assert { isThumbAtTop() }
         }
     }
 
@@ -267,7 +267,7 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
         setContent(padding = 10.dp)
         scrollbarScreen(composeRule) {
             assert {
-                hasScrollbarPadding(10.dp)
+                hasThumbHorizontalPadding(10.dp)
             }
         }
     }
@@ -277,7 +277,7 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
         setContent(thickness = 7.dp)
         scrollbarScreen(composeRule) {
             assert {
-                hasScrollbarThickness(7.dp)
+                hasThumbHorizontalThickness(7.dp)
             }
         }
     }
@@ -301,13 +301,13 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
             thumbMinHeight = 0.1f,
         )
         scrollbarScreen(composeRule) {
-            assert { isAtTop() }
-            moveScrollbarToBottom(startFrom = 0.05f)
-            assert { isAtTop() }
-            moveScrollbarToBottom(startFrom = 0.5f)
-            assert { isAtTop() }
-            moveScrollbarToBottom(startFrom = 0.95f)
-            assert { isAtTop() }
+            assert { isThumbAtTop() }
+            moveThumbToBottom(startFrom = 0.05f)
+            assert { isThumbAtTop() }
+            moveThumbToBottom(startFrom = 0.5f)
+            assert { isThumbAtTop() }
+            moveThumbToBottom(startFrom = 0.95f)
+            assert { isThumbAtTop() }
         }
     }
 
@@ -321,30 +321,30 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
         )
         scrollbarScreen(composeRule) {
             assert {
-                isAtTop()
+                isThumbAtTop()
                 hasThumbMinHeightOrGreater(0.1f)
             }
-            moveScrollbarToBottom(startFrom = 0.05f)
-            assert { isAtBottom() }
-            moveScrollbarToTop(startFrom = 0.95f)
-            assert { isAtTop() }
+            moveThumbToBottom(startFrom = 0.05f)
+            assert { isThumbAtBottom() }
+            moveThumbToTop(startFrom = 0.95f)
+            assert { isThumbAtTop() }
 
             // Now try select outside thumb area
             if (getThumbHeight() < 0.11f) {
-                moveScrollbarToBottom(startFrom = 0.2f)
-                assert { isAtTop() }
-                moveScrollbarToBottom(startFrom = 0.6f)
-                assert { isAtTop() }
+                moveThumbToBottom(startFrom = 0.2f)
+                assert { isThumbAtTop() }
+                moveThumbToBottom(startFrom = 0.6f)
+                assert { isThumbAtTop() }
             } else if (getThumbHeight() < 0.4f) {
-                moveScrollbarToBottom(startFrom = 0.5f)
-                assert { isAtTop() }
-                moveScrollbarToBottom(startFrom = 0.8f)
-                assert { isAtTop() }
+                moveThumbToBottom(startFrom = 0.5f)
+                assert { isThumbAtTop() }
+                moveThumbToBottom(startFrom = 0.8f)
+                assert { isThumbAtTop() }
             } else if (getThumbHeight() < 0.6f) {
-                moveScrollbarToBottom(startFrom = 0.7f)
-                assert { isAtTop() }
-                moveScrollbarToBottom(startFrom = 0.8f)
-                assert { isAtTop() }
+                moveThumbToBottom(startFrom = 0.7f)
+                assert { isThumbAtTop() }
+                moveThumbToBottom(startFrom = 0.8f)
+                assert { isThumbAtTop() }
             }
         }
     }
@@ -358,13 +358,13 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
             thumbMinHeight = 0.1f,
         )
         scrollbarScreen(composeRule) {
-            assert { isAtTop() }
-            moveScrollbarToBottom(startFrom = 0.05f)
-            assert { isAtBottom() }
-            moveScrollbarToTop(startFrom = 0.5f)
-            assert { isAtTop() }
-            moveScrollbarToBottom(startFrom = 0.95f)
-            assert { isAtBottom() }
+            assert { isThumbAtTop() }
+            moveThumbToBottom(startFrom = 0.05f)
+            assert { isThumbAtBottom() }
+            moveThumbToTop(startFrom = 0.5f)
+            assert { isThumbAtTop() }
+            moveThumbToBottom(startFrom = 0.95f)
+            assert { isThumbAtBottom() }
         }
     }
 
@@ -378,13 +378,13 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
             thumbMinHeight = 0.1f,
         )
         scrollbarScreen(composeRule) {
-            assert { isAtTop() }
-            moveScrollbarToBottom(startFrom = 0.05f)
-            assert { isAtBottom() }
-            moveScrollbarToTop(startFrom = 0.5f)
-            assert { isAtTop() }
-            moveScrollbarToBottom(startFrom = 0.95f)
-            assert { isAtBottom() }
+            assert { isThumbAtTop() }
+            moveThumbToBottom(startFrom = 0.05f)
+            assert { isThumbAtBottom() }
+            moveThumbToTop(startFrom = 0.5f)
+            assert { isThumbAtTop() }
+            moveThumbToBottom(startFrom = 0.95f)
+            assert { isThumbAtBottom() }
         }
     }
 
@@ -397,13 +397,13 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
             thumbMinHeight = 0.1f,
         )
         scrollbarScreen(composeRule) {
-            assert { isAtTop() }
-            moveScrollbarToBottom(startFrom = 0.05f)
-            assert { isAtTop() }
-            moveScrollbarToTop(startFrom = 0.5f)
-            assert { isAtTop() }
-            moveScrollbarToBottom(startFrom = 0.95f)
-            assert { isAtBottom() }
+            assert { isThumbAtTop() }
+            moveThumbToBottom(startFrom = 0.05f)
+            assert { isThumbAtTop() }
+            moveThumbToTop(startFrom = 0.5f)
+            assert { isThumbAtTop() }
+            moveThumbToBottom(startFrom = 0.95f)
+            assert { isThumbAtBottom() }
         }
     }
 

@@ -15,7 +15,7 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
     /**
      * @param startFrom 0f is top 1f is bottom
      */
-    fun moveScrollbarToTop(startFrom: Float = 1f) = composeRule
+    fun moveThumbToTop(startFrom: Float = 1f) = composeRule
         .onNodeWithTag(TestTagsScrollbar.scrollbarContainer)
         .performTouchInput {
             swipeUp(startY = top * (1f - startFrom) + bottom * startFrom)
@@ -24,10 +24,28 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
     /**
      * @param startFrom 0f is top 1f is bottom
      */
-    fun moveScrollbarToBottom(startFrom: Float = 0f) = composeRule
+    fun moveThumbToBottom(startFrom: Float = 0f) = composeRule
         .onNodeWithTag(TestTagsScrollbar.scrollbarContainer)
         .performTouchInput {
             swipeDown(startY = top * (1f - startFrom) + bottom * startFrom)
+        }
+
+    /**
+     * @param startFrom 0f is left 1f is right
+     */
+    fun moveThumbToRight(startFrom: Float = 0f) = composeRule
+        .onNodeWithTag(TestTagsScrollbar.scrollbarContainer)
+        .performTouchInput {
+            swipeRight(startX = left * (1f - startFrom) + right * startFrom)
+        }
+
+    /**
+     * @param startFrom 0f is left 1f is right
+     */
+    fun moveThumbToLeft(startFrom: Float = 0f) = composeRule
+        .onNodeWithTag(TestTagsScrollbar.scrollbarContainer)
+        .performTouchInput {
+            swipeLeft(startX = left * (1f - startFrom) + right * startFrom)
         }
 
     fun scrollListToItem(testTag: String) = composeRule
@@ -37,14 +55,19 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
     /**
      * Normalized thumb height compared against parent container
      */
-    fun getThumbHeight() = scrollbarBounds.height.value / scrollbarContainerBounds.height.value
+    fun getThumbHeight() = thumbBounds.height.value / scrollbarContainerBounds.height.value
+
+    /**
+     * Normalized thumb height compared against parent container
+     */
+    fun getThumbWidth() = thumbBounds.width.value / scrollbarContainerBounds.width.value
 
     /**
      * Normalized thumb bottom position compared against parent container top
      */
     fun getThumbBottomPosition(): Float {
         val base = scrollbarContainerBounds.top.value
-        return (scrollbarBounds.bottom.value - base) / scrollbarContainerBounds.height.value
+        return (thumbBounds.bottom.value - base) / scrollbarContainerBounds.height.value
     }
 
     fun assert(assertions: Assertions.() -> Unit) = Assertions().apply(assertions)
@@ -67,22 +90,35 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
             .onNodeWithTag(TestTagsScrollbar.scrollbarIndicator)
             .assertDoesNotExist()
 
-        fun isAtTop(indicatorVisible: Boolean = false) {
-            assertEqualWithTolerance(scrollbarBounds.top, scrollbarContainerBounds.top)
+        fun isThumbAtTop(indicatorVisible: Boolean = false) {
+            assertEqualWithTolerance(thumbBounds.top, scrollbarContainerBounds.top)
             if (indicatorVisible) {
                 indicatorExist()
                 assertEqualWithTolerance(
                     indicatorBounds.verticalCenter,
-                    scrollbarBounds.verticalCenter
+                    thumbBounds.verticalCenter
                 )
             } else {
                 indicatorNotExist()
             }
         }
 
-        fun isAtBottom(indicatorVisible: Boolean = false) {
+        fun isThumbAtLeft(indicatorVisible: Boolean = false) {
+            assertEqualWithTolerance(thumbBounds.left, scrollbarContainerBounds.left)
+            if (indicatorVisible) {
+                indicatorExist()
+                assertEqualWithTolerance(
+                    indicatorBounds.horizontalCenter,
+                    thumbBounds.horizontalCenter
+                )
+            } else {
+                indicatorNotExist()
+            }
+        }
+
+        fun isThumbAtBottom(indicatorVisible: Boolean = false) {
             assertEqualWithTolerance(
-                scrollbarBounds.bottom,
+                thumbBounds.bottom,
                 scrollbarContainerBounds.bottom,
                 tolerance = 15.dp
             )
@@ -90,7 +126,24 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
                 indicatorExist()
                 assertEqualWithTolerance(
                     indicatorBounds.verticalCenter,
-                    scrollbarBounds.verticalCenter
+                    thumbBounds.verticalCenter
+                )
+            } else {
+                indicatorNotExist()
+            }
+        }
+
+        fun isThumbAtRight(indicatorVisible: Boolean = false) {
+            assertEqualWithTolerance(
+                thumbBounds.right,
+                scrollbarContainerBounds.right,
+                tolerance = 15.dp
+            )
+            if (indicatorVisible) {
+                indicatorExist()
+                assertEqualWithTolerance(
+                    indicatorBounds.horizontalCenter,
+                    thumbBounds.horizontalCenter
                 )
             } else {
                 indicatorNotExist()
@@ -109,23 +162,25 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
                 .assertIsNotDisplayed()
         }
 
-        fun isAtLeftSide(indicatorVisible: Boolean = false) {
-            assertEqualWithTolerance(scrollbarBounds.left, 0.dp)
-            if (indicatorVisible) {
-                indicatorExist()
-                assertEqualWithTolerance(indicatorBounds.left, scrollbarBounds.right)
-            } else {
-                indicatorNotExist()
-            }
+        fun hasThumbHorizontalThickness(value: Dp) {
+            assertEqualWithTolerance(thumbBounds.width, value, tolerance = 0.1.dp)
         }
 
-        fun hasScrollbarThickness(value: Dp) {
-            assertEqualWithTolerance(scrollbarBounds.width, value, tolerance = 0.1.dp)
+        fun hasThumbVerticalThickness(value: Dp) {
+            assertEqualWithTolerance(thumbBounds.height, value, tolerance = 0.1.dp)
         }
 
-        fun hasScrollbarPadding(value: Dp) {
+        fun hasThumbHorizontalPadding(value: Dp) {
             assertEqualWithTolerance(
-                (scrollbarContainerBounds.width - scrollbarBounds.width) / 2,
+                (scrollbarContainerBounds.width - thumbBounds.width) / 2,
+                value,
+                tolerance = 0.1.dp
+            )
+        }
+
+        fun hasThumbVerticalPadding(value: Dp) {
+            assertEqualWithTolerance(
+                (scrollbarContainerBounds.height - thumbBounds.height) / 2,
                 value,
                 tolerance = 0.1.dp
             )
@@ -133,23 +188,59 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
 
         fun hasThumbMinHeightOrGreater(minValue: Float) {
             assertEqualOrGreater(
-                scrollbarBounds.height.value / scrollbarContainerBounds.height.value,
+                thumbBounds.height.value / scrollbarContainerBounds.height.value,
                 minValue,
                 tolerance = 0.01f
             )
         }
 
-        fun isAtRightSide(indicatorVisible: Boolean = false) {
-            assertEqualWithTolerance(scrollbarBounds.right, scrollbarContainerBounds.right)
+        fun hasThumbMinWidthOrGreater(minValue: Float) {
+            assertEqualOrGreater(
+                thumbBounds.width.value / scrollbarContainerBounds.width.value,
+                minValue,
+                tolerance = 0.01f
+            )
+        }
+
+        fun isScrollbarAtLeftSide(indicatorVisible: Boolean = false) {
+            assertEqualWithTolerance(thumbBounds.left, 0.dp)
             if (indicatorVisible) {
                 indicatorExist()
-                assertEqualWithTolerance(indicatorBounds.right, scrollbarBounds.left)
+                assertEqualWithTolerance(indicatorBounds.left, thumbBounds.right)
             } else {
                 indicatorNotExist()
             }
         }
 
+        fun isScrollbarAtRightSide(indicatorVisible: Boolean = false) {
+            assertEqualWithTolerance(thumbBounds.right, scrollbarContainerBounds.right)
+            if (indicatorVisible) {
+                indicatorExist()
+                assertEqualWithTolerance(indicatorBounds.right, thumbBounds.left)
+            } else {
+                indicatorNotExist()
+            }
+        }
 
+        fun isScrollbarAtTopSide(indicatorVisible: Boolean = false) {
+            assertEqualWithTolerance(thumbBounds.top, 0.dp)
+            if (indicatorVisible) {
+                indicatorExist()
+                assertEqualWithTolerance(indicatorBounds.top, thumbBounds.bottom)
+            } else {
+                indicatorNotExist()
+            }
+        }
+
+        fun isScrollbarAtBottomSide(indicatorVisible: Boolean = false) {
+            assertEqualWithTolerance(thumbBounds.bottom, scrollbarContainerBounds.bottom)
+            if (indicatorVisible) {
+                indicatorExist()
+                assertEqualWithTolerance(indicatorBounds.bottom, thumbBounds.top)
+            } else {
+                indicatorNotExist()
+            }
+        }
     }
 
     private val indicatorBounds
@@ -157,9 +248,9 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
             .onNodeWithTag(TestTagsScrollbar.scrollbarIndicator)
             .getUnclippedBoundsInRoot()
 
-    private val scrollbarBounds
+    private val thumbBounds
         get() = composeRule
-            .onNodeWithTag(TestTagsScrollbar.scrollbar)
+            .onNodeWithTag(TestTagsScrollbar.scrollbarThumb)
             .getUnclippedBoundsInRoot()
 
     private val scrollbarContainerBounds
@@ -170,6 +261,7 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
 
 
 private val DpRect.verticalCenter: Dp get() = (bottom + top) / 2
+private val DpRect.horizontalCenter: Dp get() = (right + left) / 2
 
 private fun assertEqualWithTolerance(valueA: Dp, valueB: Dp, tolerance: Dp = 15.dp) {
     assert((valueA - valueB).value.absoluteValue <= tolerance.value) {

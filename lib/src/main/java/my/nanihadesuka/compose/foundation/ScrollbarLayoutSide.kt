@@ -1,5 +1,13 @@
 package my.nanihadesuka.compose.foundation
 
-internal enum class ScrollbarLayoutSide {
-    Start, End
+enum class ScrollbarLayoutSide {
+    /**
+     * Left or top side
+     */
+    Start,
+
+    /**
+     * Right or bottom side
+     */
+    End
 }

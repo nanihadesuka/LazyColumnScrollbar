@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +23,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -41,8 +42,10 @@ import androidx.compose.ui.unit.dp
 import my.nanihadesuka.compose.ColumnScrollbar
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.LazyGridVerticalScrollbar
+import my.nanihadesuka.compose.RowScrollbar
 import my.nanihadesuka.compose.ScrollbarSelectionActionable
 import my.nanihadesuka.compose.ScrollbarSelectionMode
+import my.nanihadesuka.compose.foundation.ScrollbarLayoutSide
 import my.nanihadesuka.lazycolumnscrollbar.ui.theme.LazyColumnScrollbarTheme
 
 class MainActivity : ComponentActivity() {
@@ -53,7 +56,7 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class TypeTab {
-    LazyColumn, Column, LazyGrid
+    LazyColumn, Column, LazyGrid, Row
 }
 
 @Preview(showBackground = true)
@@ -61,41 +64,24 @@ enum class TypeTab {
 fun MainView() {
     LazyColumnScrollbarTheme {
         Surface(color = MaterialTheme.colors.background) {
-            val tab = rememberSaveable { mutableStateOf(TypeTab.LazyGrid) }
+            val tab = rememberSaveable { mutableStateOf(TypeTab.Column) }
             Column {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        text = TypeTab.LazyColumn.name,
-                        Modifier
-                            .selectable(
-                                selected = tab.value == TypeTab.LazyColumn,
-                                onClick = { tab.value = TypeTab.LazyColumn },
-                            )
-                            .padding(12.dp)
-                    )
-                    Text(
-                        text = TypeTab.Column.name,
-                        Modifier
-                            .selectable(
-                                selected = tab.value == TypeTab.Column,
-                                onClick = { tab.value = TypeTab.Column },
-                            )
-                            .padding(12.dp)
-                    )
-                    Text(
-                        text = TypeTab.LazyGrid.name,
-                        Modifier
-                            .selectable(
-                                selected = tab.value == TypeTab.LazyGrid,
-                                onClick = { tab.value = TypeTab.LazyGrid },
-                            )
-                            .padding(12.dp)
-                    )
+                Row {
+                    for (type in TypeTab.entries) {
+                        Text(
+                            text = type.name,
+                            Modifier
+                                .background(MaterialTheme.colors.surface, RoundedCornerShape(3.dp))
+                                .clickable { tab.value = type }
+                                .padding(18.dp)
+                        )
+                    }
                 }
 
                 when (tab.value) {
-                    TypeTab.LazyColumn -> LazyColumnView()
                     TypeTab.Column -> ColumnView()
+                    TypeTab.Row -> RowView()
+                    TypeTab.LazyColumn -> LazyColumnView()
                     TypeTab.LazyGrid -> LazyGridView()
                 }
             }
@@ -227,7 +213,7 @@ fun ColumnView() {
             indicatorContent = indicatorContent,
             selectionMode = ScrollbarSelectionMode.Thumb,
             selectionActionable = ScrollbarSelectionActionable.WhenVisible,
-            alwaysShowScrollBar = false,
+            alwaysShowScrollBar = true,
             rightSide = false
         ) {
             Column(
@@ -239,6 +225,46 @@ fun ColumnView() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RowView() {
+    val listData = (0..100).toList()
+    val listState = rememberScrollState()
+    val indicatorContent = @Composable { normalizedOffset: Float, isThumbSelected: Boolean ->
+        Indicator(
+            text = "i: ${"%.2f".format(normalizedOffset)}",
+            isThumbSelected = isThumbSelected
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .padding(12.dp)
+            .border(width = 1.dp, MaterialTheme.colors.primary)
+    ) {
+        RowScrollbar(
+            state = listState,
+            indicatorContent = indicatorContent,
+            selectionMode = ScrollbarSelectionMode.Thumb,
+            selectionActionable = ScrollbarSelectionActionable.WhenVisible,
+            alwaysShowScrollBar = false,
+            side = ScrollbarLayoutSide.End,
+        ) {
+            Row(
+                modifier = Modifier.horizontalScroll(listState)
+            ) {
+                for (it in listData) {
+                    Text(
+                        text = "Item $it",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp)
                     )
                 }
             }
