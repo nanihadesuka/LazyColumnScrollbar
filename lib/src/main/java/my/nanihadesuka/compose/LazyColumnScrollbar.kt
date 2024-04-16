@@ -15,27 +15,23 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import my.nanihadesuka.compose.foundation.ScrollbarLayoutSettings
-import my.nanihadesuka.compose.foundation.ScrollbarLayoutSide
 import my.nanihadesuka.compose.foundation.VerticalScrollbarLayout
 import my.nanihadesuka.compose.foundation.rememberLazyListStateController
 
 /**
- * Scrollbar for LazyColumn
- *
- * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
  * @param padding Padding of the scrollbar
- * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
+ * @param thumbMinLength Thumb minimum length proportional to total scrollbar's length (eg: 0.1 -> 10% of total)
  */
 @Composable
 fun LazyColumnScrollbar(
     listState: LazyListState,
     modifier: Modifier = Modifier,
-    rightSide: Boolean = true,
+    side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
     alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
-    thumbMinHeight: Float = 0.1f,
+    thumbMinLength: Float = 0.1f,
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
@@ -52,11 +48,11 @@ fun LazyColumnScrollbar(
         InternalLazyColumnScrollbar(
             state = listState,
             modifier = Modifier,
-            side = if (rightSide) ScrollbarLayoutSide.End else ScrollbarLayoutSide.Start,
+            side = side,
             alwaysShowScrollBar = alwaysShowScrollBar,
             thickness = thickness,
             padding = padding,
-            thumbMinHeight = thumbMinHeight,
+            thumbMinLength = thumbMinLength,
             thumbColor = thumbColor,
             thumbSelectedColor = thumbSelectedColor,
             selectionActionable = selectionActionable,
@@ -74,7 +70,7 @@ fun LazyColumnScrollbar(
  *
  * @param thickness Thickness of the scrollbar thumb
  * @param padding Padding of the scrollbar
- * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
+ * @param thumbMinLength Thumb minimum length proportional to total scrollbar's length (eg: 0.1 -> 10% of total)
  */
 @Composable
 fun InternalLazyColumnScrollbar(
@@ -84,7 +80,7 @@ fun InternalLazyColumnScrollbar(
     alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
-    thumbMinHeight: Float = 0.1f,
+    thumbMinLength: Float = 0.1f,
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
@@ -95,7 +91,7 @@ fun InternalLazyColumnScrollbar(
 ) {
     val controller = rememberLazyListStateController(
         state = state,
-        thumbMinLength = thumbMinHeight,
+        thumbMinLength = thumbMinLength,
         alwaysShowScrollBar = alwaysShowScrollBar,
         selectionMode = selectionMode
     )
@@ -103,7 +99,7 @@ fun InternalLazyColumnScrollbar(
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth()
     ) {
-        val maxHeightFloat = constraints.maxHeight.toFloat()
+        val maxLengthFloat = constraints.maxHeight.toFloat()
         VerticalScrollbarLayout(
             thumbSizeNormalized = controller.normalizedThumbSize.value,
             thumbOffsetNormalized = controller.normalizedOffsetPosition.value,
@@ -123,13 +119,13 @@ fun InternalLazyColumnScrollbar(
             },
             draggableModifier = Modifier.draggable(
                 state = rememberDraggableState { delta ->
-                    controller.onDraggableState(delta = delta, maxLength = maxHeightFloat)
+                    controller.onDraggableState(delta = delta, maxLength = maxLengthFloat)
                 },
                 orientation = Orientation.Vertical,
                 enabled = selectionMode != ScrollbarSelectionMode.Disabled,
                 startDragImmediately = true,
                 onDragStarted = onDragStarted@{ offset ->
-                    controller.onDragStarted(offsetPixels = offset.y, maxLength = maxHeightFloat)
+                    controller.onDragStarted(offsetPixels = offset.y, maxLength = maxLengthFloat)
                 },
                 onDragStopped = {
                     controller.onDragStopped()

@@ -56,7 +56,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at right side`() {
-        setContent(rightSide = true)
+        setContent(side = ScrollbarLayoutSide.End)
         scrollbarScreen(composeRule) {
             assert { isScrollbarAtRightSide() }
         }
@@ -64,7 +64,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at left side`() {
-        setContent(rightSide = false)
+        setContent(side = ScrollbarLayoutSide.Start)
         scrollbarScreen(composeRule) {
             assert { isScrollbarAtLeftSide() }
         }
@@ -72,7 +72,10 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at right side - with indicator`() {
-        setContent(rightSide = true, indicatorContent = { value, _ -> IndicatorContent(value) })
+        setContent(
+            side = ScrollbarLayoutSide.End,
+            indicatorContent = { value, _ -> IndicatorContent(value) }
+        )
         scrollbarScreen(composeRule) {
             assert {
                 isScrollbarAtRightSide(indicatorVisible = true)
@@ -82,7 +85,10 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at left side - with indicator`() {
-        setContent(rightSide = false, indicatorContent = { value, _ -> IndicatorContent(value) })
+        setContent(
+            side = ScrollbarLayoutSide.Start,
+            indicatorContent = { value, _ -> IndicatorContent(value) }
+        )
         scrollbarScreen(composeRule) {
             assert {
                 isScrollbarAtLeftSide(indicatorVisible = true)
@@ -356,7 +362,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     private fun setContent(
         state: ScrollState = ScrollState(initial = 0),
-        rightSide: Boolean = true,
+        side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
         alwaysShowScrollBar: Boolean = false,
         thickness: Dp = 6.dp,
         padding: Dp = 8.dp,
@@ -373,7 +379,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         composeRule.setContent {
             ColumnScrollbar(
                 state = state,
-                rightSide = rightSide,
+                side = side,
                 alwaysShowScrollBar = alwaysShowScrollBar,
                 thickness = thickness,
                 padding = padding,

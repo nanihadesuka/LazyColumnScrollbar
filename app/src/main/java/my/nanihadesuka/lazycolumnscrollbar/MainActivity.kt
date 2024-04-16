@@ -45,7 +45,7 @@ import my.nanihadesuka.compose.LazyGridVerticalScrollbar
 import my.nanihadesuka.compose.RowScrollbar
 import my.nanihadesuka.compose.ScrollbarSelectionActionable
 import my.nanihadesuka.compose.ScrollbarSelectionMode
-import my.nanihadesuka.compose.foundation.ScrollbarLayoutSide
+import my.nanihadesuka.compose.ScrollbarLayoutSide
 import my.nanihadesuka.lazycolumnscrollbar.ui.theme.LazyColumnScrollbarTheme
 
 class MainActivity : ComponentActivity() {
@@ -214,7 +214,7 @@ fun ColumnView() {
             selectionMode = ScrollbarSelectionMode.Thumb,
             selectionActionable = ScrollbarSelectionActionable.WhenVisible,
             alwaysShowScrollBar = true,
-            rightSide = false
+            side = ScrollbarLayoutSide.Start,
         ) {
             Column(
                 modifier = Modifier.verticalScroll(listState)

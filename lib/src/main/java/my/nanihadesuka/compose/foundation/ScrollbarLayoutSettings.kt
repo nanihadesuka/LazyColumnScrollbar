@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
+import my.nanihadesuka.compose.ScrollbarLayoutSide
 import my.nanihadesuka.compose.ScrollbarSelectionActionable
 
 @Stable

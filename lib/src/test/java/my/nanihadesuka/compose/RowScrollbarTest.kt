@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import my.nanihadesuka.compose.foundation.ScrollbarLayoutSide
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,7 +56,7 @@ class RowScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at bottom side`() {
-        setContent(bottomSide = true)
+        setContent(side = ScrollbarLayoutSide.End)
         scrollbarScreen(composeRule) {
             assert { isScrollbarAtBottomSide() }
         }
@@ -65,7 +64,7 @@ class RowScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at top side`() {
-        setContent(bottomSide = false)
+        setContent(side = ScrollbarLayoutSide.Start)
         scrollbarScreen(composeRule) {
             assert { isScrollbarAtTopSide() }
         }
@@ -73,7 +72,10 @@ class RowScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at bottom side - with indicator`() {
-        setContent(bottomSide = true, indicatorContent = { value, _ -> IndicatorContent(value) })
+        setContent(
+            side = ScrollbarLayoutSide.End,
+            indicatorContent = { value, _ -> IndicatorContent(value) }
+        )
         scrollbarScreen(composeRule) {
             assert {
                 isScrollbarAtBottomSide(indicatorVisible = true)
@@ -83,7 +85,10 @@ class RowScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at top side - with indicator`() {
-        setContent(bottomSide = false, indicatorContent = { value, _ -> IndicatorContent(value) })
+        setContent(
+            side = ScrollbarLayoutSide.Start,
+            indicatorContent = { value, _ -> IndicatorContent(value) }
+        )
         scrollbarScreen(composeRule) {
             assert {
                 isScrollbarAtTopSide(indicatorVisible = true)
@@ -357,7 +362,7 @@ class RowScrollbarTest(private val itemCount: Int) {
 
     private fun setContent(
         state: ScrollState = ScrollState(initial = 0),
-        bottomSide: Boolean = true,
+        side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
         alwaysShowScrollBar: Boolean = false,
         thickness: Dp = 6.dp,
         padding: Dp = 8.dp,
@@ -374,7 +379,7 @@ class RowScrollbarTest(private val itemCount: Int) {
         composeRule.setContent {
             RowScrollbar(
                 state = state,
-                side = if (bottomSide) ScrollbarLayoutSide.End else ScrollbarLayoutSide.Start,
+                side = side,
                 alwaysShowScrollBar = alwaysShowScrollBar,
                 thickness = thickness,
                 padding = padding,

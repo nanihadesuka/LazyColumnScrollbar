@@ -15,14 +15,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import my.nanihadesuka.compose.foundation.ScrollbarLayoutSettings
-import my.nanihadesuka.compose.foundation.ScrollbarLayoutSide
 import my.nanihadesuka.compose.foundation.VerticalScrollbarLayout
 import my.nanihadesuka.compose.foundation.rememberScrollStateController
 
 /**
- * Scrollbar for Column
- *
- * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
  * @param padding   Padding of the scrollbar
  * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
@@ -31,7 +27,7 @@ import my.nanihadesuka.compose.foundation.rememberScrollStateController
 fun ColumnScrollbar(
     state: ScrollState,
     modifier: Modifier = Modifier,
-    rightSide: Boolean = true,
+    side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
     alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
@@ -52,7 +48,7 @@ fun ColumnScrollbar(
         InternalColumnScrollbar(
             state = state,
             modifier = Modifier,
-            rightSide = rightSide,
+            side = side,
             alwaysShowScrollBar = alwaysShowScrollBar,
             thickness = thickness,
             padding = padding,
@@ -73,7 +69,6 @@ fun ColumnScrollbar(
  * Scrollbar for Column
  * Use this variation if you want to place the scrollbar independently of the Column position
  *
- * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
  * @param padding   Padding of the scrollbar
  * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
@@ -83,7 +78,7 @@ fun ColumnScrollbar(
 fun InternalColumnScrollbar(
     state: ScrollState,
     modifier: Modifier = Modifier,
-    rightSide: Boolean = true,
+    side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
     alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
@@ -120,7 +115,7 @@ fun InternalColumnScrollbar(
                 thumbShape = thumbShape,
                 thumbThickness = thickness,
                 thumbColor = if (controller.isSelected.value) thumbSelectedColor else thumbColor,
-                side = if (rightSide) ScrollbarLayoutSide.End else ScrollbarLayoutSide.Start,
+                side = side,
                 selectionActionable = selectionActionable,
             ),
             indicator = indicatorContent?.let {

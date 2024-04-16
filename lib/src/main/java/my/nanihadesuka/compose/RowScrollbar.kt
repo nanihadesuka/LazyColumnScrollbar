@@ -15,12 +15,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import my.nanihadesuka.compose.foundation.HorizontalScrollbarLayout
 import my.nanihadesuka.compose.foundation.ScrollbarLayoutSettings
-import my.nanihadesuka.compose.foundation.ScrollbarLayoutSide
 import my.nanihadesuka.compose.foundation.rememberScrollStateController
 
 /**
- * Scrollbar for Row
- *
  * @param thickness Thickness of the scrollbar thumb
  * @param padding Padding of the scrollbar
  * @param thumbMinLength Thumb minimum length proportional to total scrollbar's length (eg: 0.1 -> 10% of total)
