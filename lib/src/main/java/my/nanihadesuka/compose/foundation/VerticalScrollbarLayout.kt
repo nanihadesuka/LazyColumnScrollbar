@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import my.nanihadesuka.compose.ScrollbarLayoutSide
 import my.nanihadesuka.compose.ScrollbarSelectionActionable
 import my.nanihadesuka.compose.TestTagsScrollbar
 
@@ -35,6 +36,7 @@ internal fun VerticalScrollbarLayout(
     settings: ScrollbarLayoutSettings,
     draggableModifier: Modifier,
     indicator: (@Composable () -> Unit)?,
+    modifier: Modifier = Modifier,
 ) {
     val isInActionSelectable = remember { mutableStateOf(thumbIsInAction) }
     LaunchedEffect(thumbIsInAction) {
@@ -70,6 +72,7 @@ internal fun VerticalScrollbarLayout(
     )
 
     Layout(
+        modifier = modifier,
         content = {
             Box(
                 modifier = Modifier

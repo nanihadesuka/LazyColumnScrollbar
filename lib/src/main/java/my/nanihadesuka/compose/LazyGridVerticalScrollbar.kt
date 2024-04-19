@@ -24,13 +24,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.foundation.ScrollbarLayoutSettings
-import my.nanihadesuka.compose.foundation.ScrollbarLayoutSide
 import my.nanihadesuka.compose.foundation.VerticalScrollbarLayout
 import kotlin.math.floor
 
 /**
- * @param state LazyGridState
- * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
  * @param padding Padding of the scrollbar
  * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
@@ -39,7 +36,7 @@ import kotlin.math.floor
 fun LazyGridVerticalScrollbar(
     state: LazyGridState,
     modifier: Modifier = Modifier,
-    rightSide: Boolean = true,
+    side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
     alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
@@ -58,9 +55,9 @@ fun LazyGridVerticalScrollbar(
     else Box(modifier = modifier) {
         content()
         InternalLazyGridVerticalScrollbar(
-            gridState = state,
+            state = state,
             modifier = Modifier,
-            rightSide = rightSide,
+            side = side,
             alwaysShowScrollBar = alwaysShowScrollBar,
             thickness = thickness,
             padding = padding,
@@ -78,16 +75,15 @@ fun LazyGridVerticalScrollbar(
 
 /**
  * internal function
- * @param rightSide true -> right,  false -> left
  * @param thickness Thickness of the scrollbar thumb
  * @param padding Padding of the scrollbar
  * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
  */
 @Composable
 internal fun InternalLazyGridVerticalScrollbar(
-    gridState: LazyGridState,
+    state: LazyGridState,
     modifier: Modifier = Modifier,
-    rightSide: Boolean = true,
+    side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
     alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
@@ -100,7 +96,7 @@ internal fun InternalLazyGridVerticalScrollbar(
     hideDelayMillis: Int = 400,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 ) {
-    val firstVisibleItemIndex = remember { derivedStateOf { gridState.firstVisibleItemIndex } }
+    val firstVisibleItemIndex = remember { derivedStateOf { state.firstVisibleItemIndex } }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -108,12 +104,12 @@ internal fun InternalLazyGridVerticalScrollbar(
 
     var dragOffset by remember { mutableFloatStateOf(0f) }
 
-    val reverseLayout by remember { derivedStateOf { gridState.layoutInfo.reverseLayout } }
+    val reverseLayout by remember { derivedStateOf { state.layoutInfo.reverseLayout } }
 
     val realFirstVisibleItem by remember {
         derivedStateOf {
-            gridState.layoutInfo.visibleItemsInfo.firstOrNull {
-                it.index == gridState.firstVisibleItemIndex
+            state.layoutInfo.visibleItemsInfo.firstOrNull {
+                it.index == state.firstVisibleItemIndex
             }
         }
     }
@@ -122,7 +118,7 @@ internal fun InternalLazyGridVerticalScrollbar(
     val nColumns by remember {
         derivedStateOf {
             var count = 0
-            for (item in gridState.layoutInfo.visibleItemsInfo) {
+            for (item in state.layoutInfo.visibleItemsInfo) {
                 if (item.column == -1)
                     break
                 if (count == item.column) {
@@ -138,7 +134,7 @@ internal fun InternalLazyGridVerticalScrollbar(
     val isStickyHeaderInAction by remember {
         derivedStateOf {
             val realIndex = realFirstVisibleItem?.index ?: return@derivedStateOf false
-            val firstVisibleIndex = gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
+            val firstVisibleIndex = state.layoutInfo.visibleItemsInfo.firstOrNull()?.index
                 ?: return@derivedStateOf false
             realIndex != firstVisibleIndex
         }
@@ -152,13 +148,13 @@ internal fun InternalLazyGridVerticalScrollbar(
 
     val normalizedThumbSizeReal by remember {
         derivedStateOf {
-            gridState.layoutInfo.let {
+            state.layoutInfo.let {
                 if (it.totalItemsCount == 0)
                     return@let 0f
 
                 val firstItem = realFirstVisibleItem ?: return@let 0f
                 val firstPartial =
-                    firstItem.fractionHiddenTop(gridState.firstVisibleItemScrollOffset)
+                    firstItem.fractionHiddenTop(state.firstVisibleItemScrollOffset)
                 val lastPartial =
                     1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
 
@@ -202,13 +198,13 @@ internal fun InternalLazyGridVerticalScrollbar(
 
     val normalizedOffsetPosition by remember {
         derivedStateOf {
-            gridState.layoutInfo.let {
+            state.layoutInfo.let {
                 if (it.totalItemsCount == 0 || it.visibleItemsInfo.isEmpty())
                     return@let 0f
 
                 val firstItem = realFirstVisibleItem ?: return@let 0f
                 val top = firstItem.run {
-                    (index / nColumns).toFloat() + fractionHiddenTop(gridState.firstVisibleItemScrollOffset)
+                    (index / nColumns).toFloat() + fractionHiddenTop(state.firstVisibleItemScrollOffset)
                 } / (it.totalItemsCount / nColumns).toFloat()
                 offsetCorrection(top)
             }
@@ -222,22 +218,22 @@ internal fun InternalLazyGridVerticalScrollbar(
 
     fun setScrollOffset(newOffset: Float) {
         setDragOffset(newOffset)
-        val totalItemsCount = gridState.layoutInfo.totalItemsCount.toFloat() / nColumns.toFloat()
+        val totalItemsCount = state.layoutInfo.totalItemsCount.toFloat() / nColumns.toFloat()
         val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset)
         val index: Int = floor(exactIndex).toInt() * nColumns
         val remainder: Float = exactIndex - floor(exactIndex)
 
         coroutineScope.launch {
-            gridState.scrollToItem(index = index, scrollOffset = 0)
+            state.scrollToItem(index = index, scrollOffset = 0)
             val offset = realFirstVisibleItem
                 ?.size
                 ?.let { it.height.toFloat() * remainder }
                 ?.toInt() ?: 0
-            gridState.scrollToItem(index = index, scrollOffset = offset)
+            state.scrollToItem(index = index, scrollOffset = offset)
         }
     }
 
-    val isInAction = gridState.isScrollInProgress || isSelected || alwaysShowScrollBar
+    val isInAction = state.isScrollInProgress || isSelected || alwaysShowScrollBar
 
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth()
@@ -255,7 +251,7 @@ internal fun InternalLazyGridVerticalScrollbar(
                 thumbShape = thumbShape,
                 thumbThickness = thickness,
                 thumbColor = if (isSelected) thumbSelectedColor else thumbColor,
-                side = if (rightSide) ScrollbarLayoutSide.End else ScrollbarLayoutSide.Start,
+                side = side,
                 selectionActionable = selectionActionable
             ),
             indicator = indicatorContent?.let {

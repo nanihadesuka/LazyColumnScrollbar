@@ -56,7 +56,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at right side`() {
-        setContent(rightSide = true)
+        setContent(side = ScrollbarLayoutSide.End)
         scrollbarScreen(composeRule) {
             assert { isScrollbarAtRightSide() }
         }
@@ -64,7 +64,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at left side`() {
-        setContent(rightSide = false)
+        setContent(side = ScrollbarLayoutSide.Start)
         scrollbarScreen(composeRule) {
             assert { isScrollbarAtLeftSide() }
         }
@@ -72,7 +72,10 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at right side - with indicator`() {
-        setContent(rightSide = true, indicatorContent = { value, _ -> IndicatorContent(value) })
+        setContent(
+            side = ScrollbarLayoutSide.End,
+            indicatorContent = { value, _ -> IndicatorContent(value) }
+        )
         scrollbarScreen(composeRule) {
             assert {
                 isScrollbarAtRightSide(indicatorVisible = true)
@@ -82,7 +85,10 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar is at left side - with indicator`() {
-        setContent(rightSide = false, indicatorContent = { value, _ -> IndicatorContent(value) })
+        setContent(
+            side = ScrollbarLayoutSide.Start,
+            indicatorContent = { value, _ -> IndicatorContent(value) }
+        )
         scrollbarScreen(composeRule) {
             assert {
                 isScrollbarAtLeftSide(indicatorVisible = true)
@@ -221,7 +227,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     @Test
     fun `scrollbar thumb min height`() {
-        setContent(thumbMinHeight = 0.2f)
+        setContent(thumbMinLength = 0.2f)
         scrollbarScreen(composeRule) {
             assert {
                 hasThumbMinHeightOrGreater(minValue = 0.2f)
@@ -235,7 +241,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
         setContent(
             selectionMode = ScrollbarSelectionMode.Disabled,
-            thumbMinHeight = 0.1f,
+            thumbMinLength = 0.1f,
         )
         scrollbarScreen(composeRule) {
             assert { isThumbAtTop() }
@@ -254,7 +260,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
         setContent(
             selectionMode = ScrollbarSelectionMode.Thumb,
-            thumbMinHeight = 0.1f,
+            thumbMinLength = 0.1f,
         )
         scrollbarScreen(composeRule) {
             assert {
@@ -292,7 +298,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
         setContent(
             selectionMode = ScrollbarSelectionMode.Full,
-            thumbMinHeight = 0.1f,
+            thumbMinLength = 0.1f,
         )
         scrollbarScreen(composeRule) {
             assert { isThumbAtTop() }
@@ -312,7 +318,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         setContent(
             selectionMode = ScrollbarSelectionMode.Full,
             selectionActionable = ScrollbarSelectionActionable.Always,
-            thumbMinHeight = 0.1f,
+            thumbMinLength = 0.1f,
         )
         scrollbarScreen(composeRule) {
             assert { isThumbAtTop() }
@@ -331,7 +337,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         setContent(
             selectionMode = ScrollbarSelectionMode.Full,
             selectionActionable = ScrollbarSelectionActionable.WhenVisible,
-            thumbMinHeight = 0.1f,
+            thumbMinLength = 0.1f,
         )
         scrollbarScreen(composeRule) {
             assert { isThumbAtTop() }
@@ -356,11 +362,11 @@ class ColumnScrollbarTest(private val itemCount: Int) {
 
     private fun setContent(
         state: ScrollState = ScrollState(initial = 0),
-        rightSide: Boolean = true,
+        side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
         alwaysShowScrollBar: Boolean = false,
         thickness: Dp = 6.dp,
         padding: Dp = 8.dp,
-        thumbMinHeight: Float = 0.1f,
+        thumbMinLength: Float = 0.1f,
         thumbColor: Color = Color(0xFF2A59B6),
         thumbSelectedColor: Color = Color(0xFF5281CA),
         thumbShape: Shape = CircleShape,
@@ -373,12 +379,12 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         composeRule.setContent {
             ColumnScrollbar(
                 state = state,
-                rightSide = rightSide,
+                side = side,
                 alwaysShowScrollBar = alwaysShowScrollBar,
                 thickness = thickness,
                 padding = padding,
                 enabled = enabled,
-                thumbMinHeight = thumbMinHeight,
+                thumbMinHeight = thumbMinLength,
                 thumbColor = thumbColor,
                 thumbSelectedColor = thumbSelectedColor,
                 thumbShape = thumbShape,

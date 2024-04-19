@@ -1,4 +1,4 @@
-package my.nanihadesuka.compose.foundation
+package my.nanihadesuka.compose
 
 enum class ScrollbarLayoutSide {
     /**
