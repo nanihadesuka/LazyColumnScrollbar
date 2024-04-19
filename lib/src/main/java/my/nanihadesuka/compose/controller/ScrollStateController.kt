@@ -1,4 +1,4 @@
-package my.nanihadesuka.compose.foundation
+package my.nanihadesuka.compose.controller
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.runtime.Composable

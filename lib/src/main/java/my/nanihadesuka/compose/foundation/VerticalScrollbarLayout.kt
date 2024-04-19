@@ -36,6 +36,7 @@ internal fun VerticalScrollbarLayout(
     settings: ScrollbarLayoutSettings,
     draggableModifier: Modifier,
     indicator: (@Composable () -> Unit)?,
+    modifier: Modifier = Modifier,
 ) {
     val isInActionSelectable = remember { mutableStateOf(thumbIsInAction) }
     LaunchedEffect(thumbIsInAction) {
@@ -71,6 +72,7 @@ internal fun VerticalScrollbarLayout(
     )
 
     Layout(
+        modifier = modifier,
         content = {
             Box(
                 modifier = Modifier

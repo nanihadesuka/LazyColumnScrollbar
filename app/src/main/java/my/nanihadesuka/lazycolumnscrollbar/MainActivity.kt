@@ -11,12 +11,15 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -42,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import my.nanihadesuka.compose.ColumnScrollbar
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.LazyGridVerticalScrollbar
+import my.nanihadesuka.compose.LazyRowScrollbar
 import my.nanihadesuka.compose.RowScrollbar
 import my.nanihadesuka.compose.ScrollbarSelectionActionable
 import my.nanihadesuka.compose.ScrollbarSelectionMode
@@ -56,17 +60,20 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class TypeTab {
-    LazyColumn, Column, LazyGrid, Row
+    Column, Row,
+    LazyColumn, LazyRow,
+    LazyGrid
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Preview(showBackground = true)
 @Composable
 fun MainView() {
     LazyColumnScrollbarTheme {
         Surface(color = MaterialTheme.colors.background) {
-            val tab = rememberSaveable { mutableStateOf(TypeTab.Column) }
+            val tab = rememberSaveable { mutableStateOf(TypeTab.LazyRow) }
             Column {
-                Row {
+                FlowRow {
                     for (type in TypeTab.entries) {
                         Text(
                             text = type.name,
@@ -82,6 +89,7 @@ fun MainView() {
                     TypeTab.Column -> ColumnView()
                     TypeTab.Row -> RowView()
                     TypeTab.LazyColumn -> LazyColumnView()
+                    TypeTab.LazyRow -> LazyRowView()
                     TypeTab.LazyGrid -> LazyGridView()
                 }
             }
@@ -93,7 +101,7 @@ fun MainView() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LazyColumnView() {
-    val listData = (0..1000).toList()
+    val listData = (0..100).toList()
     val listState = rememberLazyListState()
 
     Box(
@@ -116,6 +124,59 @@ fun LazyColumnView() {
                 contentPadding = PaddingValues(vertical = 300.dp)
             ) {
                 (0..3).forEach { number ->
+                    stickyHeader {
+                        Surface {
+                            Text(
+                                text = "HEADER $number",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
+                }
+
+                items(listData) {
+                    Text(
+                        text = "Item $it",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .padding(vertical = 30.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun LazyRowView() {
+    val listData = (0..100).toList()
+    val listState = rememberLazyListState()
+
+    Box(
+        modifier = Modifier
+            .padding(16.dp)
+            .border(width = 1.dp, MaterialTheme.colors.primary)
+            .padding(1.dp)
+    ) {
+        LazyRowScrollbar(
+            listState,
+            selectionMode = ScrollbarSelectionMode.Thumb,
+            alwaysShowScrollBar = true,
+            indicatorContent = { index, isThumbSelected ->
+                Indicator(text = "i : $index", isThumbSelected = isThumbSelected)
+            }
+        ) {
+            LazyRow(
+                state = listState,
+                reverseLayout = false,
+                contentPadding = PaddingValues(horizontal = 10.dp)
+            ) {
+                (0..30).forEach { number ->
                     stickyHeader {
                         Surface {
                             Text(

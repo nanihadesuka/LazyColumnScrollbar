@@ -2,10 +2,7 @@ package my.nanihadesuka.compose
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,9 +11,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import my.nanihadesuka.compose.foundation.ScrollbarLayoutSettings
-import my.nanihadesuka.compose.foundation.VerticalScrollbarLayout
-import my.nanihadesuka.compose.foundation.rememberScrollStateController
+import my.nanihadesuka.compose.generic.ElementScrollbar
 
 /**
  * @param thickness Thickness of the scrollbar thumb
@@ -52,11 +47,11 @@ fun ColumnScrollbar(
             alwaysShowScrollBar = alwaysShowScrollBar,
             thickness = thickness,
             padding = padding,
-            thumbMinHeight = thumbMinHeight,
+            thumbMinLength = thumbMinHeight,
             thumbColor = thumbColor,
             thumbSelectedColor = thumbSelectedColor,
             thumbShape = thumbShape,
-            visibleHeightDp = with(LocalDensity.current) { constraints.maxHeight.toDp() },
+            visibleLengthDp = with(LocalDensity.current) { constraints.maxHeight.toDp() },
             indicatorContent = indicatorContent,
             selectionMode = selectionMode,
             selectionActionable = selectionActionable,
@@ -71,8 +66,8 @@ fun ColumnScrollbar(
  *
  * @param thickness Thickness of the scrollbar thumb
  * @param padding   Padding of the scrollbar
- * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
- * @param visibleHeightDp Visible height of column view
+ * @param thumbMinLength Thumb minimum length proportional to total scrollbar's length (eg: 0.1 -> 10% of total)
+ * @param visibleLengthDp Visible length of column view
  */
 @Composable
 fun InternalColumnScrollbar(
@@ -82,7 +77,7 @@ fun InternalColumnScrollbar(
     alwaysShowScrollBar: Boolean = false,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
-    thumbMinHeight: Float = 0.1f,
+    thumbMinLength: Float = 0.1f,
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
@@ -90,51 +85,24 @@ fun InternalColumnScrollbar(
     selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
     hideDelayMillis: Int = 400,
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
-    visibleHeightDp: Dp,
+    visibleLengthDp: Dp,
 ) {
-    val controller = rememberScrollStateController(
+    ElementScrollbar(
+        orientation = Orientation.Vertical,
         state = state,
-        visibleLengthDp = visibleHeightDp,
-        thumbMinLength = thumbMinHeight,
+        modifier = modifier,
+        side = side,
         alwaysShowScrollBar = alwaysShowScrollBar,
+        thickness = thickness,
+        padding = padding,
+        thumbMinLength = thumbMinLength,
+        thumbColor = thumbColor,
+        thumbSelectedColor = thumbSelectedColor,
+        thumbShape = thumbShape,
         selectionMode = selectionMode,
+        selectionActionable = selectionActionable,
+        hideDelayMillis = hideDelayMillis,
+        indicatorContent = indicatorContent,
+        visibleLengthDp = visibleLengthDp,
     )
-
-    BoxWithConstraints(
-        modifier = modifier.fillMaxSize()
-    ) {
-        val maxHeightFloat = constraints.maxHeight.toFloat()
-        VerticalScrollbarLayout(
-            thumbSizeNormalized = controller.normalizedThumbSize.value,
-            thumbOffsetNormalized = controller.normalizedOffsetPosition.value,
-            thumbIsInAction = controller.thumbIsInAction.value,
-            settings = ScrollbarLayoutSettings(
-                durationAnimationMillis = 500,
-                hideDelayMillis = hideDelayMillis,
-                scrollbarPadding = padding,
-                thumbShape = thumbShape,
-                thumbThickness = thickness,
-                thumbColor = if (controller.isSelected.value) thumbSelectedColor else thumbColor,
-                side = side,
-                selectionActionable = selectionActionable,
-            ),
-            indicator = indicatorContent?.let {
-                { it(controller.indicatorNormalizedOffset(), controller.isSelected.value) }
-            },
-            draggableModifier = Modifier.draggable(
-                state = rememberDraggableState { delta ->
-                    controller.onDragState(delta, maxHeightFloat)
-                },
-                orientation = Orientation.Vertical,
-                enabled = selectionMode != ScrollbarSelectionMode.Disabled,
-                startDragImmediately = true,
-                onDragStarted = { offset ->
-                    controller.onDragStarted(offset.y, maxHeightFloat)
-                },
-                onDragStopped = {
-                    controller.onDragStopped()
-                }
-            )
-        )
-    }
 }
