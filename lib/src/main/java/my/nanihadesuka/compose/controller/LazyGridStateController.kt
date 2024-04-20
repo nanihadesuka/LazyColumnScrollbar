@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.ScrollbarSelectionMode
+import kotlin.math.ceil
 import kotlin.math.floor
 
 @Composable
@@ -100,9 +101,9 @@ internal fun rememberLazyGridStateController(
                     1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
 
                 val realSize =
-                    (it.visibleItemsInfo.size / nColumns.value) - if (isStickyHeaderInAction.value) 1 else 0
-                val realVisibleSize = realSize.toFloat() - firstPartial - lastPartial
-                realVisibleSize / (it.totalItemsCount / nColumns.value).toFloat()
+                    ceil(it.visibleItemsInfo.size.toFloat() / nColumns.value.toFloat()) - if (isStickyHeaderInAction.value) 1f else 0f
+                val realVisibleSize = realSize - firstPartial - lastPartial
+                realVisibleSize / ceil(it.totalItemsCount.toFloat() / nColumns.value.toFloat())
             }
         }
     }
@@ -137,8 +138,8 @@ internal fun rememberLazyGridStateController(
 
                 val firstItem = realFirstVisibleItem.value ?: return@let 0f
                 val top = firstItem.run {
-                    (index / nColumns.value).toFloat() + fractionHiddenTop(state.firstVisibleItemScrollOffset)
-                } / (it.totalItemsCount / nColumns.value).toFloat()
+                    ceil(index.toFloat() / nColumns.value.toFloat()) + fractionHiddenTop(state.firstVisibleItemScrollOffset)
+                } / ceil(it.totalItemsCount.toFloat() / nColumns.value.toFloat())
                 offsetCorrection(top)
             }
         }
@@ -237,7 +238,8 @@ internal class LazyGridStateController(
 
     private fun setScrollOffset(newOffset: Float) {
         setDragOffset(newOffset)
-        val totalItemsCount = state.layoutInfo.totalItemsCount.toFloat() / nColumns.value.toFloat()
+        val totalItemsCount =
+            ceil(state.layoutInfo.totalItemsCount.toFloat() / nColumns.value.toFloat())
         val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset.floatValue)
         val index: Int = floor(exactIndex).toInt() * nColumns.value
         val remainder: Float = exactIndex - floor(exactIndex)

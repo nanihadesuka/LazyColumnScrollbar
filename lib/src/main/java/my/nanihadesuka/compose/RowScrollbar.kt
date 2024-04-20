@@ -90,7 +90,6 @@ fun InternalRowScrollbar(
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     visibleLengthDp: Dp,
 ) {
-
     val stateController = rememberScrollStateController(
         state = state,
         visibleLengthDp = visibleLengthDp,

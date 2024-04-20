@@ -207,7 +207,7 @@ fun LazyRowView() {
 @Composable
 fun LazyGridView() {
     val items by rememberSaveable {
-        mutableStateOf(List(100) { it })
+        mutableStateOf(List(101) { it })
     }
 
     val lazyGridState = rememberLazyGridState()
