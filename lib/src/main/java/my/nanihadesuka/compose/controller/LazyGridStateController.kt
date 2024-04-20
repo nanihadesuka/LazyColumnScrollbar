@@ -26,19 +26,17 @@ internal fun rememberLazyGridStateController(
     selectionMode: ScrollbarSelectionMode,
     orientation: Orientation
 ): LazyGridStateController {
-
-    val alwaysShowScrollBarUpdated = rememberUpdatedState(alwaysShowScrollBar)
-    val thumbMinLengthUpdated = rememberUpdatedState(thumbMinLength)
-    val selectionModeUpdated = rememberUpdatedState(selectionMode)
-    val orientationUpdated = rememberUpdatedState(orientation)
-
     val coroutineScope = rememberCoroutineScope()
 
-    val isSelected = remember { mutableStateOf(false) }
+    val thumbMinLengthUpdated = rememberUpdatedState(thumbMinLength)
+    val alwaysShowScrollBarUpdated = rememberUpdatedState(alwaysShowScrollBar)
+    val selectionModeUpdated = rememberUpdatedState(selectionMode)
+    val orientationUpdated = rememberUpdatedState(orientation)
+    val reverseLayout = remember { derivedStateOf { state.layoutInfo.reverseLayout } }
 
+    val isSelected = remember { mutableStateOf(false) }
     val dragOffset = remember { mutableFloatStateOf(0f) }
 
-    val reverseLayout = remember { derivedStateOf { state.layoutInfo.reverseLayout } }
 
     val realFirstVisibleItem = remember {
         derivedStateOf {
@@ -146,7 +144,7 @@ internal fun rememberLazyGridStateController(
         }
     }
 
-    val isInAction = remember {
+    val thumbIsInAction = remember {
         derivedStateOf {
             state.isScrollInProgress || isSelected.value || alwaysShowScrollBarUpdated.value
         }
@@ -156,7 +154,7 @@ internal fun rememberLazyGridStateController(
         LazyGridStateController(
             normalizedThumbSize = normalizedThumbSize,
             normalizedOffsetPosition = normalizedOffsetPosition,
-            thumbIsInAction = isInAction,
+            thumbIsInAction = thumbIsInAction,
             _isSelected = isSelected,
             dragOffset = dragOffset,
             selectionMode = selectionModeUpdated,

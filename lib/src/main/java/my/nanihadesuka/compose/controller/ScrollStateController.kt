@@ -27,32 +27,40 @@ internal fun rememberScrollStateController(
 ): ScrollStateController {
     val coroutineScope = rememberCoroutineScope()
 
-    val isSelected = remember { mutableStateOf(false) }
+    val visibleLengthDpUpdated = rememberUpdatedState(visibleLengthDp)
+    val thumbMinLengthUpdated = rememberUpdatedState(thumbMinLength)
+    val alwaysShowScrollBarUpdated = rememberUpdatedState(alwaysShowScrollBar)
+    val selectionModeUpdated = rememberUpdatedState(selectionMode)
 
+    val isSelected = remember { mutableStateOf(false) }
     val dragOffset = remember { mutableFloatStateOf(0f) }
 
-    val fullLengthDp = with(LocalDensity.current) { state.maxValue.toDp() + visibleLengthDp }
+    val fullLengthDp = with(LocalDensity.current) {
+        remember {
+            derivedStateOf {
+                state.maxValue.toDp() + visibleLengthDpUpdated.value
+            }
+        }
+    }
 
-    val normalizedThumbSizeReal = remember(visibleLengthDp, state.maxValue) {
+    val normalizedThumbSizeReal = remember {
         derivedStateOf {
-            if (fullLengthDp == 0.dp) 1f else {
-                val normalizedDp = visibleLengthDp / fullLengthDp
+            if (fullLengthDp.value == 0.dp) 1f else {
+                val normalizedDp = visibleLengthDpUpdated.value / fullLengthDp.value
                 normalizedDp.coerceIn(0f, 1f)
             }
         }
     }
 
-    val normalizedThumbSize = remember(normalizedThumbSizeReal.value) {
+    val normalizedThumbSize = remember {
         derivedStateOf {
-            normalizedThumbSizeReal.value.coerceAtLeast(thumbMinLength)
+            normalizedThumbSizeReal.value.coerceAtLeast(thumbMinLengthUpdated.value)
         }
     }
 
-    val normalizedThumbSizeUpdated = rememberUpdatedState(newValue = normalizedThumbSize.value)
-
     fun offsetCorrection(top: Float): Float {
         val topRealMax = 1f
-        val topMax = (1f - normalizedThumbSizeUpdated.value).coerceIn(0f, 1f)
+        val topMax = (1f - normalizedThumbSize.value).coerceIn(0f, 1f)
         return top * topMax / topRealMax
     }
 
@@ -63,23 +71,22 @@ internal fun rememberScrollStateController(
             offsetCorrection(normalized)
         }
     }
-    val normalizedOffsetPositionUpdated = rememberUpdatedState(normalizedOffsetPosition.value)
 
-    val thumbIsInAction = remember(alwaysShowScrollBar) {
+    val thumbIsInAction = remember {
         derivedStateOf {
-            state.isScrollInProgress || isSelected.value || alwaysShowScrollBar
+            state.isScrollInProgress || isSelected.value || alwaysShowScrollBarUpdated.value
         }
     }
 
-    return remember(alwaysShowScrollBar, normalizedThumbSizeReal.value) {
+    return remember {
         ScrollStateController(
-            normalizedThumbSize = normalizedThumbSizeUpdated,
-            normalizedOffsetPosition = normalizedOffsetPositionUpdated,
+            normalizedThumbSize = normalizedThumbSize,
+            normalizedOffsetPosition = normalizedOffsetPosition,
             thumbIsInAction = thumbIsInAction,
             _isSelected = isSelected,
             dragOffset = dragOffset,
             state = state,
-            selectionMode = selectionMode,
+            selectionMode = selectionModeUpdated,
             coroutineScope = coroutineScope
         )
     }
@@ -91,7 +98,7 @@ internal class ScrollStateController(
     override val thumbIsInAction: State<Boolean>,
     private val _isSelected: MutableState<Boolean>,
     private val dragOffset: MutableState<Float>,
-    private val selectionMode: ScrollbarSelectionMode,
+    private val selectionMode: State<ScrollbarSelectionMode>,
     private val state: ScrollState,
     private val coroutineScope: CoroutineScope,
 ) : StateController<Float> {
@@ -101,7 +108,7 @@ internal class ScrollStateController(
         val newOffset = offsetPixels / maxLengthPixels
         val currentOffset = normalizedOffsetPosition.value
 
-        when (selectionMode) {
+        when (selectionMode.value) {
             ScrollbarSelectionMode.Full -> {
                 if (newOffset in currentOffset..(currentOffset + normalizedThumbSize.value))
                     setDragOffset(currentOffset)
