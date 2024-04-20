@@ -448,7 +448,7 @@ class LazyGridVerticalScrollbarTest(private val itemCount: Int) {
                 thickness = thickness,
                 padding = padding,
                 enabled = enabled,
-                thumbMinHeight = thumbMinLength,
+                thumbMinLength = thumbMinLength,
                 thumbColor = thumbColor,
                 thumbSelectedColor = thumbSelectedColor,
                 thumbShape = thumbShape,
