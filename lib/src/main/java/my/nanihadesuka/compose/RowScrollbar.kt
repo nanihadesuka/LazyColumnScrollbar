@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import my.nanihadesuka.compose.controller.rememberScrollStateController
 import my.nanihadesuka.compose.generic.ElementScrollbar
 
 /**
@@ -89,15 +90,22 @@ fun InternalRowScrollbar(
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     visibleLengthDp: Dp,
 ) {
+
+    val stateController = rememberScrollStateController(
+        state = state,
+        visibleLengthDp = visibleLengthDp,
+        thumbMinLength = thumbMinLength,
+        alwaysShowScrollBar = alwaysShowScrollBar,
+        selectionMode = selectionMode
+    )
+
     ElementScrollbar(
         orientation = Orientation.Horizontal,
-        state = state,
+        stateController = stateController,
         modifier = modifier,
         side = side,
-        alwaysShowScrollBar = alwaysShowScrollBar,
         thickness = thickness,
         padding = padding,
-        thumbMinLength = thumbMinLength,
         thumbColor = thumbColor,
         thumbSelectedColor = thumbSelectedColor,
         thumbShape = thumbShape,
@@ -105,6 +113,5 @@ fun InternalRowScrollbar(
         selectionActionable = selectionActionable,
         hideDelayMillis = hideDelayMillis,
         indicatorContent = indicatorContent,
-        visibleLengthDp = visibleLengthDp,
     )
 }

@@ -86,18 +86,18 @@ internal fun rememberScrollStateController(
 }
 
 internal class ScrollStateController(
-    val normalizedThumbSize: State<Float>,
-    val normalizedOffsetPosition: State<Float>,
-    val thumbIsInAction: State<Boolean>,
+    override val normalizedThumbSize: State<Float>,
+    override val normalizedOffsetPosition: State<Float>,
+    override val thumbIsInAction: State<Boolean>,
     private val _isSelected: MutableState<Boolean>,
     private val dragOffset: MutableState<Float>,
     private val selectionMode: ScrollbarSelectionMode,
     private val state: ScrollState,
     private val coroutineScope: CoroutineScope,
-) {
-    val isSelected: State<Boolean> = _isSelected
+) : StateController<Float> {
+    override val isSelected: State<Boolean> = _isSelected
 
-    fun onDragStarted(offsetPixels: Float, maxLengthPixels: Float) {
+    override fun onDragStarted(offsetPixels: Float, maxLengthPixels: Float) {
         val newOffset = offsetPixels / maxLengthPixels
         val currentOffset = normalizedOffsetPosition.value
 
@@ -121,17 +121,17 @@ internal class ScrollStateController(
         }
     }
 
-    fun onDragStopped() {
+    override fun onDragStopped() {
         _isSelected.value = false
     }
 
-    fun onDragState(deltaPixels: Float, maxLengthPx: Float) {
+    override fun onDraggableState(deltaPixels: Float, maxLengthPixels: Float) {
         if (isSelected.value) {
-            setScrollOffset(dragOffset.value + deltaPixels / maxLengthPx)
+            setScrollOffset(dragOffset.value + deltaPixels / maxLengthPixels)
         }
     }
 
-    fun indicatorNormalizedOffset(): Float {
+    override fun indicatorValue(): Float {
         return offsetCorrectionInverse(normalizedOffsetPosition.value)
     }
 

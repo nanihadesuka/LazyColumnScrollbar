@@ -10,7 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import my.nanihadesuka.compose.generic.LazyElementScrollbar
+import my.nanihadesuka.compose.controller.rememberLazyListStateController
+import my.nanihadesuka.compose.generic.ElementScrollbar
 
 /**
  * @param thickness Thickness of the scrollbar thumb
@@ -82,15 +83,20 @@ fun InternalLazyColumnScrollbar(
     hideDelayMillis: Int = 400,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 ) {
-    LazyElementScrollbar(
-        orientation = Orientation.Vertical,
+    val controller = rememberLazyListStateController(
         state = state,
+        thumbMinLength = thumbMinLength,
+        alwaysShowScrollBar = alwaysShowScrollBar,
+        selectionMode = selectionMode
+    )
+
+    ElementScrollbar(
+        orientation = Orientation.Vertical,
+        stateController = controller,
         modifier = modifier,
         side = side,
-        alwaysShowScrollBar = alwaysShowScrollBar,
         thickness = thickness,
         padding = padding,
-        thumbMinLength = thumbMinLength,
         thumbColor = thumbColor,
         thumbSelectedColor = thumbSelectedColor,
         thumbShape = thumbShape,

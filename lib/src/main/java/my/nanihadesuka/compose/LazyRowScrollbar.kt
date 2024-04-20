@@ -1,10 +1,7 @@
 package my.nanihadesuka.compose
 
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -13,10 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import my.nanihadesuka.compose.foundation.ScrollbarLayoutSettings
-import my.nanihadesuka.compose.foundation.VerticalScrollbarLayout
 import my.nanihadesuka.compose.controller.rememberLazyListStateController
-import my.nanihadesuka.compose.generic.LazyElementScrollbar
+import my.nanihadesuka.compose.generic.ElementScrollbar
 
 /**
  * @param thickness Thickness of the scrollbar thumb
@@ -88,15 +83,20 @@ fun InternalLazyRowScrollbar(
     hideDelayMillis: Int = 400,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
 ) {
-    LazyElementScrollbar(
-        orientation = Orientation.Horizontal,
+    val controller = rememberLazyListStateController(
         state = state,
+        thumbMinLength = thumbMinLength,
+        alwaysShowScrollBar = alwaysShowScrollBar,
+        selectionMode = selectionMode
+    )
+
+    ElementScrollbar(
+        orientation = Orientation.Horizontal,
+        stateController = controller,
         modifier = modifier,
         side = side,
-        alwaysShowScrollBar = alwaysShowScrollBar,
         thickness = thickness,
         padding = padding,
-        thumbMinLength = thumbMinLength,
         thumbColor = thumbColor,
         thumbSelectedColor = thumbSelectedColor,
         thumbShape = thumbShape,

@@ -137,9 +137,9 @@ internal fun rememberLazyListStateController(
 }
 
 internal class LazyListStateController(
-    val normalizedThumbSize: State<Float>,
-    val normalizedOffsetPosition: State<Float>,
-    val thumbIsInAction: State<Boolean>,
+    override val normalizedThumbSize: State<Float>,
+    override val normalizedOffsetPosition: State<Float>,
+    override val thumbIsInAction: State<Boolean>,
     private val _isSelected: MutableState<Boolean>,
     private val dragOffset: MutableFloatState,
     private val normalizedThumbSizeReal: State<Float>,
@@ -149,25 +149,25 @@ internal class LazyListStateController(
     private val thumbMinLength: State<Float>,
     private val state: LazyListState,
     private val coroutineScope: CoroutineScope,
-) {
-    val isSelected: State<Boolean> = _isSelected
+) : StateController<Int> {
+    override val isSelected: State<Boolean> = _isSelected
 
     private val firstVisibleItemIndex = derivedStateOf { state.firstVisibleItemIndex }
 
-    fun indicatorIndex() = firstVisibleItemIndex.value
+    override fun indicatorValue() = firstVisibleItemIndex.value
 
-    fun onDraggableState(delta: Float, maxLength: Float) {
-        val displace = if (reverseLayout.value) -delta else delta // side effect ?
+    override fun onDraggableState(deltaPixels: Float, maxLengthPixels: Float) {
+        val displace = if (reverseLayout.value) -deltaPixels else deltaPixels // side effect ?
         if (isSelected.value) {
-            setScrollOffset(dragOffset.floatValue + displace / maxLength)
+            setScrollOffset(dragOffset.floatValue + displace / maxLengthPixels)
         }
     }
 
-    fun onDragStarted(offsetPixels: Float, maxLength: Float) {
-        if (maxLength <= 0f) return
+    override fun onDragStarted(offsetPixels: Float, maxLengthPixels: Float) {
+        if (maxLengthPixels <= 0f) return
         val newOffset = when {
-            reverseLayout.value -> (maxLength - offsetPixels) / maxLength
-            else -> offsetPixels / maxLength
+            reverseLayout.value -> (maxLengthPixels - offsetPixels) / maxLengthPixels
+            else -> offsetPixels / maxLengthPixels
         }
         val currentOffset = when {
             reverseLayout.value -> 1f - normalizedOffsetPosition.value - normalizedThumbSize.value
@@ -194,7 +194,7 @@ internal class LazyListStateController(
         }
     }
 
-    fun onDragStopped() {
+    override fun onDragStopped() {
         _isSelected.value = false
     }
 
