@@ -43,7 +43,7 @@ internal fun rememberScrollStateController(
         }
     }
 
-    val normalizedThumbSizeReal = remember {
+    val thumbSizeNormalizedReal = remember {
         derivedStateOf {
             if (fullLengthDp.value == 0.dp) 1f else {
                 val normalizedDp = visibleLengthDpUpdated.value / fullLengthDp.value
@@ -52,19 +52,19 @@ internal fun rememberScrollStateController(
         }
     }
 
-    val normalizedThumbSize = remember {
+    val thumbSizeNormalized = remember {
         derivedStateOf {
-            normalizedThumbSizeReal.value.coerceAtLeast(thumbMinLengthUpdated.value)
+            thumbSizeNormalizedReal.value.coerceAtLeast(thumbMinLengthUpdated.value)
         }
     }
 
     fun offsetCorrection(top: Float): Float {
         val topRealMax = 1f
-        val topMax = (1f - normalizedThumbSize.value).coerceIn(0f, 1f)
+        val topMax = (1f - thumbSizeNormalized.value).coerceIn(0f, 1f)
         return top * topMax / topRealMax
     }
 
-    val normalizedOffsetPosition = remember {
+    val thumbOffsetNormalized = remember {
         derivedStateOf {
             if (state.maxValue == 0) return@derivedStateOf 0f
             val normalized = state.value.toFloat() / state.maxValue.toFloat()
@@ -80,8 +80,8 @@ internal fun rememberScrollStateController(
 
     return remember {
         ScrollStateController(
-            normalizedThumbSize = normalizedThumbSize,
-            normalizedOffsetPosition = normalizedOffsetPosition,
+            thumbSizeNormalized = thumbSizeNormalized,
+            thumbOffsetNormalized = thumbOffsetNormalized,
             thumbIsInAction = thumbIsInAction,
             _isSelected = isSelected,
             dragOffset = dragOffset,
@@ -93,8 +93,8 @@ internal fun rememberScrollStateController(
 }
 
 internal class ScrollStateController(
-    override val normalizedThumbSize: State<Float>,
-    override val normalizedOffsetPosition: State<Float>,
+    override val thumbSizeNormalized: State<Float>,
+    override val thumbOffsetNormalized: State<Float>,
     override val thumbIsInAction: State<Boolean>,
     private val _isSelected: MutableState<Boolean>,
     private val dragOffset: MutableState<Float>,
@@ -106,11 +106,11 @@ internal class ScrollStateController(
 
     override fun onDragStarted(offsetPixels: Float, maxLengthPixels: Float) {
         val newOffset = offsetPixels / maxLengthPixels
-        val currentOffset = normalizedOffsetPosition.value
+        val currentOffset = thumbOffsetNormalized.value
 
         when (selectionMode.value) {
             ScrollbarSelectionMode.Full -> {
-                if (newOffset in currentOffset..(currentOffset + normalizedThumbSize.value))
+                if (newOffset in currentOffset..(currentOffset + thumbSizeNormalized.value))
                     setDragOffset(currentOffset)
                 else
                     setScrollOffset(newOffset)
@@ -118,7 +118,7 @@ internal class ScrollStateController(
             }
 
             ScrollbarSelectionMode.Thumb -> {
-                if (newOffset in currentOffset..(currentOffset + normalizedThumbSize.value)) {
+                if (newOffset in currentOffset..(currentOffset + thumbSizeNormalized.value)) {
                     setDragOffset(currentOffset)
                     _isSelected.value = true
                 }
@@ -139,12 +139,12 @@ internal class ScrollStateController(
     }
 
     override fun indicatorValue(): Float {
-        return offsetCorrectionInverse(normalizedOffsetPosition.value)
+        return offsetCorrectionInverse(thumbOffsetNormalized.value)
     }
 
     private fun offsetCorrectionInverse(top: Float): Float {
         val topRealMax = 1f
-        val topMax = 1f - normalizedThumbSize.value
+        val topMax = 1f - thumbSizeNormalized.value
         if (topMax == 0f) return top
         return (top * topRealMax / topMax).coerceAtLeast(0f)
     }
@@ -158,7 +158,7 @@ internal class ScrollStateController(
     }
 
     private fun setDragOffset(value: Float) {
-        val maxValue = (1f - normalizedThumbSize.value).coerceAtLeast(0f)
+        val maxValue = (1f - thumbSizeNormalized.value).coerceAtLeast(0f)
         dragOffset.value = value.coerceIn(0f, maxValue)
     }
 }

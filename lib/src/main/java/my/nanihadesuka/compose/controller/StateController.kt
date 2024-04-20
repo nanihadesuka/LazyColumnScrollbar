@@ -5,8 +5,8 @@ import androidx.compose.runtime.State
 
 @Stable
 interface StateController<IndicatorValue> {
-    val normalizedThumbSize: State<Float>
-    val normalizedOffsetPosition: State<Float>
+    val thumbSizeNormalized: State<Float>
+    val thumbOffsetNormalized: State<Float>
     val thumbIsInAction: State<Boolean>
     val isSelected: State<Boolean>
 

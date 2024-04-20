@@ -39,8 +39,8 @@ internal fun <IndicatorValue> ElementScrollbar(
 
         ScrollbarLayout(
             orientation = orientation,
-            thumbSizeNormalized = stateController.normalizedThumbSize.value,
-            thumbOffsetNormalized = stateController.normalizedOffsetPosition.value,
+            thumbSizeNormalized = stateController.thumbSizeNormalized.value,
+            thumbOffsetNormalized = stateController.thumbOffsetNormalized.value,
             thumbIsInAction = stateController.thumbIsInAction.value,
             settings = ScrollbarLayoutSettings(
                 durationAnimationMillis = 500,
