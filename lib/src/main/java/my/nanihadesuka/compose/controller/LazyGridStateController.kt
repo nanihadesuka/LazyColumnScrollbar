@@ -47,14 +47,18 @@ internal fun rememberLazyGridStateController(
         }
     }
 
-    // Workaround to know indirectly how many columns are being used (LazyGridState doesn't store it)
-    val nColumns = remember {
+    // Workaround to know indirectly how many columns/rows are being used (LazyGridState doesn't store it)
+    val nElementsMainAxis = remember {
         derivedStateOf {
             var count = 0
             for (item in state.layoutInfo.visibleItemsInfo) {
-                if (item.column == -1)
+                val index = when (orientation) {
+                    Orientation.Vertical -> item.column
+                    Orientation.Horizontal -> item.row
+                }
+                if (index == -1)
                     break
-                if (count == item.column) {
+                if (count == index) {
                     count += 1
                 } else {
                     break
@@ -101,9 +105,9 @@ internal fun rememberLazyGridStateController(
                     1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
 
                 val realSize =
-                    ceil(it.visibleItemsInfo.size.toFloat() / nColumns.value.toFloat()) - if (isStickyHeaderInAction.value) 1f else 0f
+                    ceil(it.visibleItemsInfo.size.toFloat() / nElementsMainAxis.value.toFloat()) - if (isStickyHeaderInAction.value) 1f else 0f
                 val realVisibleSize = realSize - firstPartial - lastPartial
-                realVisibleSize / ceil(it.totalItemsCount.toFloat() / nColumns.value.toFloat())
+                realVisibleSize / ceil(it.totalItemsCount.toFloat() / nElementsMainAxis.value.toFloat())
             }
         }
     }
@@ -138,8 +142,8 @@ internal fun rememberLazyGridStateController(
 
                 val firstItem = realFirstVisibleItem.value ?: return@let 0f
                 val top = firstItem.run {
-                    ceil(index.toFloat() / nColumns.value.toFloat()) + fractionHiddenTop(state.firstVisibleItemScrollOffset)
-                } / ceil(it.totalItemsCount.toFloat() / nColumns.value.toFloat())
+                    ceil(index.toFloat() / nElementsMainAxis.value.toFloat()) + fractionHiddenTop(state.firstVisibleItemScrollOffset)
+                } / ceil(it.totalItemsCount.toFloat() / nElementsMainAxis.value.toFloat())
                 offsetCorrection(top)
             }
         }
@@ -164,7 +168,7 @@ internal fun rememberLazyGridStateController(
             thumbMinLength = thumbMinLengthUpdated,
             reverseLayout = reverseLayout,
             orientation = orientationUpdated,
-            nColumns = nColumns,
+            nElementsMainAxis = nElementsMainAxis,
             state = state,
             coroutineScope = coroutineScope
         )
@@ -183,7 +187,7 @@ internal class LazyGridStateController(
     private val thumbMinLength: State<Float>,
     private val reverseLayout: State<Boolean>,
     private val orientation: State<Orientation>,
-    private val nColumns: State<Int>,
+    private val nElementsMainAxis: State<Int>,
     private val state: LazyGridState,
     private val coroutineScope: CoroutineScope,
 ) : StateController<Int> {
@@ -239,9 +243,9 @@ internal class LazyGridStateController(
     private fun setScrollOffset(newOffset: Float) {
         setDragOffset(newOffset)
         val totalItemsCount =
-            ceil(state.layoutInfo.totalItemsCount.toFloat() / nColumns.value.toFloat())
+            ceil(state.layoutInfo.totalItemsCount.toFloat() / nElementsMainAxis.value.toFloat())
         val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset.floatValue)
-        val index: Int = floor(exactIndex).toInt() * nColumns.value
+        val index: Int = floor(exactIndex).toInt() * nElementsMainAxis.value
         val remainder: Float = exactIndex - floor(exactIndex)
 
         coroutineScope.launch {

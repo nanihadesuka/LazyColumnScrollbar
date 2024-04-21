@@ -19,7 +19,7 @@ import my.nanihadesuka.compose.generic.ElementScrollbar
  * @param thumbMinLength Thumb minimum length proportional to total scrollbar's length (eg: 0.1 -> 10% of total)
  */
 @Composable
-fun LazyGridVerticalScrollbar(
+fun LazyVerticalGridScrollbar(
     state: LazyGridState,
     modifier: Modifier = Modifier,
     side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
@@ -40,7 +40,7 @@ fun LazyGridVerticalScrollbar(
     if (!enabled) content()
     else Box(modifier = modifier) {
         content()
-        InternalLazyGridVerticalScrollbar(
+        InternalLazyVerticalGridScrollbar(
             state = state,
             modifier = Modifier,
             side = side,
@@ -62,10 +62,10 @@ fun LazyGridVerticalScrollbar(
 /**
  * @param thickness Thickness of the scrollbar thumb
  * @param padding Padding of the scrollbar
- * @param thumbMinLength Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
+ * @param thumbMinLength Thumb minimum length proportional to total scrollbar's length (eg: 0.1 -> 10% of total)
  */
 @Composable
-internal fun InternalLazyGridVerticalScrollbar(
+internal fun InternalLazyVerticalGridScrollbar(
     state: LazyGridState,
     modifier: Modifier = Modifier,
     side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,

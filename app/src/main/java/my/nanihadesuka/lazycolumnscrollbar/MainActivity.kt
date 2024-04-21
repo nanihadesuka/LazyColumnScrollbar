@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
@@ -44,7 +45,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import my.nanihadesuka.compose.ColumnScrollbar
 import my.nanihadesuka.compose.LazyColumnScrollbar
-import my.nanihadesuka.compose.LazyGridVerticalScrollbar
+import my.nanihadesuka.compose.LazyHorizontalGridScrollbar
+import my.nanihadesuka.compose.LazyVerticalGridScrollbar
 import my.nanihadesuka.compose.LazyRowScrollbar
 import my.nanihadesuka.compose.RowScrollbar
 import my.nanihadesuka.compose.ScrollbarSelectionActionable
@@ -62,7 +64,7 @@ class MainActivity : ComponentActivity() {
 enum class TypeTab {
     Column, Row,
     LazyColumn, LazyRow,
-    LazyGrid
+    LazyVerticalGrid, LazyHorizontalGrid
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -90,7 +92,8 @@ fun MainView() {
                     TypeTab.Row -> RowView()
                     TypeTab.LazyColumn -> LazyColumnView()
                     TypeTab.LazyRow -> LazyRowView()
-                    TypeTab.LazyGrid -> LazyGridView()
+                    TypeTab.LazyVerticalGrid -> LazyVerticalGridView()
+                    TypeTab.LazyHorizontalGrid -> LazyHorizontalGridView()
                 }
             }
         }
@@ -205,7 +208,7 @@ fun LazyRowView() {
 }
 
 @Composable
-fun LazyGridView() {
+fun LazyVerticalGridView() {
     val items by rememberSaveable {
         mutableStateOf(List(101) { it })
     }
@@ -217,7 +220,7 @@ fun LazyGridView() {
             .border(width = 1.dp, MaterialTheme.colors.primary)
             .padding(1.dp)
     ) {
-        LazyGridVerticalScrollbar(
+        LazyVerticalGridScrollbar(
             state = lazyGridState,
             selectionMode = ScrollbarSelectionMode.Thumb,
             alwaysShowScrollBar = true,
@@ -249,6 +252,54 @@ fun LazyGridView() {
             }
         }
 
+    }
+}
+
+@Composable
+fun LazyHorizontalGridView() {
+    val items by rememberSaveable {
+        mutableStateOf(List(101) { it })
+    }
+
+    val lazyGridState = rememberLazyGridState()
+    Box(
+        modifier = Modifier
+            .padding(16.dp)
+            .border(width = 1.dp, MaterialTheme.colors.primary)
+            .padding(1.dp)
+    ) {
+        LazyHorizontalGridScrollbar(
+            state = lazyGridState,
+            selectionMode = ScrollbarSelectionMode.Thumb,
+            alwaysShowScrollBar = false,
+            indicatorContent = { index, isThumbSelected ->
+                Indicator(text = "i:$index", isThumbSelected = isThumbSelected)
+            }
+        ) {
+            LazyHorizontalGrid(
+                state = lazyGridState,
+                rows = GridCells.Adaptive(minSize = 128.dp),
+                reverseLayout = true,
+                verticalArrangement = Arrangement.spacedBy(3.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                items(items.size, key = { it }) {
+                    Surface(
+                        elevation = 3.dp,
+                        modifier = Modifier.aspectRatio(1f),
+                        color = Color.Yellow
+                    ) {
+                        Text(
+                            text = "Item $it",
+                            modifier = Modifier
+                                .padding(24.dp),
+                            color = Color.Black
+                        )
+
+                    }
+                }
+            }
+        }
     }
 }
 
