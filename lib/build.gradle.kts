@@ -5,7 +5,7 @@ plugins {
 }
 
 val versionCode: Int = 21
-val versionName: String = "2.0.0"
+val versionName: String = "2.0.1"
 
 android {
     namespace = "my.nanihadesuka.lazycolumnscrollbar"
@@ -67,7 +67,7 @@ afterEvaluate {
                 from(components.getByName("release"))
                 groupId = "my.nanihadesuka.lazycolumnscrollbar"
                 artifactId = "lazycolumnscrollbar"
-                version = "1.10.0"
+                version = versionName
             }
         }
     }
