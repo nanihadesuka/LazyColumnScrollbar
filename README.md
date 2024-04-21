@@ -10,19 +10,24 @@
 Compose implementation of the scroll bar. Can drag, scroll smoothly and includes animations.
 
 ### Features:
-- Supports LazyColumn, LazyVerticalGrid & Column 
-- Support sticky headers
-- Support reverseLayout
+
+- Support for:
+    - Column, Row, LazyColumn, LazyRow, LazyVerticalGrid, LazyHorizontalGrid
+- Takes into account:
+    - sticky headers
+    - reverseLayout
 - Optional current position indicator
-- Multiple selection states (Disabled, Full, Thumb)
-- Multiple selection actionable states (Always, WhenVisible)
+- Multiple selection modes:
+    - States (Disabled, Full, Thumb)
+    - Actionable states (Always, WhenVisible)
 - Customizable look
 - Easy integration with other composables
-- UI tests
+- Extensive UI tests
+- Sample app
 
 ## Installation
 
-Add it in your root build.gradle at the end of  repositories:
+Add it in your root build.gradle at the end of repositories:
 
 ```groovy
 allprojects {
@@ -36,146 +41,87 @@ Add it to your app build.gradle
 
 ```groovy
 dependencies {
-        implementation 'com.github.nanihadesuka:LazyColumnScrollbar:1.10.0'
+    implementation 'com.github.nanihadesuka:LazyColumnScrollbar:2.0.0'
 }
 ```
 
-# How to use for LazyColumn
+# Available scrolls components
+- ColumnScrollbar
+- RowScrollbar
+- LazyColumnScrollbar
+- LazyRowScrollbar
+- LazyVerticalGridScrollbar
+- LazyHorizontalGridScrollbar
 
-Simply wrap the LazyColumn with it
-
+# Example for LazyColumn
 ```kotlin
 val listData = (0..1000).toList()
 val listState = rememberLazyListState()
 
-LazyColumnScrollbar(listState) {
+LazyColumnScrollbar(
+  state = listState,
+  settings = ScrollbarSettings.Default  
+) {
     LazyColumn(state = listState) {
         items(listData) {
-            Text(
-                text = "Item $it",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(6.dp)
-            )
+            Text("Item $it")
         }
     }
 }
 ```
 
 indicatorContent example:
+
 ```kotlin
 indicatorContent = { index, isThumbSelected ->
     Text(
         text = "i: $index",
-        Modifier
-            .padding(4.dp)
-            .background(if (isThumbSelected) Color.Red else Color.Black, CircleShape)
-            .padding(12.dp)
+        Modifier.background(if (isThumbSelected) Color.Red else Color.Black, CircleShape)
     )
 }
 ```
 
-## LazyColumnScrollbar arguments
-
+# Default settings parameters
 ```kotlin
-fun LazyColumnScrollbar(
-    listState: LazyListState,
-    rightSide: Boolean = true,
-    alwaysShowScrollBar: Boolean = false,
-    thickness: Dp = 6.dp,
-    padding: Dp = 8.dp,
-    thumbMinHeight: Float = 0.1f,
-    thumbColor: Color = Color(0xFF2A59B6),
-    thumbSelectedColor: Color = Color(0xFF5281CA),
-    thumbShape: Shape = CircleShape,
-    selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
-    selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
-    hideDelayMillis: Int = 400,
-    enabled: Boolean = true,
-    indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
-    content: @Composable () -> Unit
-)
-```
-
-# How to use for LazyVerticalGrid
-
-Simply wrap the LazyVerticalGrid with it
-
-```kotlin
-val listData = (0..1000).toList()
-val lazyGridState = rememberLazyGridState()
-
-LazyGridVerticalScrollbar(lazyGridState) {
-    LazyVerticalGrid(state = lazyGridState) {
-        items(listData) {
-            Text(
-                text = "Item $it",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(6.dp)
-            )
-        }
+/**
+ * @param thumbMinLength Thumb minimum length proportional to total scrollbar's length (eg: 0.1 -> 10% of total)
+ */
+@Stable
+data class ScrollbarSettings(
+    val enabled: Boolean = Default.enabled,
+    val side: ScrollbarLayoutSide = Default.side,
+    val alwaysShowScrollbar: Boolean = Default.alwaysShowScrollbar,
+    val scrollbarPadding: Dp = Default.scrollbarPadding,
+    val thumbThickness: Dp = Default.thumbThickness,
+    val thumbShape: Shape = Default.thumbShape,
+    val thumbMinLength: Float = Default.thumbMinLength,
+    val thumbUnselectedColor: Color = Default.thumbUnselectedColor,
+    val thumbSelectedColor: Color = Default.thumbSelectedColor,
+    val selectionMode: ScrollbarSelectionMode = Default.selectionMode,
+    val selectionActionable: ScrollbarSelectionActionable = Default.selectionActionable,
+    val hideDelayMillis: Int = Default.hideDelayMillis,
+    val durationAnimationMillis: Int = Default.durationAnimationMillis
+) {
+    companion object {
+        val Default = ScrollbarSettings(
+            enabled = true,
+            side = ScrollbarLayoutSide.End,
+            alwaysShowScrollbar = false,
+            thumbThickness = 6.dp,
+            scrollbarPadding = 8.dp,
+            thumbMinLength = 0.1f,
+            thumbUnselectedColor = Color(0xFF2A59B6),
+            thumbSelectedColor = Color(0xFF5281CA),
+            thumbShape = CircleShape,
+            selectionMode = ScrollbarSelectionMode.Thumb,
+            selectionActionable = ScrollbarSelectionActionable.Always,
+            hideDelayMillis = 400,
+            durationAnimationMillis = 500,
+        )
     }
 }
-```
-
-indicatorContent example:
-```kotlin
-indicatorContent = { index, isThumbSelected ->
-    Text(
-        text = "i: $index",
-        Modifier
-            .padding(4.dp)
-            .background(if (isThumbSelected) Color.Red else Color.Black, CircleShape)
-            .padding(12.dp)
-    )
-}
-```
-
-# How to use for Column
-Simply wrap the LazyColumn with it
-
-```kotlin
-val listData = (0..1000).toList()
-val listState = rememberLazyListState()
-
-ColumnScrollbar(listState) {
-    Column(
-        modifier = Modifier.verticalScroll(listState)
-    ) {
-        for (it in listData) {
-            Text(
-                text = "Item $it",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            )
-        }
-    }
-}
-```
-
-## ColumnScrollbar arguments
-
-```kotlin
-fun ColumnScrollbar(
-    state: ScrollState,
-    rightSide: Boolean = true,
-    alwaysShowScrollBar: Boolean = false,
-    thickness: Dp = 6.dp,
-    padding: Dp = 8.dp,
-    thumbMinHeight: Float = 0.1f,
-    thumbColor: Color = Color(0xFF2A59B6),
-    thumbSelectedColor: Color = Color(0xFF5281CA),
-    thumbShape: Shape = CircleShape,
-    enabled: Boolean = true,
-    selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
-    selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
-    hideDelayMillis: Int = 400,
-    indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
-    content: @Composable () -> Unit
-)
 ```
 
 # License
+
 Copyright © 2022, [nani](https://github.com/nanihadesuka), Released under [MIT License](LICENSE)

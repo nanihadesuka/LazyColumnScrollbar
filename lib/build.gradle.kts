@@ -4,8 +4,8 @@ plugins {
     id("maven-publish")
 }
 
-val versionCode: Int = 20
-val versionName: String = "1.10.0"
+val versionCode: Int = 21
+val versionName: String = "2.0.0"
 
 android {
     namespace = "my.nanihadesuka.lazycolumnscrollbar"

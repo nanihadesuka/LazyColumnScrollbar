@@ -8,8 +8,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * @param thumbThickness Thickness of the scrollbar thumb
- * @param scrollbarPadding Padding of the scrollbar
  * @param thumbMinLength Thumb minimum length proportional to total scrollbar's length (eg: 0.1 -> 10% of total)
  */
 @Stable
