@@ -179,7 +179,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         setContent()
         scrollbarScreen(composeRule) {
             scrollListToItem(testTag = itemTestTag(itemCount - 1))
-            assert { isThumbAtBottom() }
+            assert { isThumbAtBottom(tolerance = 15.dp) }
         }
     }
 
@@ -190,9 +190,9 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         setContent()
         scrollbarScreen(composeRule) {
             scrollListToItem(testTag = itemTestTag(itemCount - 1))
-            assert { isThumbAtBottom() }
+            assert { isThumbAtBottom(tolerance = 15.dp) }
             scrollListToItem(testTag = itemTestTag(0))
-            assert { isThumbAtTop() }
+            assert { isThumbAtTop(tolerance = 15.dp) }
         }
     }
 
@@ -363,7 +363,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
     private fun setContent(
         state: ScrollState = ScrollState(initial = 0),
         side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
-        alwaysShowScrollBar: Boolean = false,
+        alwaysShowScrollBar: Boolean = true,
         thickness: Dp = 6.dp,
         padding: Dp = 8.dp,
         thumbMinLength: Float = 0.1f,

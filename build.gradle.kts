@@ -22,7 +22,7 @@ allprojects {
 
 subprojects {
     tasks.withType<Test> {
-        maxParallelForks = Runtime.getRuntime().availableProcessors()
+        maxParallelForks = (Runtime.getRuntime().availableProcessors() - 1).coerceAtLeast(1)
     }
 }
 

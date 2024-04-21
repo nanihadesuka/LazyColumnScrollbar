@@ -82,8 +82,12 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
             .onNodeWithTag(TestTagsScrollbar.scrollbarIndicator)
             .assertDoesNotExist()
 
-        fun isThumbAtTop(indicatorVisible: Boolean = false) {
-            assertEqualWithTolerance(thumbBounds.top, scrollbarContainerBounds.top)
+        fun isThumbAtTop(indicatorVisible: Boolean = false, tolerance: Dp = 2.dp) {
+            assertEqualWithTolerance(
+                thumbBounds.top,
+                scrollbarContainerBounds.top,
+                tolerance = tolerance
+            )
             if (indicatorVisible) {
                 indicatorExist()
                 assertEqualWithTolerance(
@@ -108,11 +112,11 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
             }
         }
 
-        fun isThumbAtBottom(indicatorVisible: Boolean = false) {
+        fun isThumbAtBottom(indicatorVisible: Boolean = false, tolerance: Dp = 2.dp) {
             assertEqualWithTolerance(
                 thumbBounds.bottom,
                 scrollbarContainerBounds.bottom,
-                tolerance = 15.dp
+                tolerance = tolerance
             )
             if (indicatorVisible) {
                 indicatorExist()
@@ -129,7 +133,6 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
             assertEqualWithTolerance(
                 thumbBounds.right,
                 scrollbarContainerBounds.right,
-                tolerance = 15.dp
             )
             if (indicatorVisible) {
                 indicatorExist()
@@ -286,7 +289,7 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
 private val DpRect.verticalCenter: Dp get() = (bottom + top) / 2
 private val DpRect.horizontalCenter: Dp get() = (right + left) / 2
 
-private fun assertEqualWithTolerance(valueA: Dp, valueB: Dp, tolerance: Dp = 15.dp) {
+private fun assertEqualWithTolerance(valueA: Dp, valueB: Dp, tolerance: Dp = 2.dp) {
     assert((valueA - valueB).value.absoluteValue <= tolerance.value) {
         "Not equal: valueA=$valueA valueB=$valueB tolerance=$tolerance"
     }

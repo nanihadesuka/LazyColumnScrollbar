@@ -426,7 +426,7 @@ class LazyVerticalGridScrollbarTest(private val itemCount: Int) {
     private fun setContent(
         lazyGridState: LazyGridState = LazyGridState(),
         side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
-        alwaysShowScrollBar: Boolean = false,
+        alwaysShowScrollBar: Boolean = true,
         thickness: Dp = 6.dp,
         padding: Dp = 8.dp,
         thumbMinLength: Float = 0.1f,
