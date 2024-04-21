@@ -124,4 +124,4 @@ data class ScrollbarSettings(
 
 # License
 
-Copyright © 2022, [nani](https://github.com/nanihadesuka), Released under [MIT License](LICENSE)
+Copyright © 2024, [nani](https://github.com/nanihadesuka), Released under [MIT License](LICENSE)
