@@ -27,7 +27,7 @@ jobs:
       - name: Setup Gradle version
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-version: 8.2.1
+          gradle-version: 8.7
 
       - name: Run unit tests
         run: |

@@ -20,6 +20,12 @@ allprojects {
     }
 }
 
+subprojects {
+    tasks.withType<Test> {
+        maxParallelForks = Runtime.getRuntime().availableProcessors()
+    }
+}
+
 tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
 }
