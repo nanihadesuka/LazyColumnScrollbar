@@ -72,7 +72,7 @@ internal fun VerticalScrollbarLayout(
     )
 
     Layout(
-        modifier = modifier,
+        modifier = modifier.testTag(TestTagsScrollbar.container),
         content = {
             Box(
                 modifier = Modifier

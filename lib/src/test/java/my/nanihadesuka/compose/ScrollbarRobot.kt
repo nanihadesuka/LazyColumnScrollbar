@@ -62,14 +62,6 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
      */
     fun getThumbWidth() = thumbBounds.width.value / scrollbarContainerBounds.width.value
 
-    /**
-     * Normalized thumb bottom position compared against parent container top
-     */
-    fun getThumbBottomPosition(): Float {
-        val base = scrollbarContainerBounds.top.value
-        return (thumbBounds.bottom.value - base) / scrollbarContainerBounds.height.value
-    }
-
     fun assert(assertions: Assertions.() -> Unit) = Assertions().apply(assertions)
 
     inner class Assertions {
@@ -171,19 +163,11 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
         }
 
         fun hasThumbHorizontalPadding(value: Dp) {
-            assertEqualWithTolerance(
-                (scrollbarContainerBounds.width - thumbBounds.width) / 2,
-                value,
-                tolerance = 0.1.dp
-            )
+            assertEqualWithTolerance(thumbPaddingHorizontal, value, tolerance = 0.1.dp)
         }
 
         fun hasThumbVerticalPadding(value: Dp) {
-            assertEqualWithTolerance(
-                (scrollbarContainerBounds.height - thumbBounds.height) / 2,
-                value,
-                tolerance = 0.1.dp
-            )
+            assertEqualWithTolerance(thumbPaddingVertical, value, tolerance = 0.1.dp)
         }
 
         fun hasThumbMinHeightOrGreater(minValue: Float) {
@@ -203,7 +187,14 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
         }
 
         fun isScrollbarAtLeftSide(indicatorVisible: Boolean = false) {
-            assertEqualWithTolerance(thumbBounds.left, 0.dp)
+            assertEqualWithTolerance(
+                thumbBounds.left - thumbPaddingHorizontal,
+                containerBounds.left
+            )
+            assertEqualWithTolerance(
+                scrollbarContainerBounds.left,
+                containerBounds.left
+            )
             if (indicatorVisible) {
                 indicatorExist()
                 assertEqualWithTolerance(indicatorBounds.left, thumbBounds.right)
@@ -213,7 +204,14 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
         }
 
         fun isScrollbarAtRightSide(indicatorVisible: Boolean = false) {
-            assertEqualWithTolerance(thumbBounds.right, scrollbarContainerBounds.right)
+            assertEqualWithTolerance(
+                thumbBounds.right + thumbPaddingHorizontal,
+                containerBounds.right
+            )
+            assertEqualWithTolerance(
+                scrollbarContainerBounds.right,
+                containerBounds.right
+            )
             if (indicatorVisible) {
                 indicatorExist()
                 assertEqualWithTolerance(indicatorBounds.right, thumbBounds.left)
@@ -223,7 +221,14 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
         }
 
         fun isScrollbarAtTopSide(indicatorVisible: Boolean = false) {
-            assertEqualWithTolerance(thumbBounds.top, 0.dp)
+            assertEqualWithTolerance(
+                thumbBounds.top - thumbPaddingVertical,
+                containerBounds.top
+            )
+            assertEqualWithTolerance(
+                scrollbarContainerBounds.top,
+                containerBounds.top
+            )
             if (indicatorVisible) {
                 indicatorExist()
                 assertEqualWithTolerance(indicatorBounds.top, thumbBounds.bottom)
@@ -233,7 +238,14 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
         }
 
         fun isScrollbarAtBottomSide(indicatorVisible: Boolean = false) {
-            assertEqualWithTolerance(thumbBounds.bottom, scrollbarContainerBounds.bottom)
+            assertEqualWithTolerance(
+                thumbBounds.bottom + thumbPaddingVertical,
+                containerBounds.bottom
+            )
+            assertEqualWithTolerance(
+                scrollbarContainerBounds.bottom,
+                containerBounds.bottom
+            )
             if (indicatorVisible) {
                 indicatorExist()
                 assertEqualWithTolerance(indicatorBounds.bottom, thumbBounds.top)
@@ -242,6 +254,17 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
             }
         }
     }
+
+    private val thumbPaddingHorizontal
+        get() = (scrollbarContainerBounds.width - thumbBounds.width) / 2
+
+    private val thumbPaddingVertical
+        get() = (scrollbarContainerBounds.height - thumbBounds.height) / 2
+
+    private val containerBounds
+        get() = composeRule
+            .onNodeWithTag(TestTagsScrollbar.container)
+            .getUnclippedBoundsInRoot()
 
     private val indicatorBounds
         get() = composeRule
