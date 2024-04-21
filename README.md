@@ -5,7 +5,7 @@
 ![Foo23 - Bar](https://img.shields.io/badge/Kotlin-1.9.23-339933)
 ![Foo23 - Bar](https://img.shields.io/badge/Compose_BOM-2024.04.00-339933)
 
-# LazyColumn && Column scrollbar for jetpack compose
+# Scrollbars implementation for jetpack compose
 
 Compose implementation of the scroll bar. Can drag, scroll smoothly and includes animations.
 
