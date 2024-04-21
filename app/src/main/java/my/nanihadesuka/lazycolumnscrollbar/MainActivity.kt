@@ -52,6 +52,7 @@ import my.nanihadesuka.compose.RowScrollbar
 import my.nanihadesuka.compose.ScrollbarSelectionActionable
 import my.nanihadesuka.compose.ScrollbarSelectionMode
 import my.nanihadesuka.compose.ScrollbarLayoutSide
+import my.nanihadesuka.compose.ScrollbarSettings
 import my.nanihadesuka.lazycolumnscrollbar.ui.theme.LazyColumnScrollbarTheme
 
 class MainActivity : ComponentActivity() {
@@ -115,8 +116,10 @@ fun LazyColumnView() {
     ) {
         LazyColumnScrollbar(
             listState,
-            selectionMode = ScrollbarSelectionMode.Thumb,
-            alwaysShowScrollBar = true,
+            settings = ScrollbarSettings(
+                selectionMode = ScrollbarSelectionMode.Thumb,
+                alwaysShowScrollbar = true,
+            ),
             indicatorContent = { index, isThumbSelected ->
                 Indicator(text = "i : $index", isThumbSelected = isThumbSelected)
             }
@@ -168,8 +171,10 @@ fun LazyRowView() {
     ) {
         LazyRowScrollbar(
             listState,
-            selectionMode = ScrollbarSelectionMode.Thumb,
-            alwaysShowScrollBar = true,
+            settings = ScrollbarSettings(
+                selectionMode = ScrollbarSelectionMode.Thumb,
+                alwaysShowScrollbar = true,
+            ),
             indicatorContent = { index, isThumbSelected ->
                 Indicator(text = "i : $index", isThumbSelected = isThumbSelected)
             }
@@ -222,8 +227,10 @@ fun LazyVerticalGridView() {
     ) {
         LazyVerticalGridScrollbar(
             state = lazyGridState,
-            selectionMode = ScrollbarSelectionMode.Thumb,
-            alwaysShowScrollBar = true,
+            settings = ScrollbarSettings(
+                selectionMode = ScrollbarSelectionMode.Thumb,
+                alwaysShowScrollbar = true,
+            ),
             indicatorContent = { index, isThumbSelected ->
                 Indicator(text = "i:$index", isThumbSelected = isThumbSelected)
             }
@@ -270,8 +277,10 @@ fun LazyHorizontalGridView() {
     ) {
         LazyHorizontalGridScrollbar(
             state = lazyGridState,
-            selectionMode = ScrollbarSelectionMode.Thumb,
-            alwaysShowScrollBar = false,
+            settings = ScrollbarSettings(
+                selectionMode = ScrollbarSelectionMode.Thumb,
+                alwaysShowScrollbar = false
+            ),
             indicatorContent = { index, isThumbSelected ->
                 Indicator(text = "i:$index", isThumbSelected = isThumbSelected)
             }
@@ -323,10 +332,12 @@ fun ColumnView() {
         ColumnScrollbar(
             state = listState,
             indicatorContent = indicatorContent,
-            selectionMode = ScrollbarSelectionMode.Thumb,
-            selectionActionable = ScrollbarSelectionActionable.WhenVisible,
-            alwaysShowScrollBar = true,
-            side = ScrollbarLayoutSide.Start,
+            settings = ScrollbarSettings(
+                selectionMode = ScrollbarSelectionMode.Thumb,
+                selectionActionable = ScrollbarSelectionActionable.WhenVisible,
+                alwaysShowScrollbar = true,
+                side = ScrollbarLayoutSide.Start,
+            ),
         ) {
             Column(
                 modifier = Modifier.verticalScroll(listState)
@@ -363,10 +374,12 @@ fun RowView() {
         RowScrollbar(
             state = listState,
             indicatorContent = indicatorContent,
-            selectionMode = ScrollbarSelectionMode.Thumb,
-            selectionActionable = ScrollbarSelectionActionable.WhenVisible,
-            alwaysShowScrollBar = false,
-            side = ScrollbarLayoutSide.End,
+            settings = ScrollbarSettings(
+                selectionMode = ScrollbarSelectionMode.Thumb,
+                selectionActionable = ScrollbarSelectionActionable.WhenVisible,
+                alwaysShowScrollbar = false,
+                side = ScrollbarLayoutSide.End,
+            ),
         ) {
             Row(
                 modifier = Modifier.horizontalScroll(listState)

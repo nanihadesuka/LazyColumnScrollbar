@@ -1,5 +1,6 @@
 package my.nanihadesuka.compose.foundation
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -33,6 +34,7 @@ internal fun VerticalScrollbarLayout(
     thumbSizeNormalized: Float,
     thumbOffsetNormalized: Float,
     thumbIsInAction: Boolean,
+    thumbIsSelected: Boolean,
     settings: ScrollbarLayoutSettings,
     draggableModifier: Modifier,
     indicator: (@Composable () -> Unit)?,
@@ -52,6 +54,12 @@ internal fun VerticalScrollbarLayout(
         ScrollbarSelectionActionable.Always -> true
         ScrollbarSelectionActionable.WhenVisible -> isInActionSelectable.value
     }
+
+    val thumbColor by animateColorAsState(
+        targetValue = if (thumbIsSelected) settings.thumbUnselectedColor else settings.thumbUnselectedColor,
+        animationSpec = tween(durationMillis = 50),
+        label = "scrollbar thumb color value"
+    )
 
     val hideAlpha by animateFloatAsState(
         targetValue = if (thumbIsInAction) 1f else 0f,
@@ -84,7 +92,7 @@ internal fun VerticalScrollbarLayout(
                     .alpha(hideAlpha)
                     .clip(settings.thumbShape)
                     .width(settings.thumbThickness)
-                    .background(settings.thumbColor)
+                    .background(thumbColor)
                     .testTag(TestTagsScrollbar.scrollbarThumb)
             )
             when (indicator) {
@@ -156,13 +164,15 @@ private fun LayoutPreview() {
         VerticalScrollbarLayout(
             thumbSizeNormalized = 0.2f,
             thumbOffsetNormalized = 0.4f,
+            thumbIsSelected = true,
             settings = ScrollbarLayoutSettings(
                 durationAnimationMillis = 500,
                 hideDelayMillis = 400,
                 scrollbarPadding = 8.dp,
                 thumbShape = CircleShape,
                 thumbThickness = 6.dp,
-                thumbColor = Color.Red,
+                thumbUnselectedColor = Color.Green,
+                thumbSelectedColor = Color.Red,
                 side = ScrollbarLayoutSide.Start,
                 selectionActionable = ScrollbarSelectionActionable.Always
             ),

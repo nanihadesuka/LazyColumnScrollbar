@@ -14,7 +14,8 @@ internal data class ScrollbarLayoutSettings(
     val scrollbarPadding: Dp,
     val thumbShape: Shape,
     val thumbThickness: Dp,
-    val thumbColor: Color,
+    val thumbUnselectedColor: Color,
+    val thumbSelectedColor: Color,
     val side: ScrollbarLayoutSide,
     val selectionActionable: ScrollbarSelectionActionable,
 )

@@ -149,7 +149,7 @@ class RowScrollbarTest(private val itemCount: Int) {
         if (itemCount == 0) return
 
         setContent(
-            alwaysShowScrollBar = false,
+            alwaysShowScrollbar = false,
         )
 
         scrollbarScreen(composeRule) {
@@ -163,7 +163,7 @@ class RowScrollbarTest(private val itemCount: Int) {
         if (itemCount == 0) return
 
         setContent(
-            alwaysShowScrollBar = true,
+            alwaysShowScrollbar = true,
         )
 
         scrollbarScreen(composeRule) {
@@ -363,7 +363,7 @@ class RowScrollbarTest(private val itemCount: Int) {
     private fun setContent(
         state: ScrollState = ScrollState(initial = 0),
         side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
-        alwaysShowScrollBar: Boolean = true,
+        alwaysShowScrollbar: Boolean = true,
         thickness: Dp = 6.dp,
         padding: Dp = 8.dp,
         thumbMinLength: Float = 0.1f,
@@ -379,18 +379,20 @@ class RowScrollbarTest(private val itemCount: Int) {
         composeRule.setContent {
             RowScrollbar(
                 state = state,
-                side = side,
-                alwaysShowScrollBar = alwaysShowScrollBar,
-                thickness = thickness,
-                padding = padding,
-                enabled = enabled,
-                thumbMinLength = thumbMinLength,
-                thumbColor = thumbColor,
-                thumbSelectedColor = thumbSelectedColor,
-                thumbShape = thumbShape,
+                settings = ScrollbarSettings(
+                    enabled = enabled,
+                    side = side,
+                    alwaysShowScrollbar = alwaysShowScrollbar,
+                    scrollbarPadding = padding,
+                    thumbThickness = thickness,
+                    thumbMinLength = thumbMinLength,
+                    thumbUnselectedColor = thumbColor,
+                    thumbSelectedColor = thumbSelectedColor,
+                    thumbShape = thumbShape,
+                    selectionMode = selectionMode,
+                    selectionActionable = selectionActionable,
+                ),
                 indicatorContent = indicatorContent,
-                selectionMode = selectionMode,
-                selectionActionable = selectionActionable,
             ) {
                 Row(Modifier.verticalScroll(state = state)) {
                     repeat(listItemsCount) {

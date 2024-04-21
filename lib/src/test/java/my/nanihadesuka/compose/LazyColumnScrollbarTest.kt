@@ -441,19 +441,21 @@ class LazyColumnScrollbarTest(private val itemCount: Int) {
     ) {
         composeRule.setContent {
             LazyColumnScrollbar(
-                listState = state,
-                side = side,
-                alwaysShowScrollBar = alwaysShowScrollBar,
-                thickness = thickness,
-                padding = padding,
-                enabled = enabled,
-                thumbMinLength = thumbMinLength,
-                thumbColor = thumbColor,
-                thumbSelectedColor = thumbSelectedColor,
-                thumbShape = thumbShape,
+                state = state,
+                settings = ScrollbarSettings(
+                    enabled = enabled,
+                    side = side,
+                    alwaysShowScrollbar = alwaysShowScrollBar,
+                    scrollbarPadding = padding,
+                    thumbThickness = thickness,
+                    thumbMinLength = thumbMinLength,
+                    thumbUnselectedColor = thumbColor,
+                    thumbSelectedColor = thumbSelectedColor,
+                    thumbShape = thumbShape,
+                    selectionMode = selectionMode,
+                    selectionActionable = selectionActionable,
+                ),
                 indicatorContent = indicatorContent,
-                selectionMode = selectionMode,
-                selectionActionable = selectionActionable,
             ) {
                 LazyColumn(
                     state = state,

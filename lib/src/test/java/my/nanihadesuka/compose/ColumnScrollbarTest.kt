@@ -149,7 +149,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         if (itemCount == 0) return
 
         setContent(
-            alwaysShowScrollBar = false,
+            alwaysShowScrollbar = false,
         )
 
         scrollbarScreen(composeRule) {
@@ -163,7 +163,7 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         if (itemCount == 0) return
 
         setContent(
-            alwaysShowScrollBar = true,
+            alwaysShowScrollbar = true,
         )
 
         scrollbarScreen(composeRule) {
@@ -363,11 +363,11 @@ class ColumnScrollbarTest(private val itemCount: Int) {
     private fun setContent(
         state: ScrollState = ScrollState(initial = 0),
         side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
-        alwaysShowScrollBar: Boolean = true,
+        alwaysShowScrollbar: Boolean = true,
         thickness: Dp = 6.dp,
         padding: Dp = 8.dp,
         thumbMinLength: Float = 0.1f,
-        thumbColor: Color = Color(0xFF2A59B6),
+        thumbUnselectedColor: Color = Color(0xFF2A59B6),
         thumbSelectedColor: Color = Color(0xFF5281CA),
         thumbShape: Shape = CircleShape,
         enabled: Boolean = true,
@@ -379,18 +379,20 @@ class ColumnScrollbarTest(private val itemCount: Int) {
         composeRule.setContent {
             ColumnScrollbar(
                 state = state,
-                side = side,
-                alwaysShowScrollBar = alwaysShowScrollBar,
-                thickness = thickness,
-                padding = padding,
-                enabled = enabled,
-                thumbMinHeight = thumbMinLength,
-                thumbColor = thumbColor,
-                thumbSelectedColor = thumbSelectedColor,
-                thumbShape = thumbShape,
+                settings = ScrollbarSettings(
+                    enabled = enabled,
+                    side = side,
+                    alwaysShowScrollbar = alwaysShowScrollbar,
+                    scrollbarPadding = padding,
+                    thumbThickness = thickness,
+                    thumbMinLength = thumbMinLength,
+                    thumbUnselectedColor = thumbUnselectedColor,
+                    thumbSelectedColor = thumbSelectedColor,
+                    thumbShape = thumbShape,
+                    selectionMode = selectionMode,
+                    selectionActionable = selectionActionable,
+                ),
                 indicatorContent = indicatorContent,
-                selectionMode = selectionMode,
-                selectionActionable = selectionActionable,
             ) {
                 Column(Modifier.verticalScroll(state = state)) {
                     repeat(listItemsCount) {
