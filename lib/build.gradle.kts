@@ -4,10 +4,13 @@ plugins {
     id("maven-publish")
 }
 
-val versionName: String = "2.0.2"
+object MySettings {
+    val versionName: String = "2.0.3"
+    val namespace = "my.nanihadesuka.lazycolumnscrollbar"
+}
 
 android {
-    namespace = "my.nanihadesuka.lazycolumnscrollbar"
+    namespace = MySettings.namespace
     compileSdk = 34
 
     buildFeatures {
@@ -52,16 +55,23 @@ android {
             isIncludeAndroidResources = true
         }
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            register("release", MavenPublication::class) {
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = MySettings.namespace
+            artifactId = "lazycolumnscrollbar"
+            version = MySettings.versionName
+
+            afterEvaluate {
                 from(components["release"])
-                groupId = "my.nanihadesuka.lazycolumnscrollbar"
-                artifactId = "lazycolumnscrollbar"
-                version = versionName
             }
         }
     }
