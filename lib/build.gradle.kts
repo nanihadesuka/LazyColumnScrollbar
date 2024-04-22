@@ -4,24 +4,18 @@ plugins {
     id("maven-publish")
 }
 
-val versionCode: Int = 21
-val versionName: String = "2.0.1"
+val versionName: String = "2.0.2"
 
 android {
     namespace = "my.nanihadesuka.lazycolumnscrollbar"
     compileSdk = 34
 
     buildFeatures {
-        buildConfig = true
         compose = true
     }
 
     defaultConfig {
         minSdk = 21
-        // you removed these variables REALLY GRADLE ???
-        buildConfigField("int", "VERSION_CODE", versionCode.toString())
-        buildConfigField("String", "VERSION_NAME", "\"$versionName\"")
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
         vectorDrawables {
@@ -63,8 +57,8 @@ android {
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("release") {
-                from(components.getByName("release"))
+            register("release", MavenPublication::class) {
+                from(components["release"])
                 groupId = "my.nanihadesuka.lazycolumnscrollbar"
                 artifactId = "lazycolumnscrollbar"
                 version = versionName
