@@ -63,15 +63,14 @@ android {
     }
 }
 
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            groupId = MySettings.namespace
-            artifactId = "lazycolumnscrollbar"
-            version = MySettings.versionName
-
-            afterEvaluate {
+afterEvaluate {
+    publishing {
+        publications {
+            register<MavenPublication>("release") {
                 from(components["release"])
+                groupId = MySettings.namespace
+                artifactId = "lazycolumnscrollbar"
+                version = MySettings.versionName
             }
         }
     }
