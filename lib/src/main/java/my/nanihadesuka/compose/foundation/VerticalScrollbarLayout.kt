@@ -56,7 +56,7 @@ internal fun VerticalScrollbarLayout(
     }
 
     val thumbColor by animateColorAsState(
-        targetValue = if (thumbIsSelected) settings.thumbUnselectedColor else settings.thumbUnselectedColor,
+        targetValue = if (thumbIsSelected) settings.thumbSelectedColor else settings.thumbUnselectedColor,
         animationSpec = tween(durationMillis = 50),
         label = "scrollbar thumb color value"
     )
