@@ -27,14 +27,9 @@ android {
     }
 
     buildTypes {
-        named("release") {
-            postprocessing {
-                isMinifyEnabled = false
-                proguardFile("proguard-rules.pro")
-                isRemoveUnusedCode = false
-                isObfuscate = false
-                isOptimizeCode = true
-            }
+        release {
+            isMinifyEnabled = false
+            proguardFile("proguard-rules.pro")
         }
     }
 
