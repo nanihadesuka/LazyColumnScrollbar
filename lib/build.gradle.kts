@@ -31,7 +31,7 @@ android {
             postprocessing {
                 isMinifyEnabled = false
                 proguardFile("proguard-rules.pro")
-                isRemoveUnusedCode = true
+                isRemoveUnusedCode = false
                 isObfuscate = false
                 isOptimizeCode = true
             }
