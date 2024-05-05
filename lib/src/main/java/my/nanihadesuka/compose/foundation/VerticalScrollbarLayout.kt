@@ -1,9 +1,6 @@
 package my.nanihadesuka.compose.foundation
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -12,10 +9,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -24,7 +17,6 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
 import my.nanihadesuka.compose.ScrollbarLayoutSide
 import my.nanihadesuka.compose.ScrollbarSelectionActionable
 import my.nanihadesuka.compose.TestTagsScrollbar
@@ -40,43 +32,10 @@ internal fun VerticalScrollbarLayout(
     indicator: (@Composable () -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
-    val isInActionSelectable = remember { mutableStateOf(thumbIsInAction) }
-    LaunchedEffect(thumbIsInAction) {
-        if (thumbIsInAction) {
-            isInActionSelectable.value = true
-        } else {
-            delay(timeMillis = settings.durationAnimationMillis.toLong() + settings.hideDelayMillis.toLong())
-            isInActionSelectable.value = false
-        }
-    }
-
-    val activeDraggableModifier = when (settings.selectionActionable) {
-        ScrollbarSelectionActionable.Always -> true
-        ScrollbarSelectionActionable.WhenVisible -> isInActionSelectable.value
-    }
-
-    val thumbColor by animateColorAsState(
-        targetValue = if (thumbIsSelected) settings.thumbSelectedColor else settings.thumbUnselectedColor,
-        animationSpec = tween(durationMillis = 50),
-        label = "scrollbar thumb color value"
-    )
-
-    val hideAlpha by animateFloatAsState(
-        targetValue = if (thumbIsInAction) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = if (thumbIsInAction) 75 else settings.durationAnimationMillis,
-            delayMillis = if (thumbIsInAction) 0 else settings.hideDelayMillis
-        ),
-        label = "scrollbar alpha value"
-    )
-
-    val hideDisplacement by animateDpAsState(
-        targetValue = if (thumbIsInAction) 0.dp else 14.dp,
-        animationSpec = tween(
-            durationMillis = if (thumbIsInAction) 75 else settings.durationAnimationMillis,
-            delayMillis = if (thumbIsInAction) 0 else settings.hideDelayMillis
-        ),
-        label = "scrollbar displacement value"
+    val state = rememberScrollbarLayoutState(
+        thumbIsInAction = thumbIsInAction,
+        thumbIsSelected = thumbIsSelected,
+        settings = settings,
     )
 
     Layout(
@@ -89,10 +48,10 @@ internal fun VerticalScrollbarLayout(
                         start = if (settings.side == ScrollbarLayoutSide.Start) settings.scrollbarPadding else 0.dp,
                         end = if (settings.side == ScrollbarLayoutSide.End) settings.scrollbarPadding else 0.dp,
                     )
-                    .alpha(hideAlpha)
+                    .alpha(state.hideAlpha.value)
                     .clip(settings.thumbShape)
                     .width(settings.thumbThickness)
-                    .background(thumbColor)
+                    .background(state.thumbColor.value)
                     .testTag(TestTagsScrollbar.scrollbarThumb)
             )
             when (indicator) {
@@ -100,7 +59,7 @@ internal fun VerticalScrollbarLayout(
                 else -> Box(
                     Modifier
                         .testTag(TestTagsScrollbar.scrollbarIndicator)
-                        .alpha(hideAlpha)
+                        .alpha(state.hideAlpha.value)
                 ) {
                     indicator()
                 }
@@ -109,7 +68,7 @@ internal fun VerticalScrollbarLayout(
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(settings.scrollbarPadding * 2 + settings.thumbThickness)
-                    .run { if (activeDraggableModifier) then(draggableModifier) else this }
+                    .run { if (state.activeDraggableModifier.value) then(draggableModifier) else this }
                     .testTag(TestTagsScrollbar.scrollbarContainer)
             )
         },
@@ -124,8 +83,8 @@ internal fun VerticalScrollbarLayout(
                 val offset = (constraints.maxHeight.toFloat() * thumbOffsetNormalized).toInt()
 
                 val hideDisplacementPx = when (settings.side) {
-                    ScrollbarLayoutSide.Start -> -hideDisplacement.roundToPx()
-                    ScrollbarLayoutSide.End -> +hideDisplacement.roundToPx()
+                    ScrollbarLayoutSide.Start -> -state.hideDisplacement.value.roundToPx()
+                    ScrollbarLayoutSide.End -> +state.hideDisplacement.value.roundToPx()
                 }
 
                 placeableThumb.placeRelative(
@@ -174,7 +133,9 @@ private fun LayoutPreview() {
                 thumbUnselectedColor = Color.Green,
                 thumbSelectedColor = Color.Red,
                 side = ScrollbarLayoutSide.Start,
-                selectionActionable = ScrollbarSelectionActionable.Always
+                selectionActionable = ScrollbarSelectionActionable.Always,
+                hideEasingAnimation = FastOutSlowInEasing,
+                hideDisplacement = 14.dp,
             ),
             draggableModifier = Modifier,
             thumbIsInAction = true,

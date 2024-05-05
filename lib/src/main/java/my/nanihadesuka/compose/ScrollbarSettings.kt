@@ -1,5 +1,7 @@
 package my.nanihadesuka.compose
 
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
@@ -24,7 +26,9 @@ data class ScrollbarSettings(
     val selectionMode: ScrollbarSelectionMode = Default.selectionMode,
     val selectionActionable: ScrollbarSelectionActionable = Default.selectionActionable,
     val hideDelayMillis: Int = Default.hideDelayMillis,
-    val durationAnimationMillis: Int = Default.durationAnimationMillis
+    val hideDisplacement: Dp = Default.hideDisplacement,
+    val hideEasingAnimation: Easing = Default.hideEasingAnimation,
+    val durationAnimationMillis: Int = Default.durationAnimationMillis,
 ) {
     companion object {
         val Default = ScrollbarSettings(
@@ -40,6 +44,8 @@ data class ScrollbarSettings(
             selectionMode = ScrollbarSelectionMode.Thumb,
             selectionActionable = ScrollbarSelectionActionable.Always,
             hideDelayMillis = 400,
+            hideDisplacement = 14.dp,
+            hideEasingAnimation = FastOutSlowInEasing,
             durationAnimationMillis = 500,
         )
     }

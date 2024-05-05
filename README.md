@@ -88,37 +88,41 @@ indicatorContent = { index, isThumbSelected ->
  */
 @Stable
 data class ScrollbarSettings(
-    val enabled: Boolean = Default.enabled,
-    val side: ScrollbarLayoutSide = Default.side,
-    val alwaysShowScrollbar: Boolean = Default.alwaysShowScrollbar,
-    val scrollbarPadding: Dp = Default.scrollbarPadding,
-    val thumbThickness: Dp = Default.thumbThickness,
-    val thumbShape: Shape = Default.thumbShape,
-    val thumbMinLength: Float = Default.thumbMinLength,
-    val thumbUnselectedColor: Color = Default.thumbUnselectedColor,
-    val thumbSelectedColor: Color = Default.thumbSelectedColor,
-    val selectionMode: ScrollbarSelectionMode = Default.selectionMode,
-    val selectionActionable: ScrollbarSelectionActionable = Default.selectionActionable,
-    val hideDelayMillis: Int = Default.hideDelayMillis,
-    val durationAnimationMillis: Int = Default.durationAnimationMillis
+  val enabled: Boolean = Default.enabled,
+  val side: ScrollbarLayoutSide = Default.side,
+  val alwaysShowScrollbar: Boolean = Default.alwaysShowScrollbar,
+  val scrollbarPadding: Dp = Default.scrollbarPadding,
+  val thumbThickness: Dp = Default.thumbThickness,
+  val thumbShape: Shape = Default.thumbShape,
+  val thumbMinLength: Float = Default.thumbMinLength,
+  val thumbUnselectedColor: Color = Default.thumbUnselectedColor,
+  val thumbSelectedColor: Color = Default.thumbSelectedColor,
+  val selectionMode: ScrollbarSelectionMode = Default.selectionMode,
+  val selectionActionable: ScrollbarSelectionActionable = Default.selectionActionable,
+  val hideDelayMillis: Int = Default.hideDelayMillis,
+  val hideDisplacement: Dp = Default.hideDisplacement,
+  val hideEasingAnimation: Easing = Default.hideEasingAnimation,
+  val durationAnimationMillis: Int = Default.durationAnimationMillis,
 ) {
-    companion object {
-        val Default = ScrollbarSettings(
-            enabled = true,
-            side = ScrollbarLayoutSide.End,
-            alwaysShowScrollbar = false,
-            thumbThickness = 6.dp,
-            scrollbarPadding = 8.dp,
-            thumbMinLength = 0.1f,
-            thumbUnselectedColor = Color(0xFF2A59B6),
-            thumbSelectedColor = Color(0xFF5281CA),
-            thumbShape = CircleShape,
-            selectionMode = ScrollbarSelectionMode.Thumb,
-            selectionActionable = ScrollbarSelectionActionable.Always,
-            hideDelayMillis = 400,
-            durationAnimationMillis = 500,
-        )
-    }
+  companion object {
+    val Default = ScrollbarSettings(
+      enabled = true,
+      side = ScrollbarLayoutSide.End,
+      alwaysShowScrollbar = false,
+      thumbThickness = 6.dp,
+      scrollbarPadding = 8.dp,
+      thumbMinLength = 0.1f,
+      thumbUnselectedColor = Color(0xFF2A59B6),
+      thumbSelectedColor = Color(0xFF5281CA),
+      thumbShape = CircleShape,
+      selectionMode = ScrollbarSelectionMode.Thumb,
+      selectionActionable = ScrollbarSelectionActionable.Always,
+      hideDelayMillis = 400,
+      hideDisplacement = 14.dp,
+      hideEasingAnimation = FastOutSlowInEasing,
+      durationAnimationMillis = 500,
+    )
+  }
 }
 ```
 

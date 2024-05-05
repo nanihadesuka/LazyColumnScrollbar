@@ -1,5 +1,6 @@
 package my.nanihadesuka.compose.foundation
 
+import androidx.compose.animation.core.Easing
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -9,8 +10,6 @@ import my.nanihadesuka.compose.ScrollbarSelectionActionable
 
 @Stable
 internal data class ScrollbarLayoutSettings(
-    val durationAnimationMillis: Int,
-    val hideDelayMillis: Int,
     val scrollbarPadding: Dp,
     val thumbShape: Shape,
     val thumbThickness: Dp,
@@ -18,4 +17,8 @@ internal data class ScrollbarLayoutSettings(
     val thumbSelectedColor: Color,
     val side: ScrollbarLayoutSide,
     val selectionActionable: ScrollbarSelectionActionable,
+    val hideDisplacement: Dp,
+    val hideDelayMillis: Int,
+    val hideEasingAnimation: Easing,
+    val durationAnimationMillis: Int
 )
