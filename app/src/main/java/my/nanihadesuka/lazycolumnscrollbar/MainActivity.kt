@@ -314,7 +314,7 @@ fun LazyHorizontalGridView() {
 
 @Composable
 fun ColumnView() {
-    val listData = (0..100).toList()
+    val listData = (0..18).toList()
     val listState = rememberScrollState()
     val indicatorContent = @Composable { normalizedOffset: Float, isThumbSelected: Boolean ->
         Indicator(

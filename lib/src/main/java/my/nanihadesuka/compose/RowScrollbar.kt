@@ -46,6 +46,7 @@ fun InternalRowScrollbar(
         state = state,
         visibleLengthDp = visibleLengthDp,
         thumbMinLength = settings.thumbMinLength,
+        thumbMaxLength = settings.thumbMaxLength,
         alwaysShowScrollBar = settings.alwaysShowScrollbar,
         selectionMode = settings.selectionMode,
     )

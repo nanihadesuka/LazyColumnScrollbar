@@ -173,6 +173,22 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
             assertEqualWithTolerance(thumbPaddingVertical, value, tolerance = 0.1.dp)
         }
 
+        fun hasThumbHeight(value: Float) {
+            assertEqualWithTolerance(
+                thumbBounds.height.value / scrollbarContainerBounds.height.value,
+                value,
+                tolerance = 0.01f
+            )
+        }
+
+        fun hasThumbWidth(value: Float) {
+            assertEqualWithTolerance(
+                thumbBounds.width.value / scrollbarContainerBounds.width.value,
+                value,
+                tolerance = 0.01f
+            )
+        }
+
         fun hasThumbMinHeightOrGreater(minValue: Float) {
             assertEqualOrGreater(
                 thumbBounds.height.value / scrollbarContainerBounds.height.value,
@@ -288,6 +304,12 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
 
 private val DpRect.verticalCenter: Dp get() = (bottom + top) / 2
 private val DpRect.horizontalCenter: Dp get() = (right + left) / 2
+
+private fun assertEqualWithTolerance(valueA: Float, valueB: Float, tolerance: Float = 0.01f) {
+    assert((valueA - valueB).absoluteValue <= tolerance) {
+        "Not equal: valueA=$valueA valueB=$valueB tolerance=$tolerance"
+    }
+}
 
 private fun assertEqualWithTolerance(valueA: Dp, valueB: Dp, tolerance: Dp = 2.dp) {
     assert((valueA - valueB).value.absoluteValue <= tolerance.value) {

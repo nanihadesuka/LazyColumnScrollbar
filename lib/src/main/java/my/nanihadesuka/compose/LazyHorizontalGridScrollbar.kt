@@ -40,6 +40,7 @@ fun InternalLazyHorizontalGridScrollbar(
     val controller = rememberLazyGridStateController(
         state = state,
         thumbMinLength = settings.thumbMinLength,
+        thumbMaxLength = settings.thumbMaxLength,
         alwaysShowScrollBar = settings.alwaysShowScrollbar,
         selectionMode = settings.selectionMode,
         orientation = Orientation.Horizontal

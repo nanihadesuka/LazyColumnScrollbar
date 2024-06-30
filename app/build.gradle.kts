@@ -11,8 +11,8 @@ android {
         applicationId = "my.nanihadesuka.lazycolumnscrollbar"
         minSdk = 21
         targetSdk = 34
-        versionCode = 8
-        versionName = "2.0.0"
+        versionCode = 9
+        versionName = "2.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

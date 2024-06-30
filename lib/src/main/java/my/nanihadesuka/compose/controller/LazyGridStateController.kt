@@ -23,6 +23,7 @@ import kotlin.math.floor
 internal fun rememberLazyGridStateController(
     state: LazyGridState,
     thumbMinLength: Float,
+    thumbMaxLength: Float,
     alwaysShowScrollBar: Boolean,
     selectionMode: ScrollbarSelectionMode,
     orientation: Orientation
@@ -30,6 +31,7 @@ internal fun rememberLazyGridStateController(
     val coroutineScope = rememberCoroutineScope()
 
     val thumbMinLengthUpdated = rememberUpdatedState(thumbMinLength)
+    val thumbMaxLengthUpdated = rememberUpdatedState(thumbMaxLength)
     val alwaysShowScrollBarUpdated = rememberUpdatedState(alwaysShowScrollBar)
     val selectionModeUpdated = rememberUpdatedState(selectionMode)
     val orientationUpdated = rememberUpdatedState(orientation)
@@ -114,7 +116,10 @@ internal fun rememberLazyGridStateController(
 
     val thumbSizeNormalized = remember {
         derivedStateOf {
-            thumbSizeNormalizedReal.value.coerceAtLeast(thumbMinLengthUpdated.value)
+            thumbSizeNormalizedReal.value.coerceIn(
+                thumbMinLengthUpdated.value,
+                thumbMaxLengthUpdated.value,
+            )
         }
     }
 
@@ -142,7 +147,9 @@ internal fun rememberLazyGridStateController(
 
                 val firstItem = realFirstVisibleItem.value ?: return@let 0f
                 val top = firstItem.run {
-                    ceil(index.toFloat() / nElementsMainAxis.value.toFloat()) + fractionHiddenTop(state.firstVisibleItemScrollOffset)
+                    ceil(index.toFloat() / nElementsMainAxis.value.toFloat()) + fractionHiddenTop(
+                        state.firstVisibleItemScrollOffset
+                    )
                 } / ceil(it.totalItemsCount.toFloat() / nElementsMainAxis.value.toFloat())
                 offsetCorrection(top)
             }

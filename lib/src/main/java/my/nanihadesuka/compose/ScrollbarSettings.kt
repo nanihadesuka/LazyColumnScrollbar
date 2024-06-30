@@ -21,6 +21,7 @@ data class ScrollbarSettings(
     val thumbThickness: Dp = Default.thumbThickness,
     val thumbShape: Shape = Default.thumbShape,
     val thumbMinLength: Float = Default.thumbMinLength,
+    val thumbMaxLength: Float = Default.thumbMaxLength,
     val thumbUnselectedColor: Color = Default.thumbUnselectedColor,
     val thumbSelectedColor: Color = Default.thumbSelectedColor,
     val selectionMode: ScrollbarSelectionMode = Default.selectionMode,
@@ -30,6 +31,12 @@ data class ScrollbarSettings(
     val hideEasingAnimation: Easing = Default.hideEasingAnimation,
     val durationAnimationMillis: Int = Default.durationAnimationMillis,
 ) {
+    init {
+        require(thumbMinLength <= thumbMaxLength) {
+            "thumbMinLength ($thumbMinLength) must be less or equal to thumbMaxLength ($thumbMaxLength)"
+        }
+    }
+
     companion object {
         val Default = ScrollbarSettings(
             enabled = true,
@@ -38,6 +45,7 @@ data class ScrollbarSettings(
             thumbThickness = 6.dp,
             scrollbarPadding = 8.dp,
             thumbMinLength = 0.1f,
+            thumbMaxLength = 1.0f,
             thumbUnselectedColor = Color(0xFF2A59B6),
             thumbSelectedColor = Color(0xFF5281CA),
             thumbShape = CircleShape,

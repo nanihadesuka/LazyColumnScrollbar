@@ -22,12 +22,14 @@ import kotlin.math.floor
 internal fun rememberLazyListStateController(
     state: LazyListState,
     thumbMinLength: Float,
+    thumbMaxLength: Float,
     alwaysShowScrollBar: Boolean,
     selectionMode: ScrollbarSelectionMode
 ): LazyListStateController {
     val coroutineScope = rememberCoroutineScope()
 
     val thumbMinLengthUpdated = rememberUpdatedState(thumbMinLength)
+    val thumbMaxLengthUpdated = rememberUpdatedState(thumbMaxLength)
     val alwaysShowScrollBarUpdated = rememberUpdatedState(alwaysShowScrollBar)
     val selectionModeUpdated = rememberUpdatedState(selectionMode)
     val reverseLayout = remember { derivedStateOf { state.layoutInfo.reverseLayout } }
@@ -80,7 +82,10 @@ internal fun rememberLazyListStateController(
 
     val thumbSizeNormalized = remember {
         derivedStateOf {
-            thumbSizeNormalizedReal.value.coerceAtLeast(thumbMinLengthUpdated.value)
+            thumbSizeNormalizedReal.value.coerceIn(
+                thumbMinLengthUpdated.value,
+                thumbMaxLengthUpdated.value,
+            )
         }
     }
 

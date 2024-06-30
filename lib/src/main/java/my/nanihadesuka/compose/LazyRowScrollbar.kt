@@ -40,6 +40,7 @@ fun InternalLazyRowScrollbar(
     val controller = rememberLazyListStateController(
         state = state,
         thumbMinLength = settings.thumbMinLength,
+        thumbMaxLength = settings.thumbMaxLength,
         alwaysShowScrollBar = settings.alwaysShowScrollbar,
         selectionMode = settings.selectionMode,
     )

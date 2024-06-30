@@ -289,6 +289,16 @@ class LazyVerticalGridScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
+    fun `scrollbar thumb exact height`() {
+        setContent(thumbMinLength = 0.4f, thumbMaxLength = 0.4f)
+        scrollbarScreen(composeRule) {
+            assert {
+                hasThumbHeight(value = 0.4f)
+            }
+        }
+    }
+
+    @Test
     fun `scrollbar thumb min height`() {
         setContent(thumbMinLength = 0.2f)
         scrollbarScreen(composeRule) {
@@ -430,6 +440,7 @@ class LazyVerticalGridScrollbarTest(private val itemCount: Int) {
         thickness: Dp = 6.dp,
         padding: Dp = 8.dp,
         thumbMinLength: Float = 0.1f,
+        thumbMaxLength: Float = 1f,
         thumbColor: Color = Color(0xFF2A59B6),
         thumbSelectedColor: Color = Color(0xFF5281CA),
         thumbShape: Shape = CircleShape,
@@ -450,6 +461,7 @@ class LazyVerticalGridScrollbarTest(private val itemCount: Int) {
                     scrollbarPadding = padding,
                     thumbThickness = thickness,
                     thumbMinLength = thumbMinLength,
+                    thumbMaxLength = thumbMaxLength,
                     thumbUnselectedColor = thumbColor,
                     thumbSelectedColor = thumbSelectedColor,
                     thumbShape = thumbShape,

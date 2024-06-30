@@ -22,6 +22,7 @@ internal fun rememberScrollStateController(
     state: ScrollState,
     visibleLengthDp: Dp,
     thumbMinLength: Float,
+    thumbMaxLength: Float,
     alwaysShowScrollBar: Boolean,
     selectionMode: ScrollbarSelectionMode
 ): ScrollStateController {
@@ -29,6 +30,7 @@ internal fun rememberScrollStateController(
 
     val visibleLengthDpUpdated = rememberUpdatedState(visibleLengthDp)
     val thumbMinLengthUpdated = rememberUpdatedState(thumbMinLength)
+    val thumbMaxLengthUpdated = rememberUpdatedState(thumbMaxLength)
     val alwaysShowScrollBarUpdated = rememberUpdatedState(alwaysShowScrollBar)
     val selectionModeUpdated = rememberUpdatedState(selectionMode)
 
@@ -54,7 +56,10 @@ internal fun rememberScrollStateController(
 
     val thumbSizeNormalized = remember {
         derivedStateOf {
-            thumbSizeNormalizedReal.value.coerceAtLeast(thumbMinLengthUpdated.value)
+            thumbSizeNormalizedReal.value.coerceIn(
+                thumbMinLengthUpdated.value,
+                thumbMaxLengthUpdated.value,
+            )
         }
     }
 

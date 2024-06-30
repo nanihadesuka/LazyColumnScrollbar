@@ -40,8 +40,9 @@ fun InternalLazyColumnScrollbar(
     val controller = rememberLazyListStateController(
         state = state,
         thumbMinLength = settings.thumbMinLength,
+        thumbMaxLength = settings.thumbMaxLength,
         alwaysShowScrollBar = settings.alwaysShowScrollbar,
-        selectionMode = settings.selectionMode
+        selectionMode = settings.selectionMode,
     )
 
     ElementScrollbar(
