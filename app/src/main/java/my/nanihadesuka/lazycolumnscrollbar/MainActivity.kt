@@ -36,6 +36,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -105,7 +106,7 @@ fun MainView() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LazyColumnView() {
-    val listData = (0..100).toList()
+    val listData = remember { (0..100).toList() }
     val listState = rememberLazyListState()
 
     Box(
@@ -160,7 +161,7 @@ fun LazyColumnView() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LazyRowView() {
-    val listData = (0..100).toList()
+    val listData = remember { (0..100).toList() }
     val listState = rememberLazyListState()
 
     Box(
@@ -314,7 +315,7 @@ fun LazyHorizontalGridView() {
 
 @Composable
 fun ColumnView() {
-    val listData = (0..18).toList()
+    val listData = remember { (0..18).toList() }
     val listState = rememberScrollState()
     val indicatorContent = @Composable { normalizedOffset: Float, isThumbSelected: Boolean ->
         Indicator(
@@ -357,7 +358,7 @@ fun ColumnView() {
 
 @Composable
 fun RowView() {
-    val listData = (0..100).toList()
+    val listData = remember { (0..100).toList() }
     val listState = rememberScrollState()
     val indicatorContent = @Composable { normalizedOffset: Float, isThumbSelected: Boolean ->
         Indicator(
