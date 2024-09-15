@@ -1,6 +1,12 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    id("com.android.library")
-    id("kotlin-android")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.jetbrains.compose)
+    alias(libs.plugins.jetbrains.compose.compiler)
     id("maven-publish")
 }
 
@@ -13,10 +19,6 @@ android {
     namespace = MySettings.namespace
     compileSdk = 34
 
-    buildFeatures {
-        compose = true
-    }
-
     defaultConfig {
         minSdk = 21
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -25,6 +27,10 @@ android {
             useSupportLibrary = true
         }
     }
+
+    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    sourceSets["main"].res.srcDirs("src/androidMain/res")
+    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
 
     buildTypes {
         release {
@@ -37,14 +43,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-    }
-
+    @Suppress("UnstableApiUsage")
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
@@ -71,16 +71,66 @@ afterEvaluate {
     }
 }
 
+kotlin {
+
+    val isAndroidApp = plugins.hasPlugin("com.android.application")
+    val isAndroidLibrary = plugins.hasPlugin("com.android.library")
+    if (isAndroidApp || isAndroidLibrary) {
+        androidTarget {
+            if (isAndroidLibrary) {
+                publishLibraryVariants("release")
+            }
+            @OptIn(ExperimentalKotlinGradlePluginApi::class)
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_1_8)
+            }
+        }
+    }
+
+    jvm()
+
+    js {
+        browser()
+        nodejs()
+        binaries.executable()
+        binaries.library()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+        nodejs()
+        binaries.executable()
+        binaries.library()
+    }
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    macosX64()
+    macosArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.runtime)
+            implementation(compose.ui)
+            implementation(compose.animation)
+            implementation(compose.components.uiToolingPreview)
+        }
+        androidMain.dependencies {
+            implementation(compose.preview)
+        }
+        androidUnitTest.dependencies {
+            implementation(libs.junit)
+            implementation(compose.desktop.uiTestJUnit4)
+            implementation(libs.robolectric)
+        }
+    }
+}
+
 dependencies {
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.material)
-    implementation(libs.androidx.compose.ui.ui)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-
-    testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.compose.ui.test.junit4)
-    testImplementation(libs.junit)
 }

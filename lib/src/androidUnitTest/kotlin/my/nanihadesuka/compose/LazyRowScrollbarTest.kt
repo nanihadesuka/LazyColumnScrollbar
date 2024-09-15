@@ -1,13 +1,12 @@
 package my.nanihadesuka.compose
 
-
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,17 +21,18 @@ import org.junit.runner.RunWith
 import org.robolectric.ParameterizedRobolectricTestRunner
 
 @RunWith(ParameterizedRobolectricTestRunner::class)
-class RowScrollbarTest(private val itemCount: Int) {
+class LazyRowScrollbarTest(private val itemCount: Int) {
 
     companion object {
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = " Items count: {0} ")
-        fun parametrizeListItemCount() = listOf<Array<Int>>(
-            arrayOf(0),
-            arrayOf(1),
-            arrayOf(10),
-            arrayOf(100)
-        )
+        fun parametrizeListItemCount() =
+            listOf<Array<Int>>(
+                arrayOf(0),
+                arrayOf(1),
+                arrayOf(10),
+                arrayOf(100)
+            )
     }
 
     @get:Rule
@@ -97,13 +97,30 @@ class RowScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    fun `move thumb to the right`() {
+    fun `move thumb to the left - with reverse layout`() {
         if (itemCount == 0) return
 
-        setContent()
+        setContent(reverseLayout = true)
+        scrollbarScreen(composeRule) {
+            moveThumbToLeft(1f)
+            assert {
+                isThumbAtLeft()
+                isItemVisible(itemTag = itemTestTag(itemCount - 1))
+            }
+        }
+    }
+
+    @Test
+    fun `move thumb to the right - with reverse layout`() {
+        if (itemCount == 0) return
+
+        setContent(reverseLayout = true)
         scrollbarScreen(composeRule) {
             moveThumbToRight()
-            assert { isThumbAtRight() }
+            assert {
+                isThumbAtRight()
+                isItemVisible(itemTag = itemTestTag(0))
+            }
         }
     }
 
@@ -115,8 +132,27 @@ class RowScrollbarTest(private val itemCount: Int) {
         scrollbarScreen(composeRule) {
             moveThumbToRight()
             assert { isThumbAtRight() }
+            moveThumbToLeft(1f)
+            assert {
+                isThumbAtLeft()
+                isItemVisible(itemTag = itemTestTag(0))
+            }
+        }
+    }
+
+    @Test
+    fun `move thumb to the right`() {
+        if (itemCount == 0) return
+
+        setContent()
+        scrollbarScreen(composeRule) {
             moveThumbToLeft()
             assert { isThumbAtLeft() }
+            moveThumbToRight()
+            assert {
+                isThumbAtRight()
+                isItemVisible(itemTag = itemTestTag(itemCount - 1))
+            }
         }
     }
 
@@ -126,7 +162,7 @@ class RowScrollbarTest(private val itemCount: Int) {
 
         setContent(indicatorContent = { value, _ -> IndicatorContent(value) })
         scrollbarScreen(composeRule) {
-            moveThumbToRight()
+            moveThumbToRight(startFrom = 0.05f)
             assert { isThumbAtRight(indicatorVisible = true) }
         }
     }
@@ -139,13 +175,13 @@ class RowScrollbarTest(private val itemCount: Int) {
         scrollbarScreen(composeRule) {
             moveThumbToRight()
             assert { isThumbAtRight(indicatorVisible = true) }
-            moveThumbToLeft()
+            moveThumbToLeft(1f)
             assert { isThumbAtLeft(indicatorVisible = true) }
         }
     }
 
     @Test
-    fun `always show thumb false`() {
+    fun `always show scrollbar false`() {
         if (itemCount == 0) return
 
         setContent(
@@ -159,7 +195,7 @@ class RowScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    fun `always show thumb true`() {
+    fun `always show scrollbar true`() {
         if (itemCount == 0) return
 
         setContent(
@@ -173,7 +209,7 @@ class RowScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    fun `scroll list to the end`() {
+    fun `scroll list to the right`() {
         if (itemCount == 0) return
 
         setContent()
@@ -184,7 +220,7 @@ class RowScrollbarTest(private val itemCount: Int) {
     }
 
     @Test
-    fun `scroll list to the start`() {
+    fun `scroll list to the left`() {
         if (itemCount == 0) return
 
         setContent()
@@ -192,6 +228,30 @@ class RowScrollbarTest(private val itemCount: Int) {
             scrollListToItem(testTag = itemTestTag(itemCount - 1))
             assert { isThumbAtRight() }
             scrollListToItem(testTag = itemTestTag(0))
+            assert { isThumbAtLeft() }
+        }
+    }
+
+    @Test
+    fun `scroll list to the right - with reverse layout`() {
+        if (itemCount == 0) return
+
+        setContent(reverseLayout = true)
+        scrollbarScreen(composeRule) {
+            scrollListToItem(testTag = itemTestTag(itemCount - 1))
+            assert { isThumbAtLeft() }
+            scrollListToItem(testTag = itemTestTag(0))
+            assert { isThumbAtRight() }
+        }
+    }
+
+    @Test
+    fun `scroll list to the left - with reverse layout `() {
+        if (itemCount == 0) return
+
+        setContent(reverseLayout = true)
+        scrollbarScreen(composeRule) {
+            scrollListToItem(testTag = itemTestTag(itemCount - 1))
             assert { isThumbAtLeft() }
         }
     }
@@ -361,7 +421,7 @@ class RowScrollbarTest(private val itemCount: Int) {
     }
 
     @Composable
-    private fun IndicatorContent(value: Float) {
+    private fun IndicatorContent(value: Int) {
         Surface {
             Text(
                 text = "Indicator",
@@ -371,24 +431,25 @@ class RowScrollbarTest(private val itemCount: Int) {
     }
 
     private fun setContent(
-        state: ScrollState = ScrollState(initial = 0),
+        state: LazyListState = LazyListState(),
         side: ScrollbarLayoutSide = ScrollbarLayoutSide.End,
         alwaysShowScrollbar: Boolean = true,
         thickness: Dp = 6.dp,
         padding: Dp = 8.dp,
         thumbMinLength: Float = 0.1f,
-        thumbMaxLength: Float = 1.0f,
+        thumbMaxLength: Float = 1f,
         thumbColor: Color = Color(0xFF2A59B6),
         thumbSelectedColor: Color = Color(0xFF5281CA),
         thumbShape: Shape = CircleShape,
         enabled: Boolean = true,
         selectionMode: ScrollbarSelectionMode = ScrollbarSelectionMode.Thumb,
         selectionActionable: ScrollbarSelectionActionable = ScrollbarSelectionActionable.Always,
-        indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
-        listItemsCount: Int = itemCount
+        indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
+        listItemsCount: Int = itemCount,
+        reverseLayout: Boolean = false
     ) {
         composeRule.setContent {
-            RowScrollbar(
+            LazyRowScrollbar(
                 state = state,
                 settings = ScrollbarSettings(
                     enabled = enabled,
@@ -406,8 +467,12 @@ class RowScrollbarTest(private val itemCount: Int) {
                 ),
                 indicatorContent = indicatorContent,
             ) {
-                Row(Modifier.verticalScroll(state = state)) {
-                    repeat(listItemsCount) {
+                LazyRow(
+                    state = state,
+                    modifier = Modifier.fillMaxSize(),
+                    reverseLayout = reverseLayout
+                ) {
+                    items(listItemsCount, key = { it }) {
                         Text(
                             text = "Item $it",
                             modifier = Modifier
