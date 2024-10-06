@@ -73,13 +73,10 @@ afterEvaluate {
 
 kotlin {
 
-    val isAndroidApp = plugins.hasPlugin("com.android.application")
     val isAndroidLibrary = plugins.hasPlugin("com.android.library")
-    if (isAndroidApp || isAndroidLibrary) {
+    if (isAndroidLibrary) {
         androidTarget {
-            if (isAndroidLibrary) {
-                publishLibraryVariants("release")
-            }
+            publishLibraryVariants("release")
             @OptIn(ExperimentalKotlinGradlePluginApi::class)
             compilerOptions {
                 jvmTarget.set(JvmTarget.JVM_1_8)
