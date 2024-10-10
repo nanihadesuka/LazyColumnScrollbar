@@ -1,6 +1,8 @@
 plugins {
-    id("com.android.application")
     id("kotlin-android")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.compose)
+    alias(libs.plugins.jetbrains.compose.compiler)
 }
 
 android {
@@ -22,6 +24,7 @@ android {
 
     buildTypes {
         named("release") {
+            @Suppress("UnstableApiUsage")
             postprocessing {
                 isMinifyEnabled = false
                 proguardFile("proguard-rules.pro")
@@ -39,12 +42,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -53,16 +50,10 @@ android {
 }
 
 dependencies {
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.material)
-    implementation(libs.androidx.compose.ui.ui)
-    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(compose.material3)
+    implementation(compose.ui)
+    implementation(compose.preview)
     implementation(libs.androidx.compose.activity)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
     implementation(libs.android.material)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(project(":lib"))
-
-    debugImplementation(libs.androidx.compose.ui.tooling)
 }

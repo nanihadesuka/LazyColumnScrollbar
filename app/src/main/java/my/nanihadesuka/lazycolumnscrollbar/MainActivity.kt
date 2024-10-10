@@ -30,9 +30,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -74,7 +74,7 @@ enum class TypeTab {
 @Composable
 fun MainView() {
     LazyColumnScrollbarTheme {
-        Surface(color = MaterialTheme.colors.background) {
+        Surface(color = MaterialTheme.colorScheme.background) {
             val tab = rememberSaveable { mutableStateOf(TypeTab.LazyRow) }
             Column {
                 FlowRow {
@@ -82,7 +82,7 @@ fun MainView() {
                         Text(
                             text = type.name,
                             Modifier
-                                .background(MaterialTheme.colors.surface, RoundedCornerShape(3.dp))
+                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(3.dp))
                                 .clickable { tab.value = type }
                                 .padding(18.dp)
                         )
@@ -112,7 +112,7 @@ fun LazyColumnView() {
     Box(
         modifier = Modifier
             .padding(16.dp)
-            .border(width = 1.dp, MaterialTheme.colors.primary)
+            .border(width = 1.dp, MaterialTheme.colorScheme.primary)
             .padding(1.dp)
     ) {
         LazyColumnScrollbar(
@@ -167,7 +167,7 @@ fun LazyRowView() {
     Box(
         modifier = Modifier
             .padding(16.dp)
-            .border(width = 1.dp, MaterialTheme.colors.primary)
+            .border(width = 1.dp, MaterialTheme.colorScheme.primary)
             .padding(1.dp)
     ) {
         LazyRowScrollbar(
@@ -223,7 +223,7 @@ fun LazyVerticalGridView() {
     Box(
         modifier = Modifier
             .padding(16.dp)
-            .border(width = 1.dp, MaterialTheme.colors.primary)
+            .border(width = 1.dp, MaterialTheme.colorScheme.primary)
             .padding(1.dp)
     ) {
         LazyVerticalGridScrollbar(
@@ -244,7 +244,7 @@ fun LazyVerticalGridView() {
             ) {
                 items(items.size, key = { it }) {
                     Surface(
-                        elevation = 3.dp,
+                        tonalElevation = 3.dp,
                         modifier = Modifier.aspectRatio(1f),
                         color = Color.Yellow
                     ) {
@@ -273,7 +273,7 @@ fun LazyHorizontalGridView() {
     Box(
         modifier = Modifier
             .padding(16.dp)
-            .border(width = 1.dp, MaterialTheme.colors.primary)
+            .border(width = 1.dp, MaterialTheme.colorScheme.primary)
             .padding(1.dp)
     ) {
         LazyHorizontalGridScrollbar(
@@ -295,7 +295,7 @@ fun LazyHorizontalGridView() {
             ) {
                 items(items.size, key = { it }) {
                     Surface(
-                        elevation = 3.dp,
+                        tonalElevation = 3.dp,
                         modifier = Modifier.aspectRatio(1f),
                         color = Color.Yellow
                     ) {
@@ -327,7 +327,7 @@ fun ColumnView() {
     Box(
         modifier = Modifier
             .padding(16.dp)
-            .border(width = 1.dp, MaterialTheme.colors.primary)
+            .border(width = 1.dp, MaterialTheme.colorScheme.primary)
             .padding(1.dp)
     ) {
         ColumnScrollbar(
@@ -370,7 +370,7 @@ fun RowView() {
     Box(
         modifier = Modifier
             .padding(12.dp)
-            .border(width = 1.dp, MaterialTheme.colors.primary)
+            .border(width = 1.dp, MaterialTheme.colorScheme.primary)
     ) {
         RowScrollbar(
             state = listState,
@@ -415,7 +415,7 @@ fun Indicator(text: String, isThumbSelected: Boolean) {
                 .background(Color.Green)
                 .padding(8.dp)
                 .clip(CircleShape)
-                .background(if (isThumbSelected) Color.Red else MaterialTheme.colors.background)
+                .background(if (isThumbSelected) Color.Red else MaterialTheme.colorScheme.background)
                 .padding(12.dp)
         )
     }
