@@ -26,6 +26,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,14 +52,17 @@ import androidx.compose.ui.unit.dp
 import my.nanihadesuka.compose.ColumnScrollbar
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.LazyHorizontalGridScrollbar
+import my.nanihadesuka.compose.LazyHorizontalStaggeredGridScrollbar
 import my.nanihadesuka.compose.LazyVerticalGridScrollbar
 import my.nanihadesuka.compose.LazyRowScrollbar
+import my.nanihadesuka.compose.LazyVerticalStaggeredGridScrollbar
 import my.nanihadesuka.compose.RowScrollbar
 import my.nanihadesuka.compose.ScrollbarSelectionActionable
 import my.nanihadesuka.compose.ScrollbarSelectionMode
 import my.nanihadesuka.compose.ScrollbarLayoutSide
 import my.nanihadesuka.compose.ScrollbarSettings
 import my.nanihadesuka.lazycolumnscrollbar.ui.theme.LazyColumnScrollbarTheme
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,7 +74,8 @@ class MainActivity : ComponentActivity() {
 enum class TypeTab {
     Column, Row,
     LazyColumn, LazyRow,
-    LazyVerticalGrid, LazyHorizontalGrid
+    LazyVerticalGrid, LazyHorizontalGrid,
+    LazyVerticalStaggeredGrid, LazyHorizontalStaggeredGrid
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -96,6 +105,8 @@ fun MainView() {
                     TypeTab.LazyRow -> LazyRowView()
                     TypeTab.LazyVerticalGrid -> LazyVerticalGridView()
                     TypeTab.LazyHorizontalGrid -> LazyHorizontalGridView()
+                    TypeTab.LazyVerticalStaggeredGrid -> LazyVerticalStaggeredGridView()
+                    TypeTab.LazyHorizontalStaggeredGrid -> LazyHorizontalStaggeredGridView()
                 }
             }
         }
@@ -312,6 +323,107 @@ fun LazyHorizontalGridView() {
         }
     }
 }
+
+@Composable
+fun LazyVerticalStaggeredGridView() {
+    val items by rememberSaveable {
+        mutableStateOf(List(101) { it to Random.nextFloat() + 0.5F })
+    }
+
+    val lazyStaggeredGridState = rememberLazyStaggeredGridState()
+    Box(
+        modifier = Modifier
+            .padding(16.dp)
+            .border(width = 1.dp, MaterialTheme.colorScheme.primary)
+            .padding(1.dp)
+    ) {
+        LazyVerticalStaggeredGridScrollbar(
+            state = lazyStaggeredGridState,
+            settings = ScrollbarSettings(
+                selectionMode = ScrollbarSelectionMode.Thumb,
+                alwaysShowScrollbar = true,
+            ),
+            indicatorContent = { index, isThumbSelected ->
+                Indicator(text = "i:$index", isThumbSelected = isThumbSelected)
+            }
+        ) {
+            LazyVerticalStaggeredGrid(
+                state = lazyStaggeredGridState,
+                columns = StaggeredGridCells.Adaptive(minSize = 128.dp),
+                verticalItemSpacing = 3.dp,
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                items(items, key = { it.first }) { (index, aspectRatio) ->
+                    Surface(
+                        tonalElevation = 3.dp,
+                        modifier = Modifier.aspectRatio(aspectRatio),
+                        color = Color.Yellow
+                    ) {
+                        Text(
+                            text = "Item $index",
+                            modifier = Modifier
+                                .padding(24.dp),
+                            color = Color.Black
+                        )
+
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+@Composable
+fun LazyHorizontalStaggeredGridView() {
+    val items by rememberSaveable {
+        mutableStateOf(List(101) { it to Random.nextFloat() + 0.5F })
+    }
+
+    val lazyStaggeredGridState = rememberLazyStaggeredGridState()
+    Box(
+        modifier = Modifier
+            .padding(16.dp)
+            .border(width = 1.dp, MaterialTheme.colorScheme.primary)
+            .padding(1.dp)
+    ) {
+        LazyHorizontalStaggeredGridScrollbar(
+            state = lazyStaggeredGridState,
+            settings = ScrollbarSettings(
+                selectionMode = ScrollbarSelectionMode.Thumb,
+                alwaysShowScrollbar = false
+            ),
+            indicatorContent = { index, isThumbSelected ->
+                Indicator(text = "i:$index", isThumbSelected = isThumbSelected)
+            }
+        ) {
+            LazyHorizontalStaggeredGrid(
+                state = lazyStaggeredGridState,
+                rows = StaggeredGridCells.Adaptive(minSize = 128.dp),
+                reverseLayout = true,
+                verticalArrangement = Arrangement.spacedBy(3.dp),
+                horizontalItemSpacing = 3.dp,
+            ) {
+                items(items, key = { it.first }) { (index, aspectRatio) ->
+                    Surface(
+                        tonalElevation = 3.dp,
+                        modifier = Modifier.aspectRatio(aspectRatio),
+                        color = Color.Yellow
+                    ) {
+                        Text(
+                            text = "Item $index",
+                            modifier = Modifier
+                                .padding(24.dp),
+                            color = Color.Black
+                        )
+
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun ColumnView() {
