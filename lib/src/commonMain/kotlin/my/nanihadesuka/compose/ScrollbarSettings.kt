@@ -14,22 +14,22 @@ import androidx.compose.ui.unit.dp
  */
 @Stable
 data class ScrollbarSettings(
-    val enabled: Boolean = Default.enabled,
-    val side: ScrollbarLayoutSide = Default.side,
-    val alwaysShowScrollbar: Boolean = Default.alwaysShowScrollbar,
-    val scrollbarPadding: Dp = Default.scrollbarPadding,
-    val thumbThickness: Dp = Default.thumbThickness,
-    val thumbShape: Shape = Default.thumbShape,
-    val thumbMinLength: Float = Default.thumbMinLength,
-    val thumbMaxLength: Float = Default.thumbMaxLength,
-    val thumbUnselectedColor: Color = Default.thumbUnselectedColor,
-    val thumbSelectedColor: Color = Default.thumbSelectedColor,
-    val selectionMode: ScrollbarSelectionMode = Default.selectionMode,
-    val selectionActionable: ScrollbarSelectionActionable = Default.selectionActionable,
-    val hideDelayMillis: Int = Default.hideDelayMillis,
-    val hideDisplacement: Dp = Default.hideDisplacement,
-    val hideEasingAnimation: Easing = Default.hideEasingAnimation,
-    val durationAnimationMillis: Int = Default.durationAnimationMillis,
+    var enabled: Boolean = Default.enabled,
+    var side: ScrollbarLayoutSide = Default.side,
+    var alwaysShowScrollbar: Boolean = Default.alwaysShowScrollbar,
+    var scrollbarPadding: Dp = Default.scrollbarPadding,
+    var thumbThickness: Dp = Default.thumbThickness,
+    var thumbShape: Shape = Default.thumbShape,
+    var thumbMinLength: Float = Default.thumbMinLength,
+    var thumbMaxLength: Float = Default.thumbMaxLength,
+    var thumbUnselectedColor: Color = Default.thumbUnselectedColor,
+    var thumbSelectedColor: Color = Default.thumbSelectedColor,
+    var selectionMode: ScrollbarSelectionMode = Default.selectionMode,
+    var selectionActionable: ScrollbarSelectionActionable = Default.selectionActionable,
+    var hideDelayMillis: Int = Default.hideDelayMillis,
+    var hideDisplacement: Dp = Default.hideDisplacement,
+    var hideEasingAnimation: Easing = Default.hideEasingAnimation,
+    var durationAnimationMillis: Int = Default.durationAnimationMillis,
 ) {
     init {
         require(thumbMinLength <= thumbMaxLength) {
