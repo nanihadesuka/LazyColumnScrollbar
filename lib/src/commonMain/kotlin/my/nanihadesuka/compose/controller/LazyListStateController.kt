@@ -24,7 +24,8 @@ internal fun rememberLazyListStateController(
     thumbMinLength: Float,
     thumbMaxLength: Float,
     alwaysShowScrollBar: Boolean,
-    selectionMode: ScrollbarSelectionMode
+    selectionMode: ScrollbarSelectionMode,
+    isSelected: MutableState<Boolean> = remember { mutableStateOf(false) }
 ): LazyListStateController {
     val coroutineScope = rememberCoroutineScope()
 
@@ -34,7 +35,6 @@ internal fun rememberLazyListStateController(
     val selectionModeUpdated = rememberUpdatedState(selectionMode)
     val reverseLayout = remember { derivedStateOf { state.layoutInfo.reverseLayout } }
 
-    val isSelected = remember { mutableStateOf(false) }
     val dragOffset = remember { mutableFloatStateOf(0f) }
 
     val realFirstVisibleItem = remember {

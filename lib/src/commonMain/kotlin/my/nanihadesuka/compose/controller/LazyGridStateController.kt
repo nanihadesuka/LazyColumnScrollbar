@@ -26,7 +26,8 @@ internal fun rememberLazyGridStateController(
     thumbMaxLength: Float,
     alwaysShowScrollBar: Boolean,
     selectionMode: ScrollbarSelectionMode,
-    orientation: Orientation
+    orientation: Orientation,
+    isSelected: MutableState<Boolean> = remember { mutableStateOf(false) }
 ): LazyGridStateController {
     val coroutineScope = rememberCoroutineScope()
 
@@ -37,9 +38,7 @@ internal fun rememberLazyGridStateController(
     val orientationUpdated = rememberUpdatedState(orientation)
     val reverseLayout = remember { derivedStateOf { state.layoutInfo.reverseLayout } }
 
-    val isSelected = remember { mutableStateOf(false) }
     val dragOffset = remember { mutableFloatStateOf(0f) }
-
 
     val realFirstVisibleItem = remember {
         derivedStateOf {

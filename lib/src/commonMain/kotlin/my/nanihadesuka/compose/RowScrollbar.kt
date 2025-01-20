@@ -4,6 +4,9 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -41,6 +44,7 @@ fun InternalRowScrollbar(
     settings: ScrollbarSettings = ScrollbarSettings.Default,
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     visibleLengthDp: Dp,
+    isSelected: MutableState<Boolean> = remember { mutableStateOf(false) }
 ) {
     val stateController = rememberScrollStateController(
         state = state,
@@ -49,6 +53,7 @@ fun InternalRowScrollbar(
         thumbMaxLength = settings.thumbMaxLength,
         alwaysShowScrollBar = settings.alwaysShowScrollbar,
         selectionMode = settings.selectionMode,
+        isSelected = isSelected
     )
 
     ElementScrollbar(

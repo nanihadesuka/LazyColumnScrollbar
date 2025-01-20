@@ -24,7 +24,8 @@ internal fun rememberScrollStateController(
     thumbMinLength: Float,
     thumbMaxLength: Float,
     alwaysShowScrollBar: Boolean,
-    selectionMode: ScrollbarSelectionMode
+    selectionMode: ScrollbarSelectionMode,
+    isSelected: MutableState<Boolean> = remember { mutableStateOf(false) }
 ): ScrollStateController {
     val coroutineScope = rememberCoroutineScope()
 
@@ -34,7 +35,6 @@ internal fun rememberScrollStateController(
     val alwaysShowScrollBarUpdated = rememberUpdatedState(alwaysShowScrollBar)
     val selectionModeUpdated = rememberUpdatedState(selectionMode)
 
-    val isSelected = remember { mutableStateOf(false) }
     val dragOffset = remember { mutableFloatStateOf(0f) }
 
     val fullLengthDp = with(LocalDensity.current) {

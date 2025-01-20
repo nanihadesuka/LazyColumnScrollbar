@@ -4,6 +4,9 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import my.nanihadesuka.compose.controller.rememberLazyListStateController
 import my.nanihadesuka.compose.generic.ElementScrollbar
@@ -36,6 +39,7 @@ fun InternalLazyColumnScrollbar(
     modifier: Modifier = Modifier,
     settings: ScrollbarSettings = ScrollbarSettings.Default,
     indicatorContent: @Composable() ((index: Int, isThumbSelected: Boolean) -> Unit)? = null,
+    isSelected: MutableState<Boolean> = remember { mutableStateOf(false) }
 ) {
     val controller = rememberLazyListStateController(
         state = state,
@@ -43,6 +47,7 @@ fun InternalLazyColumnScrollbar(
         thumbMaxLength = settings.thumbMaxLength,
         alwaysShowScrollBar = settings.alwaysShowScrollbar,
         selectionMode = settings.selectionMode,
+        isSelected = isSelected
     )
 
     ElementScrollbar(

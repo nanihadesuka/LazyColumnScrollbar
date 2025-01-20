@@ -4,6 +4,9 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import my.nanihadesuka.compose.controller.rememberLazyGridStateController
 import my.nanihadesuka.compose.generic.ElementScrollbar
@@ -14,6 +17,7 @@ fun LazyHorizontalGridScrollbar(
     modifier: Modifier = Modifier,
     settings: ScrollbarSettings = ScrollbarSettings.Default,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
+    isSelected: MutableState<Boolean> = remember { mutableStateOf(false) },
     content: @Composable () -> Unit
 ) {
     if (!settings.enabled) content()
@@ -23,6 +27,7 @@ fun LazyHorizontalGridScrollbar(
             state = state,
             settings = settings,
             indicatorContent = indicatorContent,
+            isSelected = isSelected
         )
     }
 }
@@ -36,6 +41,7 @@ fun InternalLazyHorizontalGridScrollbar(
     modifier: Modifier = Modifier,
     settings: ScrollbarSettings = ScrollbarSettings.Default,
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
+    isSelected: MutableState<Boolean> = remember { mutableStateOf(false) }
 ) {
     val controller = rememberLazyGridStateController(
         state = state,
@@ -43,7 +49,8 @@ fun InternalLazyHorizontalGridScrollbar(
         thumbMaxLength = settings.thumbMaxLength,
         alwaysShowScrollBar = settings.alwaysShowScrollbar,
         selectionMode = settings.selectionMode,
-        orientation = Orientation.Horizontal
+        orientation = Orientation.Horizontal,
+        isSelected = isSelected
     )
 
     ElementScrollbar(
