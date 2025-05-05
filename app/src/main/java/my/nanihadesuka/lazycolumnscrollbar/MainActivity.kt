@@ -15,9 +15,12 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -35,31 +38,33 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import my.nanihadesuka.compose.ColumnScrollbar
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.LazyHorizontalGridScrollbar
 import my.nanihadesuka.compose.LazyHorizontalStaggeredGridScrollbar
-import my.nanihadesuka.compose.LazyVerticalGridScrollbar
 import my.nanihadesuka.compose.LazyRowScrollbar
+import my.nanihadesuka.compose.LazyVerticalGridScrollbar
 import my.nanihadesuka.compose.LazyVerticalStaggeredGridScrollbar
 import my.nanihadesuka.compose.RowScrollbar
+import my.nanihadesuka.compose.ScrollbarLayoutSide
 import my.nanihadesuka.compose.ScrollbarSelectionActionable
 import my.nanihadesuka.compose.ScrollbarSelectionMode
-import my.nanihadesuka.compose.ScrollbarLayoutSide
 import my.nanihadesuka.compose.ScrollbarSettings
 import my.nanihadesuka.lazycolumnscrollbar.ui.theme.LazyColumnScrollbarTheme
 import kotlin.random.Random
@@ -75,7 +80,8 @@ enum class TypeTab {
     Column, Row,
     LazyColumn, LazyRow,
     LazyVerticalGrid, LazyHorizontalGrid,
-    LazyVerticalStaggeredGrid, LazyHorizontalStaggeredGrid
+    LazyVerticalStaggeredGrid, LazyHorizontalStaggeredGrid,
+    Popup,
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -91,7 +97,10 @@ fun MainView() {
                         Text(
                             text = type.name,
                             Modifier
-                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(3.dp))
+                                .background(
+                                    MaterialTheme.colorScheme.surface,
+                                    RoundedCornerShape(3.dp)
+                                )
                                 .clickable { tab.value = type }
                                 .padding(18.dp)
                         )
@@ -107,17 +116,17 @@ fun MainView() {
                     TypeTab.LazyHorizontalGrid -> LazyHorizontalGridView()
                     TypeTab.LazyVerticalStaggeredGrid -> LazyVerticalStaggeredGridView()
                     TypeTab.LazyHorizontalStaggeredGrid -> LazyHorizontalStaggeredGridView()
+                    TypeTab.Popup -> PopupView(true)
                 }
             }
         }
     }
 }
 
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LazyColumnView() {
-    val listData = remember { (0..100).toList() }
+fun LazyColumnView(itemCount: Int = 101) {
+    val listData = remember(itemCount) { (0 until itemCount).toList() }
     val listState = rememberLazyListState()
 
     Box(
@@ -171,8 +180,8 @@ fun LazyColumnView() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LazyRowView() {
-    val listData = remember { (0..100).toList() }
+fun LazyRowView(itemCount: Int = 101) {
+    val listData = remember(itemCount) { (0 until itemCount).toList() }
     val listState = rememberLazyListState()
 
     Box(
@@ -225,11 +234,8 @@ fun LazyRowView() {
 }
 
 @Composable
-fun LazyVerticalGridView() {
-    val items by rememberSaveable {
-        mutableStateOf(List(101) { it })
-    }
-
+fun LazyVerticalGridView(itemCount: Int = 101) {
+    val items = remember(itemCount) { List(itemCount) { it } }
     val lazyGridState = rememberLazyGridState()
     Box(
         modifier = Modifier
@@ -275,11 +281,8 @@ fun LazyVerticalGridView() {
 }
 
 @Composable
-fun LazyHorizontalGridView() {
-    val items by rememberSaveable {
-        mutableStateOf(List(101) { it })
-    }
-
+fun LazyHorizontalGridView(itemCount: Int = 101) {
+    val items = remember(itemCount) { List(itemCount) { it } }
     val lazyGridState = rememberLazyGridState()
     Box(
         modifier = Modifier
@@ -325,11 +328,8 @@ fun LazyHorizontalGridView() {
 }
 
 @Composable
-fun LazyVerticalStaggeredGridView() {
-    val items by rememberSaveable {
-        mutableStateOf(List(101) { it to Random.nextFloat() + 0.5F })
-    }
-
+fun LazyVerticalStaggeredGridView(itemCount: Int = 101) {
+    val items = remember(itemCount) { List(itemCount) { it to Random.nextFloat() + 0.5F } }
     val lazyStaggeredGridState = rememberLazyStaggeredGridState()
     Box(
         modifier = Modifier
@@ -375,11 +375,8 @@ fun LazyVerticalStaggeredGridView() {
 }
 
 @Composable
-fun LazyHorizontalStaggeredGridView() {
-    val items by rememberSaveable {
-        mutableStateOf(List(101) { it to Random.nextFloat() + 0.5F })
-    }
-
+fun LazyHorizontalStaggeredGridView(itemCount: Int = 101) {
+    val items = remember(itemCount) { List(itemCount) { it to Random.nextFloat() + 0.5F } }
     val lazyStaggeredGridState = rememberLazyStaggeredGridState()
     Box(
         modifier = Modifier
@@ -424,10 +421,9 @@ fun LazyHorizontalStaggeredGridView() {
     }
 }
 
-
 @Composable
-fun ColumnView() {
-    val listData = remember { (0..18).toList() }
+fun ColumnView(itemCount: Int = 101) {
+    val listData = remember(itemCount) { (0 until itemCount).toList() }
     val listState = rememberScrollState()
     val indicatorContent = @Composable { normalizedOffset: Float, isThumbSelected: Boolean ->
         Indicator(
@@ -469,8 +465,8 @@ fun ColumnView() {
 }
 
 @Composable
-fun RowView() {
-    val listData = remember { (0..100).toList() }
+fun RowView(itemCount: Int = 101) {
+    val listData = remember(itemCount) { (0 until itemCount).toList() }
     val listState = rememberScrollState()
     val indicatorContent = @Composable { normalizedOffset: Float, isThumbSelected: Boolean ->
         Indicator(
@@ -510,6 +506,72 @@ fun RowView() {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun PopupView(show: Boolean) {
+    val trigger = remember { mutableStateOf(show) }
+    if (trigger.value) {
+        Dialog(onDismissRequest = { trigger.value = false }) {
+            Surface(
+                color = MaterialTheme.colorScheme.background,
+                shape = RoundedCornerShape(4.dp),
+                tonalElevation = 4.dp
+            ) {
+                val selectedTab = rememberSaveable { mutableStateOf(TypeTab.Column) }
+                val listSize = rememberSaveable { mutableStateOf(50) }
+
+                Column(modifier = Modifier.padding(16.dp)) {
+                    FlowRow {
+                        for (type in TypeTab.values()) {
+                            Text(
+                                text = type.name,
+                                modifier = Modifier
+                                    .background(
+                                        if (type == selectedTab.value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                                        RoundedCornerShape(3.dp)
+                                    )
+                                    .clickable { selectedTab.value = type }
+                                    .padding(12.dp),
+                                color = if (type == selectedTab.value) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "List size: ${listSize.value}")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = { if (listSize.value > 0) listSize.value-- }) {
+                            Text("-")
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Button(onClick = { listSize.value++ }) {
+                            Text("+")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    when (selectedTab.value) {
+                        TypeTab.Column -> ColumnView(itemCount = listSize.value)
+                        TypeTab.Row -> RowView(itemCount = listSize.value)
+                        TypeTab.LazyColumn -> LazyColumnView(itemCount = listSize.value)
+                        TypeTab.LazyRow -> LazyRowView(itemCount = listSize.value)
+                        TypeTab.LazyVerticalGrid -> LazyVerticalGridView(itemCount = listSize.value)
+                        TypeTab.LazyHorizontalGrid -> LazyHorizontalGridView(itemCount = listSize.value)
+                        TypeTab.LazyVerticalStaggeredGrid -> LazyVerticalStaggeredGridView(itemCount = listSize.value)
+                        TypeTab.LazyHorizontalStaggeredGrid -> LazyHorizontalStaggeredGridView(
+                            itemCount = listSize.value
+                        )
+
+                        TypeTab.Popup -> {}
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun Indicator(text: String, isThumbSelected: Boolean) {
