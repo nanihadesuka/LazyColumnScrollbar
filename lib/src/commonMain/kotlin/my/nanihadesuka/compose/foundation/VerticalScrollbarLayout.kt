@@ -69,7 +69,7 @@ internal fun VerticalScrollbarLayout(
         measurePolicy = { measurables, constraints ->
             val placeables = measurables.map { it.measure(constraints) }
 
-            layout(constraints.maxWidth, constraints.maxHeight) {
+            layout(constraints.minWidth, constraints.minHeight) {
                 val placeableThumb = placeables[0]
                 val placeableIndicator = placeables[1]
                 val placeableScrollbarArea = placeables[2]
