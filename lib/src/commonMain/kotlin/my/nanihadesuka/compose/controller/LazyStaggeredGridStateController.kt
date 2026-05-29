@@ -81,7 +81,7 @@ internal fun rememberLazyStaggeredGridStateController(
 
     fun LazyStaggeredGridItemInfo.fractionHiddenTop(firstItemOffset: Int): Float {
         return when (orientationUpdated.value) {
-            Orientation.Vertical -> if (size.height == 0) 0f else firstItemOffset / size.width.toFloat()
+            Orientation.Vertical -> if (size.height == 0) 0f else firstItemOffset / size.height.toFloat()
             Orientation.Horizontal -> if (size.width == 0) 0f else firstItemOffset / size.width.toFloat()
         }
     }
