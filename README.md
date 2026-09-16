@@ -63,24 +63,28 @@ dependencies {
 > **Migrating from 2.x:** the coordinates changed from `com.github.nanihadesuka:LazyColumnScrollbar`
 > to `com.github.nanihadesuka.LazyColumnScrollbar:lazycolumnscrollbar`. Package names are unchanged.
 
-# Available scrolls components
-- ColumnScrollbar
-- RowScrollbar
-- LazyColumnScrollbar
-- LazyRowScrollbar
-- LazyVerticalGridScrollbar
-- LazyHorizontalGridScrollbar
-- LazyVerticalStaggeredGridScrollbar
-- LazyHorizontalStaggeredGridScrollbar
+# Usage
 
-# Example for LazyColumn
+Every scrollbar wraps its scrollable content and takes the same state object as that content:
+
+| Scrollbar | State |
+|---|---|
+| `ColumnScrollbar`, `RowScrollbar` | `rememberScrollState()` |
+| `LazyColumnScrollbar`, `LazyRowScrollbar` | `rememberLazyListState()` |
+| `LazyVerticalGridScrollbar`, `LazyHorizontalGridScrollbar` | `rememberLazyGridState()` |
+| `LazyVerticalStaggeredGridScrollbar`, `LazyHorizontalStaggeredGridScrollbar` | `rememberLazyStaggeredGridState()` |
+
+All of them also accept an optional `modifier`, `settings` (see [Default settings parameters](#default-settings-parameters)) and `indicatorContent`.
+
+### LazyColumn
+
 ```kotlin
 val listData = (0..1000).toList()
 val listState = rememberLazyListState()
 
 LazyColumnScrollbar(
-  state = listState,
-  settings = ScrollbarSettings.Default  
+    state = listState,
+    settings = ScrollbarSettings.Default,
 ) {
     LazyColumn(state = listState) {
         items(listData) {
@@ -90,7 +94,49 @@ LazyColumnScrollbar(
 }
 ```
 
-indicatorContent example:
+### Column
+
+```kotlin
+val scrollState = rememberScrollState()
+
+ColumnScrollbar(state = scrollState) {
+    Column(Modifier.verticalScroll(scrollState)) {
+        repeat(100) {
+            Text("Item $it")
+        }
+    }
+}
+```
+
+### LazyVerticalStaggeredGrid
+
+Staggered grid scrollbars take an extra `reverseLayout` parameter, which must match the grid's own `reverseLayout`:
+
+```kotlin
+val gridState = rememberLazyStaggeredGridState()
+val reverseLayout = false
+
+LazyVerticalStaggeredGridScrollbar(
+    state = gridState,
+    reverseLayout = reverseLayout,
+) {
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(2),
+        state = gridState,
+        reverseLayout = reverseLayout,
+    ) {
+        items(100) {
+            Text("Item $it", Modifier.height((40 + it % 5 * 20).dp))
+        }
+    }
+}
+```
+
+### Position indicator
+
+`indicatorContent` shows a composable next to the thumb while scrolling.
+
+For lazy scrollbars it receives the first visible item `index`:
 
 ```kotlin
 indicatorContent = { index, isThumbSelected ->
@@ -100,6 +146,21 @@ indicatorContent = { index, isThumbSelected ->
     )
 }
 ```
+
+For `ColumnScrollbar` and `RowScrollbar` it receives a `normalizedOffset` between `0f` and `1f` instead:
+
+```kotlin
+indicatorContent = { normalizedOffset, isThumbSelected ->
+    Text(
+        text = "${(normalizedOffset * 100).roundToInt()}%",
+        Modifier.background(if (isThumbSelected) Color.Red else Color.Black, CircleShape)
+    )
+}
+```
+
+### Placing the scrollbar independently
+
+Each scrollbar also has an `Internal*` variant (e.g. `InternalLazyColumnScrollbar`) that draws only the scrollbar, so it can be placed anywhere in your layout instead of wrapping the content.
 
 # Default settings parameters
 ```kotlin
