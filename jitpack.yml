@@ -1,5 +1,9 @@
 before_install:
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
   - sdk update
-  - sdk install java 21.0.8-tem
-  - sdk use java 21.0.8-tem
+  # Must satisfy gradle/gradle-daemon-jvm.properties (toolchainVersion=25)
+  - sdk install java 25.0.4-tem
+  - sdk use java 25.0.4-tem
+install:
+  # Publish only the library; apple targets are built as klibs via cross-compilation
+  - ./gradlew :lazycolumnscrollbar:publishToMavenLocal -Pgroup=$GROUP -Pversion=$VERSION --console=plain

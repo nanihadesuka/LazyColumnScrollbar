@@ -9,8 +9,10 @@ plugins {
     id("maven-publish")
 }
 
-group = "my.nanihadesuka.lazycolumnscrollbar"
-version = "2.2.0"
+// JitPack passes -Pgroup/-Pversion; multiplatform module metadata references the
+// per-target artifacts by these coordinates, so they must not be overridden
+group = providers.gradleProperty("group").getOrElse("my.nanihadesuka.lazycolumnscrollbar")
+version = providers.gradleProperty("version").getOrElse("2.2.0")
 
 kotlin {
     android {
