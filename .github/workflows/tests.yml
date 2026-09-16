@@ -29,4 +29,4 @@ jobs:
 
       - name: Run unit tests
         run: |
-          ./gradlew :lib:testAndroidHostTest
+          ./gradlew :lazycolumnscrollbar:testAndroidHostTest
