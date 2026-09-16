@@ -6,23 +6,3 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
 }
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { setUrl("https://jitpack.io") }
-    }
-}
-
-subprojects {
-    tasks.withType<Test> {
-        maxParallelForks = (Runtime.getRuntime().availableProcessors() - 1).coerceAtLeast(1)
-        // Robolectric needs access to JDK internals on recent JDKs
-        jvmArgs(
-            "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
-            "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
-            "--add-opens=java.base/java.io=ALL-UNNAMED",
-        )
-    }
-}
