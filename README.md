@@ -2,17 +2,20 @@
 [![](https://jitpack.io/v/nanihadesuka/LazyColumnScrollbar/month.svg)](https://jitpack.io/#nanihadesuka/LazyColumnScrollbar)
 [![](https://github.com/nanihadesuka/LazyColumnScrollbar/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/nanihadesuka/LazyColumnScrollbar/commits/master)
 [![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/nanihadesuka/LazyColumnScrollbar/blob/main/LICENSE)
-![Foo23 - Bar](https://img.shields.io/badge/Kotlin-1.9.23-339933)
-![Foo23 - Bar](https://img.shields.io/badge/Compose_BOM-2024.04.00-339933)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.4.20-339933)
+![Compose Multiplatform](https://img.shields.io/badge/Compose_Multiplatform-1.12.0-339933)
+![Platforms](https://img.shields.io/badge/Platforms-Android_%7C_iOS_%7C_macOS_%7C_JVM_%7C_JS_%7C_Wasm-339933)
 
-# Scrollbars implementation for jetpack compose
+# Scrollbars implementation for Compose Multiplatform
 
-Compose implementation of the scroll bar. Can drag, scroll smoothly and includes animations.
+Compose Multiplatform implementation of the scroll bar. Can drag, scroll smoothly and includes animations.
 
 ### Features:
 
 - Support for:
-    - Column, Row, LazyColumn, LazyRow, LazyVerticalGrid, LazyHorizontalGrid
+    - Column, Row, LazyColumn, LazyRow, LazyVerticalGrid, LazyHorizontalGrid, LazyVerticalStaggeredGrid, LazyHorizontalStaggeredGrid
+- Kotlin Multiplatform targets:
+    - Android, iOS (arm64, simulatorArm64), macOS (arm64), JVM desktop, JS, Wasm
 - Takes into account:
     - sticky headers
     - reverseLayout
@@ -27,23 +30,38 @@ Compose implementation of the scroll bar. Can drag, scroll smoothly and includes
 
 ## Installation
 
-Add it in your root build.gradle at the end of repositories:
+Add the JitPack repository in your `settings.gradle.kts`:
 
-```groovy
-allprojects {
+```kotlin
+dependencyResolutionManagement {
     repositories {
-        maven { url 'https://jitpack.io' }
+        maven("https://jitpack.io")
     }
 }
 ```
 
-Add it to your app build.gradle
+Add the dependency to `commonMain` in a multiplatform module:
 
-```groovy
-dependencies {
-    implementation 'com.github.nanihadesuka:LazyColumnScrollbar:2.2.0'
+```kotlin
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("com.github.nanihadesuka.LazyColumnScrollbar:lazycolumnscrollbar:3.0.0")
+        }
+    }
 }
 ```
+
+Or to an Android-only module:
+
+```kotlin
+dependencies {
+    implementation("com.github.nanihadesuka.LazyColumnScrollbar:lazycolumnscrollbar:3.0.0")
+}
+```
+
+> **Migrating from 2.x:** the coordinates changed from `com.github.nanihadesuka:LazyColumnScrollbar`
+> to `com.github.nanihadesuka.LazyColumnScrollbar:lazycolumnscrollbar`. Package names are unchanged.
 
 # Available scrolls components
 - ColumnScrollbar
@@ -52,6 +70,8 @@ dependencies {
 - LazyRowScrollbar
 - LazyVerticalGridScrollbar
 - LazyHorizontalGridScrollbar
+- LazyVerticalStaggeredGridScrollbar
+- LazyHorizontalStaggeredGridScrollbar
 
 # Example for LazyColumn
 ```kotlin
