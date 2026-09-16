@@ -1,5 +1,4 @@
 plugins {
-    id("kotlin-android")
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.jetbrains.compose.compiler)
@@ -7,12 +6,12 @@ plugins {
 
 android {
     namespace = "my.nanihadesuka.lazycolumnscrollbar.sample"
-    compileSdk = 34
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "my.nanihadesuka.lazycolumnscrollbar"
-        minSdk = 21
-        targetSdk = 34
+        minSdk = 23
+        targetSdk = 37
         versionCode = 9
         versionName = "2.1.0"
 
@@ -24,23 +23,13 @@ android {
 
     buildTypes {
         named("release") {
-            @Suppress("UnstableApiUsage")
-            postprocessing {
-                isMinifyEnabled = false
-                proguardFile("proguard-rules.pro")
-                isRemoveUnusedCode = true
-                isObfuscate = false
-                isOptimizeCode = true
-                isRemoveUnusedResources = true
-            }
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     packaging {
         resources {
@@ -50,9 +39,9 @@ android {
 }
 
 dependencies {
-    implementation(compose.material3)
-    implementation(compose.ui)
-    implementation(compose.preview)
+    implementation(libs.jetbrains.compose.material3)
+    implementation(libs.jetbrains.compose.ui)
+    implementation(libs.jetbrains.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.activity)
     implementation(libs.android.material)
     implementation(project(":lib"))
