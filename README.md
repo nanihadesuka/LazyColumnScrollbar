@@ -2,17 +2,20 @@
 [![](https://jitpack.io/v/nanihadesuka/LazyColumnScrollbar/month.svg)](https://jitpack.io/#nanihadesuka/LazyColumnScrollbar)
 [![](https://github.com/nanihadesuka/LazyColumnScrollbar/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/nanihadesuka/LazyColumnScrollbar/commits/master)
 [![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/nanihadesuka/LazyColumnScrollbar/blob/main/LICENSE)
-![Foo23 - Bar](https://img.shields.io/badge/Kotlin-1.9.23-339933)
-![Foo23 - Bar](https://img.shields.io/badge/Compose_BOM-2024.04.00-339933)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.4.20-339933)
+![Compose Multiplatform](https://img.shields.io/badge/Compose_Multiplatform-1.12.0-339933)
+![Platforms](https://img.shields.io/badge/Platforms-Android_%7C_iOS_%7C_macOS_%7C_JVM_%7C_JS_%7C_Wasm-339933)
 
-# Scrollbars implementation for jetpack compose
+# Scrollbars implementation for Compose Multiplatform
 
-Compose implementation of the scroll bar. Can drag, scroll smoothly and includes animations.
+Compose Multiplatform implementation of the scroll bar. Can drag, scroll smoothly and includes animations.
 
 ### Features:
 
 - Support for:
-    - Column, Row, LazyColumn, LazyRow, LazyVerticalGrid, LazyHorizontalGrid
+    - Column, Row, LazyColumn, LazyRow, LazyVerticalGrid, LazyHorizontalGrid, LazyVerticalStaggeredGrid, LazyHorizontalStaggeredGrid
+- Kotlin Multiplatform targets:
+    - Android, iOS (arm64, simulatorArm64), macOS (arm64), JVM desktop, JS, Wasm
 - Takes into account:
     - sticky headers
     - reverseLayout
@@ -27,40 +30,61 @@ Compose implementation of the scroll bar. Can drag, scroll smoothly and includes
 
 ## Installation
 
-Add it in your root build.gradle at the end of repositories:
+Add the JitPack repository in your `settings.gradle.kts`:
 
-```groovy
-allprojects {
+```kotlin
+dependencyResolutionManagement {
     repositories {
-        maven { url 'https://jitpack.io' }
+        maven("https://jitpack.io")
     }
 }
 ```
 
-Add it to your app build.gradle
+Add the dependency to `commonMain` in a multiplatform module:
 
-```groovy
-dependencies {
-    implementation 'com.github.nanihadesuka:LazyColumnScrollbar:2.2.0'
+```kotlin
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("com.github.nanihadesuka.LazyColumnScrollbar:lazycolumnscrollbar:3.0.0")
+        }
+    }
 }
 ```
 
-# Available scrolls components
-- ColumnScrollbar
-- RowScrollbar
-- LazyColumnScrollbar
-- LazyRowScrollbar
-- LazyVerticalGridScrollbar
-- LazyHorizontalGridScrollbar
+Or to an Android-only module:
 
-# Example for LazyColumn
+```kotlin
+dependencies {
+    implementation("com.github.nanihadesuka.LazyColumnScrollbar:lazycolumnscrollbar:3.0.0")
+}
+```
+
+> **Migrating from 2.x:** the coordinates changed from `com.github.nanihadesuka:LazyColumnScrollbar`
+> to `com.github.nanihadesuka.LazyColumnScrollbar:lazycolumnscrollbar`. Package names are unchanged.
+
+# Usage
+
+Every scrollbar wraps its scrollable content and takes the same state object as that content:
+
+| Scrollbar | State |
+|---|---|
+| `ColumnScrollbar`, `RowScrollbar` | `rememberScrollState()` |
+| `LazyColumnScrollbar`, `LazyRowScrollbar` | `rememberLazyListState()` |
+| `LazyVerticalGridScrollbar`, `LazyHorizontalGridScrollbar` | `rememberLazyGridState()` |
+| `LazyVerticalStaggeredGridScrollbar`, `LazyHorizontalStaggeredGridScrollbar` | `rememberLazyStaggeredGridState()` |
+
+All of them also accept an optional `modifier`, `settings` (see [Default settings parameters](#default-settings-parameters)) and `indicatorContent`.
+
+### LazyColumn
+
 ```kotlin
 val listData = (0..1000).toList()
 val listState = rememberLazyListState()
 
 LazyColumnScrollbar(
-  state = listState,
-  settings = ScrollbarSettings.Default  
+    state = listState,
+    settings = ScrollbarSettings.Default,
 ) {
     LazyColumn(state = listState) {
         items(listData) {
@@ -70,7 +94,49 @@ LazyColumnScrollbar(
 }
 ```
 
-indicatorContent example:
+### Column
+
+```kotlin
+val scrollState = rememberScrollState()
+
+ColumnScrollbar(state = scrollState) {
+    Column(Modifier.verticalScroll(scrollState)) {
+        repeat(100) {
+            Text("Item $it")
+        }
+    }
+}
+```
+
+### LazyVerticalStaggeredGrid
+
+Staggered grid scrollbars take an extra `reverseLayout` parameter, which must match the grid's own `reverseLayout`:
+
+```kotlin
+val gridState = rememberLazyStaggeredGridState()
+val reverseLayout = false
+
+LazyVerticalStaggeredGridScrollbar(
+    state = gridState,
+    reverseLayout = reverseLayout,
+) {
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(2),
+        state = gridState,
+        reverseLayout = reverseLayout,
+    ) {
+        items(100) {
+            Text("Item $it", Modifier.height((40 + it % 5 * 20).dp))
+        }
+    }
+}
+```
+
+### Position indicator
+
+`indicatorContent` shows a composable next to the thumb while scrolling.
+
+For lazy scrollbars it receives the first visible item `index`:
 
 ```kotlin
 indicatorContent = { index, isThumbSelected ->
@@ -80,6 +146,21 @@ indicatorContent = { index, isThumbSelected ->
     )
 }
 ```
+
+For `ColumnScrollbar` and `RowScrollbar` it receives a `normalizedOffset` between `0f` and `1f` instead:
+
+```kotlin
+indicatorContent = { normalizedOffset, isThumbSelected ->
+    Text(
+        text = "${(normalizedOffset * 100).roundToInt()}%",
+        Modifier.background(if (isThumbSelected) Color.Red else Color.Black, CircleShape)
+    )
+}
+```
+
+### Placing the scrollbar independently
+
+Each scrollbar also has an `Internal*` variant (e.g. `InternalLazyColumnScrollbar`) that draws only the scrollbar, so it can be placed anywhere in your layout instead of wrapping the content.
 
 # Default settings parameters
 ```kotlin
@@ -136,4 +217,4 @@ data class ScrollbarSettings(
 
 # License
 
-Copyright © 2024, [nani](https://github.com/nanihadesuka), Released under [MIT License](LICENSE)
+Copyright © 2021-2026, [nani](https://github.com/nanihadesuka), Released under [MIT License](LICENSE)

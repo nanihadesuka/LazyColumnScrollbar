@@ -12,7 +12,7 @@ plugins {
 // JitPack passes -Pgroup/-Pversion; multiplatform module metadata references the
 // per-target artifacts by these coordinates, so they must not be overridden
 group = providers.gradleProperty("group").getOrElse("my.nanihadesuka.lazycolumnscrollbar")
-version = providers.gradleProperty("version").getOrElse("2.2.0")
+version = providers.gradleProperty("version").getOrElse("3.0.0")
 
 kotlin {
     android {
