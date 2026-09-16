@@ -1,6 +1,7 @@
 package my.nanihadesuka.compose.controller
 
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridItemInfo
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.runtime.Composable
@@ -16,8 +17,22 @@ import androidx.compose.runtime.rememberUpdatedState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.ScrollbarSelectionMode
-import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.max
+import kotlin.math.min
+
+/**
+ * Scroll position measured in items.
+ *
+ * @param hiddenItems items scrolled past the content start, fractions included
+ * @param visibleItems items inside the content window, fractions included
+ * @param contentLengthPx main axis length of the content window
+ */
+internal class StaggeredGridScrollMetrics(
+    val hiddenItems: Float,
+    val visibleItems: Float,
+    val contentLengthPx: Int,
+)
 
 @Composable
 internal fun rememberLazyStaggeredGridStateController(
@@ -36,80 +51,63 @@ internal fun rememberLazyStaggeredGridStateController(
     val alwaysShowScrollBarUpdated = rememberUpdatedState(alwaysShowScrollBar)
     val selectionModeUpdated = rememberUpdatedState(selectionMode)
     val orientationUpdated = rememberUpdatedState(orientation)
-    val reverseLayout = remember { derivedStateOf { reverseLayout } }
+    val reverseLayoutUpdated = rememberUpdatedState(reverseLayout)
 
     val isSelected = remember { mutableStateOf(false) }
     val dragOffset = remember { mutableFloatStateOf(0f) }
 
-    val realFirstVisibleItem = remember {
-        derivedStateOf {
-            state.layoutInfo.visibleItemsInfo.firstOrNull {
-                it.index == state.firstVisibleItemIndex
-            }
-        }
+    fun LazyStaggeredGridItemInfo.mainAxisOffset() = when (orientationUpdated.value) {
+        Orientation.Vertical -> offset.y
+        Orientation.Horizontal -> offset.x
     }
 
-    // Workaround to know indirectly how many columns/rows are being used (LazyGridState doesn't store it)
-    val nElementsMainAxis = remember {
+    fun LazyStaggeredGridItemInfo.mainAxisSize() = when (orientationUpdated.value) {
+        Orientation.Vertical -> size.height
+        Orientation.Horizontal -> size.width
+    }
+
+    // Item start offsets never decrease with the item index, so any item that is not laid out
+    // and whose index lies between the smallest and largest visible index is fully scrolled past.
+    // Summing per-item fractions gives values that are continuous and monotonic while scrolling,
+    // independent of which lane holds the first visible item.
+    val scrollMetrics = remember {
         derivedStateOf {
-            var count = 0
-            for (item in state.layoutInfo.visibleItemsInfo) {
-                val index = when (orientation) {
-                    Orientation.Vertical -> item.lane
-                    Orientation.Horizontal -> item.lane
+            val info = state.layoutInfo
+            val items = info.visibleItemsInfo
+            if (info.totalItemsCount == 0 || items.isEmpty())
+                return@derivedStateOf StaggeredGridScrollMetrics(0f, 0f, 0)
+
+            val contentEnd = info.viewportEndOffset - info.afterContentPadding
+            var minIndex = Int.MAX_VALUE
+            var maxIndex = Int.MIN_VALUE
+            var hidden = 0f
+            var visible = 0f
+            for (item in items) {
+                minIndex = min(minIndex, item.index)
+                maxIndex = max(maxIndex, item.index)
+                val start = item.mainAxisOffset()
+                val size = item.mainAxisSize()
+                if (size <= 0) {
+                    if (start < 0) hidden += 1f
+                    continue
                 }
-                if (index == -1)
-                    break
-                if (count == index) {
-                    count += 1
-                } else {
-                    break
-                }
+                val end = start + size
+                hidden += (-start.toFloat() / size).coerceIn(0f, 1f)
+                visible += ((min(end, contentEnd) - max(start, 0)).toFloat() / size).coerceIn(0f, 1f)
             }
-            count.coerceAtLeast(1)
-        }
-    }
-
-    val isStickyHeaderInAction = remember {
-        derivedStateOf {
-            val realIndex = realFirstVisibleItem.value?.index ?: return@derivedStateOf false
-            val firstVisibleIndex = state.layoutInfo.visibleItemsInfo.firstOrNull()?.index
-                ?: return@derivedStateOf false
-            realIndex != firstVisibleIndex
-        }
-    }
-
-    fun LazyStaggeredGridItemInfo.fractionHiddenTop(firstItemOffset: Int): Float {
-        return when (orientationUpdated.value) {
-            Orientation.Vertical -> if (size.height == 0) 0f else firstItemOffset / size.height.toFloat()
-            Orientation.Horizontal -> if (size.width == 0) 0f else firstItemOffset / size.width.toFloat()
-        }
-    }
-
-    fun LazyStaggeredGridItemInfo.fractionVisibleBottom(viewportEndOffset: Int): Float {
-        return when (orientationUpdated.value) {
-            Orientation.Vertical -> if (size.height == 0) 0f else (viewportEndOffset - offset.y).toFloat() / size.height.toFloat()
-            Orientation.Horizontal -> if (size.width == 0) 0f else (viewportEndOffset - offset.x).toFloat() / size.width.toFloat()
+            val notLaidOutBetween = (maxIndex - minIndex + 1) - items.size
+            StaggeredGridScrollMetrics(
+                hiddenItems = hidden + minIndex + notLaidOutBetween,
+                visibleItems = visible,
+                contentLengthPx = contentEnd,
+            )
         }
     }
 
     val thumbSizeNormalizedReal = remember {
         derivedStateOf {
-            state.layoutInfo.let {
-                if (it.totalItemsCount == 0)
-                    return@let 0f
-
-                val firstItem = realFirstVisibleItem.value ?: return@let 0f
-                val firstPartial =
-                    firstItem.fractionHiddenTop(state.firstVisibleItemScrollOffset)
-                val lastPartial =
-                    1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
-
-                val realSize =
-                    ceil(it.visibleItemsInfo.size.toFloat() / nElementsMainAxis.value.toFloat()) - if (isStickyHeaderInAction.value) 1f else 0f
-                val realVisibleSize = realSize - firstPartial - lastPartial
-                realVisibleSize / ceil(it.totalItemsCount.toFloat() / nElementsMainAxis.value.toFloat())
-            }
+            val total = state.layoutInfo.totalItemsCount
+            if (total == 0) 0f else scrollMetrics.value.visibleItems / total
         }
     }
 
@@ -126,32 +124,23 @@ internal fun rememberLazyStaggeredGridStateController(
         val topRealMax = (1f - thumbSizeNormalizedReal.value).coerceIn(0f, 1f)
         if (thumbSizeNormalizedReal.value >= thumbMinLengthUpdated.value) {
             return when {
-                reverseLayout.value -> topRealMax - top
+                reverseLayoutUpdated.value -> topRealMax - top
                 else -> top
             }
         }
 
         val topMax = 1f - thumbMinLengthUpdated.value
         return when {
-            reverseLayout.value -> (topRealMax - top) * topMax / topRealMax
+            reverseLayoutUpdated.value -> (topRealMax - top) * topMax / topRealMax
             else -> top * topMax / topRealMax
         }
     }
 
     val thumbOffsetNormalized = remember {
         derivedStateOf {
-            state.layoutInfo.let {
-                if (it.totalItemsCount == 0 || it.visibleItemsInfo.isEmpty())
-                    return@let 0f
-
-                val firstItem = realFirstVisibleItem.value ?: return@let 0f
-                val top = firstItem.run {
-                    ceil(index.toFloat() / nElementsMainAxis.value.toFloat()) + fractionHiddenTop(
-                        state.firstVisibleItemScrollOffset
-                    )
-                } / ceil(it.totalItemsCount.toFloat() / nElementsMainAxis.value.toFloat())
-                offsetCorrection(top)
-            }
+            val total = state.layoutInfo.totalItemsCount
+            if (total == 0 || state.layoutInfo.visibleItemsInfo.isEmpty()) 0f
+            else offsetCorrection(scrollMetrics.value.hiddenItems / total)
         }
     }
 
@@ -170,11 +159,9 @@ internal fun rememberLazyStaggeredGridStateController(
             _isSelected = isSelected,
             dragOffset = dragOffset,
             selectionMode = selectionModeUpdated,
-            realFirstVisibleItem = realFirstVisibleItem,
+            scrollMetrics = scrollMetrics,
             thumbMinLength = thumbMinLengthUpdated,
-            reverseLayout = reverseLayout,
-            orientation = orientationUpdated,
-            nElementsMainAxis = nElementsMainAxis,
+            reverseLayout = reverseLayoutUpdated,
             state = state,
             coroutineScope = coroutineScope
         )
@@ -188,12 +175,10 @@ internal class LazyStaggeredGridStateController(
     private val _isSelected: MutableState<Boolean>,
     private val dragOffset: MutableFloatState,
     private val selectionMode: State<ScrollbarSelectionMode>,
-    private val realFirstVisibleItem: State<LazyStaggeredGridItemInfo?>,
+    private val scrollMetrics: State<StaggeredGridScrollMetrics>,
     private val thumbSizeNormalizedReal: State<Float>,
     private val thumbMinLength: State<Float>,
     private val reverseLayout: State<Boolean>,
-    private val orientation: State<Orientation>,
-    private val nElementsMainAxis: State<Int>,
     private val state: LazyStaggeredGridState,
     private val coroutineScope: CoroutineScope,
 ) : StateController<Int> {
@@ -205,9 +190,9 @@ internal class LazyStaggeredGridStateController(
     }
 
     override fun onDraggableState(deltaPixels: Float, maxLengthPixels: Float) {
-        val displace = if (reverseLayout.value) -deltaPixels else deltaPixels // side effect ?
+        val displace = if (reverseLayout.value) -deltaPixels else deltaPixels
         if (isSelected.value) {
-            setScrollOffset(dragOffset.floatValue + displace / maxLengthPixels)
+            setScrollOffset(dragOffset.floatValue + displace / maxLengthPixels, direction = displace)
         }
     }
 
@@ -227,7 +212,7 @@ internal class LazyStaggeredGridStateController(
                 if (newOffset in currentOffset..(currentOffset + thumbSizeNormalized.value))
                     setDragOffset(currentOffset)
                 else
-                    setScrollOffset(newOffset)
+                    setScrollOffset(newOffset, direction = 0f)
                 _isSelected.value = true
             }
 
@@ -246,27 +231,33 @@ internal class LazyStaggeredGridStateController(
         _isSelected.value = false
     }
 
-    private fun setScrollOffset(newOffset: Float) {
+    /**
+     * @param direction sign of the drag movement (positive toward the list end), or 0 for a jump.
+     */
+    private fun setScrollOffset(newOffset: Float, direction: Float) {
         setDragOffset(newOffset)
-        val totalItemsCount =
-            ceil(state.layoutInfo.totalItemsCount.toFloat() / nElementsMainAxis.value.toFloat())
-        val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset.floatValue)
-        val index: Int = floor(exactIndex).toInt() * nElementsMainAxis.value
-        val remainder: Float = exactIndex - floor(exactIndex)
+        val targetOffset = dragOffset.floatValue
 
         coroutineScope.launch {
-            state.scrollToItem(index = index, scrollOffset = 0)
-            val offset = realFirstVisibleItem.value
-                ?.size
-                ?.let {
-                    val size = when (orientation.value) {
-                        Orientation.Vertical -> it.height
-                        Orientation.Horizontal -> it.width
-                    }
-                    size.toFloat() * remainder
-                }
-                ?.toInt() ?: 0
-            state.scrollToItem(index = index, scrollOffset = offset)
+            val totalItems = state.layoutInfo.totalItemsCount
+            if (totalItems == 0) return@launch
+            val targetHiddenItems = totalItems * offsetCorrectionInverse(targetOffset)
+
+            if (direction == 0f) {
+                state.scrollToItem(floor(targetHiddenItems).toInt().coerceIn(0, totalItems - 1))
+            }
+
+            // Item sizes outside the viewport are unknown, so scroll by pixels using the item
+            // density of the visible window; each drag event re-targets from the new layout.
+            val metrics = scrollMetrics.value
+            if (metrics.contentLengthPx <= 0 || metrics.visibleItems <= 0f) return@launch
+            val itemsPerPixel = metrics.visibleItems / metrics.contentLengthPx
+            val deltaPixels = (targetHiddenItems - metrics.hiddenItems) / itemsPerPixel
+
+            // Never scroll against the drag direction, so the content can't oscillate.
+            if (direction > 0f && deltaPixels <= 0f) return@launch
+            if (direction < 0f && deltaPixels >= 0f) return@launch
+            state.scrollBy(deltaPixels)
         }
     }
 

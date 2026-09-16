@@ -404,6 +404,7 @@ class LazyHorizontalGridScrollbarTest(private val itemCount: Int) {
         }
     }
 
+    // TODO: Missing @Test - WhenVisible selection mode is not yet fully implemented
     fun `scrollbar selection actionable - WhenVisible`() {
         if (itemCount == 0) return
 

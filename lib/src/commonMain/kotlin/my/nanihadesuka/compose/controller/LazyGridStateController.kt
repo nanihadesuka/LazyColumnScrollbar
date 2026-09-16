@@ -51,22 +51,20 @@ internal fun rememberLazyGridStateController(
 
     // Workaround to know indirectly how many columns/rows are being used (LazyGridState doesn't store it)
     val nElementsMainAxis = remember {
+        var cachedCount = 1
         derivedStateOf {
-            var count = 0
+            var maxIndex = 0
             for (item in state.layoutInfo.visibleItemsInfo) {
                 val index = when (orientation) {
                     Orientation.Vertical -> item.column
                     Orientation.Horizontal -> item.row
                 }
-                if (index == -1)
-                    break
-                if (count == index) {
-                    count += 1
-                } else {
-                    break
-                }
+                if (index == -1) continue
+                if (index > maxIndex) maxIndex = index
             }
-            count.coerceAtLeast(1)
+            val detected = (maxIndex + 1).coerceAtLeast(1)
+            if (detected > cachedCount) cachedCount = detected
+            cachedCount
         }
     }
 
@@ -104,7 +102,9 @@ internal fun rememberLazyGridStateController(
                 val firstPartial =
                     firstItem.fractionHiddenTop(state.firstVisibleItemScrollOffset)
                 val lastPartial =
-                    1f - it.visibleItemsInfo.last().fractionVisibleBottom(it.viewportEndOffset)
+                    1f - it.visibleItemsInfo.last().fractionVisibleBottom(
+                        it.viewportEndOffset - it.afterContentPadding
+                    )
 
                 val realSize =
                     ceil(it.visibleItemsInfo.size.toFloat() / nElementsMainAxis.value.toFloat()) - if (isStickyHeaderInAction.value) 1f else 0f

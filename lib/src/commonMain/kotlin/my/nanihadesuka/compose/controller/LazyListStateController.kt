@@ -45,20 +45,11 @@ internal fun rememberLazyListStateController(
         }
     }
 
-    val isStickyHeaderInAction = remember {
-        derivedStateOf {
-            val realIndex = realFirstVisibleItem.value?.index ?: return@derivedStateOf false
-            val firstVisibleIndex = state.layoutInfo.visibleItemsInfo.firstOrNull()?.index
-                ?: return@derivedStateOf false
-            realIndex != firstVisibleIndex
-        }
+    fun LazyListItemInfo.fractionHiddenTop(firstItemOffset: Int): Float {
+        val sizeWithSpacing = size + state.layoutInfo.mainAxisItemSpacing
+        return if (sizeWithSpacing <= 0) 0f
+        else (firstItemOffset.toFloat() / sizeWithSpacing).coerceIn(0f, 1f)
     }
-
-    fun LazyListItemInfo.fractionHiddenTop(firstItemOffset: Int) =
-        if (size == 0) 0f else firstItemOffset / size.toFloat()
-
-    fun LazyListItemInfo.fractionVisibleBottom(viewportEndOffset: Int) =
-        if (size == 0) 0f else (viewportEndOffset - offset).toFloat() / size.toFloat()
 
     val thumbSizeNormalizedReal = remember {
         derivedStateOf {
@@ -67,15 +58,30 @@ internal fun rememberLazyListStateController(
                     return@let 0f
 
                 val firstItem = realFirstVisibleItem.value ?: return@let 0f
-                val firstPartial =
-                    firstItem.fractionHiddenTop(state.firstVisibleItemScrollOffset)
-                val lastPartial = 1f - it.visibleItemsInfo.last().fractionVisibleBottom(
-                    it.viewportEndOffset - it.afterContentPadding
-                )
+                val contentEnd = it.viewportEndOffset - it.afterContentPadding
 
-                val realSize = it.visibleItemsInfo.size - if (isStickyHeaderInAction.value) 1 else 0
-                val realVisibleSize = realSize.toFloat() - firstPartial - lastPartial
-                realVisibleSize / it.totalItemsCount.toFloat()
+                // Items laid out inside the start content padding and a pinned sticky header have
+                // index < firstVisibleItemIndex; items inside the end content padding start past
+                // contentEnd. Neither is part of the visible content window.
+                var visibleCount = 0
+                var lastItem = firstItem
+                for (item in it.visibleItemsInfo) {
+                    if (item.index < firstItem.index || item.offset >= contentEnd) continue
+                    visibleCount++
+                    if (item.index > lastItem.index) lastItem = item
+                }
+
+                val firstPartial = firstItem.fractionHiddenTop(state.firstVisibleItemScrollOffset)
+                // A pinned first item reports a clamped offset, so derive its end from the scroll offset.
+                val lastEnd = if (lastItem.index == firstItem.index)
+                    firstItem.size - state.firstVisibleItemScrollOffset
+                else
+                    lastItem.offset + lastItem.size
+                val lastPartial = if (lastItem.size == 0) 0f
+                else ((lastEnd - contentEnd).toFloat() / lastItem.size).coerceIn(0f, 1f)
+
+                val realVisibleSize = visibleCount - firstPartial - lastPartial
+                realVisibleSize.coerceAtLeast(0f) / it.totalItemsCount.toFloat()
             }
         }
     }
@@ -226,8 +232,7 @@ internal class LazyListStateController(
         coroutineScope.launch {
             state.scrollToItem(index = index, scrollOffset = 0)
             val offset = realFirstVisibleItem.value
-                ?.size
-                ?.let { it.toFloat() * remainder }
+                ?.let { (it.size + state.layoutInfo.mainAxisItemSpacing).toFloat() * remainder }
                 ?: 0f
             state.scrollBy(offset)
         }
