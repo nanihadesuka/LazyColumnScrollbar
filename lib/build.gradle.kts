@@ -75,6 +75,8 @@ tasks.withType<Test>().configureEach {
         "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
         "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
         "--add-opens=java.base/java.io=ALL-UNNAMED",
+        // Robolectric loads its native runtime through System.load
+        "--enable-native-access=ALL-UNNAMED",
     )
 }
 

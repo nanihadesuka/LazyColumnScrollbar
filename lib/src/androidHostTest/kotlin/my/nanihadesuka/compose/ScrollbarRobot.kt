@@ -62,6 +62,24 @@ class ScrollbarRobot(private val composeRule: ComposeContentTestRule) {
      */
     fun getThumbWidth() = thumbBounds.width.value / scrollbarContainerBounds.width.value
 
+    /**
+     * Normalized thumb vertical offset: 0f at top, 1f at bottom
+     */
+    fun getThumbVerticalOffset(): Float {
+        val range = scrollbarContainerBounds.height.value - thumbBounds.height.value
+        if (range <= 0f) return 0f
+        return ((thumbBounds.top.value - scrollbarContainerBounds.top.value) / range).coerceIn(0f, 1f)
+    }
+
+    /**
+     * Normalized thumb horizontal offset: 0f at left, 1f at right
+     */
+    fun getThumbHorizontalOffset(): Float {
+        val range = scrollbarContainerBounds.width.value - thumbBounds.width.value
+        if (range <= 0f) return 0f
+        return ((thumbBounds.left.value - scrollbarContainerBounds.left.value) / range).coerceIn(0f, 1f)
+    }
+
     fun assert(assertions: Assertions.() -> Unit) = Assertions().apply(assertions)
 
     inner class Assertions {
